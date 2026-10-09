@@ -13,7 +13,7 @@ const DEFS_FIG = `<defs>
     <stop offset="0" stop-color="#d9deea"/><stop offset=".35" stop-color="#fbfcfe"/><stop offset="1" stop-color="#d3d9e6"/>
   </linearGradient>
   <radialGradient id="figFondo" cx=".5" cy=".4" r=".8">
-    <stop offset="0" stop-color="#f3f5fa"/><stop offset="1" stop-color="#dce1ec"/>
+    <stop offset="0" stop-color="#eaedf4"/><stop offset="1" stop-color="#d0d6e3"/>
   </radialGradient>
 </defs>`;
 function figManual(svg, pie){
@@ -49,74 +49,142 @@ function svgGluteosAnatomia(){
     <text x="92" y="198" ${_FT}>Vista posterior de la pelvis</text>
   </svg>`;
 }
+/* ---------- Maniquí anatómico para las figuras de ejercicios ----------
+   Cada extremidad es una cadena de "cápsulas" (contorno + relleno + brillo),
+   así el cuerpo tiene grosor y volumen en vez de palitos. El lado lejano va
+   más oscuro y detrás para dar profundidad. Coordenadas en el viewBox 300×190. */
+const TINTA = '#2e3558';
+const PIEL = '#f8f9fc';
+const PIEL_LEJOS = '#c3cad9';
+const PELO = '#8e97ae';
+
+function _capPartes(puntos, grosores, relleno, brillo = true){
+  let contorno = '', cuerpo = '', luz = '';
+  for(let i = 0; i < puntos.length - 1; i++){
+    const [x1, y1] = puntos[i], [x2, y2] = puntos[i + 1], g = grosores[i];
+    const seg = `M ${x1} ${y1} L ${x2} ${y2}`;
+    contorno += `<path d="${seg}" stroke="${TINTA}" stroke-width="${g + 3.4}" stroke-linecap="round" fill="none"/>`;
+    cuerpo += `<path d="${seg}" stroke="${relleno}" stroke-width="${g}" stroke-linecap="round" fill="none"/>`;
+    if(brillo){
+      // Brillo desplazado hacia "arriba" de la pieza: simula luz cenital sobre un cilindro
+      const L = Math.hypot(x2 - x1, y2 - y1) || 1;
+      let nx = -(y2 - y1) / L, ny = (x2 - x1) / L;
+      if(ny > 0){ nx = -nx; ny = -ny; }
+      const d = g * 0.22, a = 0.18, b = 0.82;
+      luz += `<path d="M ${x1 + (x2 - x1) * a + nx * d} ${y1 + (y2 - y1) * a + ny * d} L ${x1 + (x2 - x1) * b + nx * d} ${y1 + (y2 - y1) * b + ny * d}" stroke="#fff" stroke-opacity=".7" stroke-width="${(g * 0.28).toFixed(1)}" stroke-linecap="round" fill="none"/>`;
+    }
+  }
+  return [contorno, cuerpo, luz];
+}
+function _cap(puntos, grosores, relleno, brillo = true){
+  return _capPartes(puntos, grosores, relleno, brillo).join('');
+}
+
+/**
+ * p: cabeza [x,y], hombro, codo, muneca, cadera, rodilla, tobillo, punta (del pie),
+ *    mira (1 = derecha, -1 = izquierda), lejos: desplazamiento del brazo y pierna del fondo,
+ *    brazoLejos / piernaLejos: articulaciones propias del lado lejano (opcional).
+ */
+function maniqui(p){
+  const off = (pt) => [pt[0] + p.lejos[0], pt[1] + p.lejos[1]];
+  const pl = p.piernaLejos || [p.cadera, p.rodilla, p.tobillo, p.punta].map(off);
+  const bl = p.brazoLejos || [p.hombro, p.codo, p.muneca].map(off);
+  const [cx, cy] = p.cabeza;
+  let s = '';
+  // Lado lejano (detrás)
+  s += _cap(pl.slice(0, 3), [15, 11], PIEL_LEJOS, false) + _cap(pl.slice(2), [7], PIEL_LEJOS, false);
+  s += _cap(bl, [9, 7.5], PIEL_LEJOS, false) + `<circle cx="${bl[2][0]}" cy="${bl[2][1]}" r="4.6" fill="${PIEL_LEJOS}" stroke="${TINTA}" stroke-width="1.7"/>`;
+  // Torso: hombro → cadera con pecho/espalda, más glúteo en la cadera
+  const medio = [(p.hombro[0] + p.cadera[0]) / 2, (p.hombro[1] + p.cadera[1]) / 2];
+  const [tc, tf, tl] = _capPartes([p.hombro, medio, p.cadera], [27, 24], PIEL);
+  s += `<circle cx="${p.cadera[0]}" cy="${p.cadera[1]}" r="14.2" fill="${TINTA}"/>` + tc
+     + `<circle cx="${p.cadera[0]}" cy="${p.cadera[1]}" r="12.5" fill="${PIEL}"/>` + tf + tl;
+  // Cuello y cabeza (con pelo en la nuca y oreja)
+  s += _cap([[cx, cy + 9], p.hombro], [9], PIEL, false);
+  s += `<ellipse cx="${cx}" cy="${cy}" rx="10.5" ry="12" fill="${PIEL}" stroke="${TINTA}" stroke-width="1.8"/>`;
+  s += `<path d="M ${cx - 10.5 * p.mira} ${cy + 3} C ${cx - 12 * p.mira} ${cy - 12}, ${cx + 2 * p.mira} ${cy - 15}, ${cx + 8 * p.mira} ${cy - 8} C ${cx + 1 * p.mira} ${cy - 9}, ${cx - 4 * p.mira} ${cy - 4}, ${cx - 6 * p.mira} ${cy + 5} Z" fill="${PELO}" stroke="${TINTA}" stroke-width="1.4" stroke-linejoin="round"/>`;
+  s += `<ellipse cx="${cx - 2 * p.mira}" cy="${cy + 1}" rx="2.2" ry="3" fill="none" stroke="${TINTA}" stroke-width="1.2"/>`;
+  // Lado cercano (delante)
+  s += _cap([p.cadera, p.rodilla, p.tobillo], [15.5, 11], PIEL) + _cap([p.tobillo, p.punta], [7.5], PIEL, false);
+  s += _cap([p.hombro, p.codo, p.muneca], [9.5, 8], PIEL);
+  s += `<circle cx="${p.muneca[0]}" cy="${p.muneca[1]}" r="4.8" fill="${PIEL}" stroke="${TINTA}" stroke-width="1.7"/>`;
+  return s;
+}
+
+/* Equipo */
+function _disco(x, y, r){
+  return `<circle cx="${x}" cy="${y}" r="${r}" fill="#3b4366" stroke="${TINTA}" stroke-width="2"/>
+    <circle cx="${x}" cy="${y}" r="${r * 0.62}" fill="none" stroke="#6b7392" stroke-width="1.4"/>
+    <circle cx="${x}" cy="${y}" r="${r * 0.18}" fill="#c9cfdd" stroke="${TINTA}" stroke-width="1.2"/>`;
+}
+function _banco(x, y, w, alto){
+  return `<rect x="${x}" y="${y}" width="${w}" height="12" rx="5" fill="#4a5275" stroke="${TINTA}" stroke-width="2"/>
+    <rect x="${x + 4}" y="${y + 2}" width="${w - 8}" height="3" rx="1.5" fill="#6d769b"/>
+    <rect x="${x + 8}" y="${y + 12}" width="7" height="${alto}" fill="#9aa2b8" stroke="${TINTA}" stroke-width="1.6"/>
+    <rect x="${x + w - 15}" y="${y + 12}" width="7" height="${alto}" fill="#9aa2b8" stroke="${TINTA}" stroke-width="1.6"/>`;
+}
+function _mancuerna(x, y){
+  return `<rect x="${x - 9}" y="${y - 2}" width="18" height="4" rx="2" fill="#6b7392" stroke="${TINTA}" stroke-width="1.2"/>
+    <rect x="${x - 12}" y="${y - 6}" width="6" height="12" rx="2" fill="#3b4366" stroke="${TINTA}" stroke-width="1.4"/>
+    <rect x="${x + 6}" y="${y - 6}" width="6" height="12" rx="2" fill="#3b4366" stroke="${TINTA}" stroke-width="1.4"/>`;
+}
+const _suelo = (y) => `<line x1="14" y1="${y}" x2="286" y2="${y}" stroke="${TINTA}" stroke-width="1.6" opacity=".35"/>
+  <ellipse cx="150" cy="${y + 1}" rx="120" ry="3" fill="${TINTA}" opacity=".06"/>`;
+
 function svgHipThrust(){
   return `<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="296" height="186" rx="14" fill="#e7ebf3"/>
-    <rect x="28" y="86" width="74" height="16" rx="4" ${_FM}/>
-    <rect x="38" y="102" width="10" height="52" ${_FM}/>
-    <rect x="82" y="102" width="10" height="52" ${_FM}/>
-    <circle cx="88" cy="62" r="13" ${_FM}/>
-    <path d="M 98 70 L 158 92" ${_FL}/>
-    <path d="M 158 92 L 196 92" ${_FL}/>
-    <path d="M 196 92 L 200 152" ${_FL}/>
-    <line x1="184" y1="152" x2="216" y2="152" stroke="#3d4468" stroke-width="3"/>
-    <line x1="120" y1="60" x2="120" y2="104" stroke="#3d4468" stroke-width="4"/>
-    <circle cx="120" cy="82" r="15" fill="none" stroke="#3d4468" stroke-width="4"/>
-    <text x="132" y="70" ${_FT}>Cadera extendida</text>
-    <text x="206" y="120" ${_FT}>Tibia</text><text x="206" y="132" ${_FT}>vertical</text>
+    ${_suelo(152)}
+    ${_banco(26, 90, 78, 50)}
+    ${maniqui({ cabeza:[82,68], hombro:[98,84], codo:[118,100], muneca:[146,84], cadera:[166,84],
+      rodilla:[208,82], tobillo:[210,146], punta:[228,150], mira:1, lejos:[-4,-3] })}
+    ${_disco(152, 70, 17)}
+    <text x="168" y="58" ${_FT}>Cadera extendida</text>
+    <text x="222" y="112" ${_FT}>Tibia</text><text x="222" y="124" ${_FT}>vertical</text>
     <text x="24" y="176" ${_FT}>Hip thrust: hombros en el banco, mirada al frente, cadera arriba</text>
   </svg>`;
 }
 function svgSentadilla(){
   return `<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="296" height="186" rx="14" fill="#e7ebf3"/>
-    <circle cx="128" cy="46" r="13" ${_FM}/>
-    <path d="M 126 59 L 118 104" ${_FL}/>
-    <line x1="106" y1="66" x2="132" y2="62" stroke="#3d4468" stroke-width="4"/>
-    <circle cx="119" cy="64" r="9" fill="none" stroke="#3d4468" stroke-width="3.2"/>
-    <path d="M 118 104 L 158 108" ${_FL}/>
-    <path d="M 158 108 L 152 152" ${_FL}/>
-    <line x1="138" y1="152" x2="170" y2="152" stroke="#3d4468" stroke-width="3"/>
-    <line x1="80" y1="108" x2="196" y2="108" stroke="#3d4468" stroke-width="1.4" stroke-dasharray="5 4" opacity=".6"/>
-    <text x="200" y="112" ${_FT}>Muslo paralelo</text>
-    <text x="52" y="42" ${_FT}>Espalda</text><text x="52" y="54" ${_FT}>neutra</text>
-    <line x1="86" y1="48" x2="118" y2="70" stroke="#3d4468" stroke-width="1.4" opacity=".6"/>
+    ${_suelo(152)}
+    <line x1="70" y1="108" x2="196" y2="108" stroke="${TINTA}" stroke-width="1.4" stroke-dasharray="5 4" opacity=".55"/>
+    ${maniqui({ cabeza:[150,44], hombro:[140,64], codo:[122,76], muneca:[128,58], cadera:[118,108],
+      rodilla:[168,106], tobillo:[156,146], punta:[176,150], mira:1, lejos:[5,-2] })}
+    ${_disco(130, 62, 14)}
+    <text x="202" y="112" ${_FT}>Muslo paralelo</text>
+    <text x="40" y="42" ${_FT}>Espalda</text><text x="40" y="54" ${_FT}>neutra</text>
+    <line x1="80" y1="50" x2="120" y2="66" stroke="${TINTA}" stroke-width="1.4" opacity=".6"/>
     <text x="24" y="176" ${_FT}>Sentadilla: pecho arriba, rodillas siguen la punta del pie, talón apoyado</text>
   </svg>`;
 }
 function svgRDL(){
   return `<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="296" height="186" rx="14" fill="#e7ebf3"/>
-    <circle cx="102" cy="58" r="13" ${_FM}/>
-    <path d="M 112 66 L 168 88" ${_FL}/>
-    <path d="M 168 88 L 176 150" ${_FL}/>
-    <line x1="162" y1="150" x2="192" y2="150" stroke="#3d4468" stroke-width="3"/>
-    <path d="M 116 72 L 150 118" ${_FL}/>
-    <line x1="128" y1="118" x2="172" y2="118" stroke="#3d4468" stroke-width="4"/>
-    <circle cx="150" cy="118" r="12" fill="none" stroke="#3d4468" stroke-width="3.4"/>
-    <path d="M 170 82 C 182 76, 192 78, 198 86" fill="none" stroke="#3d4468" stroke-width="1.6" stroke-dasharray="4 3"/>
-    <text x="202" y="80" ${_FT}>Cadera atrás</text>
-    <text x="40" y="106" ${_FT}>Barra pegada</text><text x="40" y="118" ${_FT}>a las piernas</text>
-    <line x1="100" y1="112" x2="136" y2="116" stroke="#3d4468" stroke-width="1.4" opacity=".6"/>
+    ${_suelo(150)}
+    ${maniqui({ cabeza:[106,64], hombro:[126,78], codo:[132,102], muneca:[138,124], cadera:[176,84],
+      rodilla:[174,116], tobillo:[178,146], punta:[160,150], mira:-1, lejos:[-4,-2] })}
+    ${_disco(140, 126, 14)}
+    <path d="M 186 72 C 198 64, 210 66, 216 76" fill="none" stroke="${TINTA}" stroke-width="1.6" stroke-dasharray="4 3"/>
+    <text x="218" y="74" ${_FT}>Cadera atrás</text>
+    <text x="30" y="108" ${_FT}>Barra pegada</text><text x="30" y="120" ${_FT}>a las piernas</text>
+    <line x1="96" y1="116" x2="124" y2="122" stroke="${TINTA}" stroke-width="1.4" opacity=".6"/>
     <text x="24" y="176" ${_FT}>Peso muerto rumano: bisagra de cadera, rodillas semiflexionadas</text>
   </svg>`;
 }
 function svgBulgarian(){
   return `<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="296" height="186" rx="14" fill="#e7ebf3"/>
-    <rect x="196" y="104" width="66" height="14" rx="4" ${_FM}/>
-    <rect x="204" y="118" width="9" height="36" ${_FM}/>
-    <rect x="244" y="118" width="9" height="36" ${_FM}/>
-    <circle cx="108" cy="42" r="13" ${_FM}/>
-    <path d="M 108 55 L 112 96" ${_FL}/>
-    <path d="M 112 96 L 88 122" ${_FL}/>
-    <path d="M 88 122 L 92 152" ${_FL}/>
-    <line x1="78" y1="152" x2="106" y2="152" stroke="#3d4468" stroke-width="3"/>
-    <path d="M 112 96 L 168 104" ${_FL}/>
-    <path d="M 168 104 L 206 100" ${_FL}/>
-    <text x="30" y="104" ${_FT}>Rodilla ~90°</text>
-    <text x="148" y="76" ${_FT}>Pie trasero elevado</text>
-    <line x1="188" y1="80" x2="200" y2="98" stroke="#3d4468" stroke-width="1.4" opacity=".6"/>
+    ${_suelo(152)}
+    ${_banco(186, 100, 76, 40)}
+    ${maniqui({ cabeza:[110,32], hombro:[112,50], codo:[114,74], muneca:[115,96], cadera:[116,98],
+      rodilla:[80,104], tobillo:[82,146], punta:[64,150], mira:-1, lejos:[3,-2],
+      piernaLejos:[[118,97],[146,136],[196,104],[214,98]],
+      brazoLejos:[[115,49],[118,73],[120,95]] })}
+    ${_mancuerna(115, 100)}
+    <text x="24" y="84" ${_FT}>Rodilla ~90°</text>
+    <text x="158" y="66" ${_FT}>Pie trasero elevado</text>
+    <line x1="196" y1="70" x2="206" y2="96" stroke="${TINTA}" stroke-width="1.4" opacity=".6"/>
     <text x="24" y="176" ${_FT}>Bulgarian split squat: el peso queda en la pierna delantera</text>
   </svg>`;
 }
