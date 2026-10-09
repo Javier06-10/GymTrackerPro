@@ -9,13 +9,14 @@ import { UiService } from '../../../core/ui.service';
 import { abrirWhatsApp, primerNombre } from '../../../core/whatsapp';
 import { fmtFecha, hoyISO, normalizar } from '../../../core/util';
 import { Modal } from '../../../shared/modal';
+import { Sparkline } from '../../../shared/graficas/sparkline';
 
 interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls: string } }
 
 /** Carpeta de rutinas por día con catálogo e historial de carga (portado de tabRutinas). */
 @Component({
   selector: 'app-tab-rutinas',
-  imports: [FormsModule, Modal],
+  imports: [FormsModule, Modal, Sparkline],
   template: `
     @let a = atleta();
     <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
@@ -61,6 +62,7 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
                       <div class="hist-vacio">Sin historial todavía — registra un peso de trabajo para empezar la progresión.</div>
                     } @else {
                       <div class="hist-titulo">📈 Carga progresiva</div>
+                      <app-sparkline [registros]="ej.historialPeso" />
                       @for (f of filas; track $index) {
                         <div class="hist-fila"><span>{{ fecha(f.fecha) }}</span><b>{{ f.peso }}</b><span [class]="f.delta.cls">{{ f.delta.txt }}</span></div>
                       }

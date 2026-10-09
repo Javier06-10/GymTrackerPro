@@ -1,8 +1,9 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { VistaAvatar, dibujarAvatar, graficaLineaSVG } from '../../../core/avatar';
+import { VistaAvatar, dibujarAvatar } from '../../../core/avatar';
+import { GraficaLinea } from '../../../shared/graficas/grafica-linea';
 import { DatosService } from '../../../core/datos.service';
-import { GRUPOS_MEDIDA, ZONAS, ZONAS_INVERTIDAS, delta, etiquetaZona, medicionPendiente, serieMedida, ultimaMedida } from '../../../core/dominio';
+import { GRUPOS_MEDIDA, ZONAS, ZONAS_INVERTIDAS, delta, deltaPeso, etiquetaZona, medicionPendiente, serieMedida, ultimaMedida } from '../../../core/dominio';
 import { Atleta, Medida } from '../../../core/modelos';
 import { AuthService } from '../../../core/auth.service';
 import { compararProgreso } from '../../../core/pdf';
@@ -16,7 +17,7 @@ import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
 /** Medidas + avatar anatómico evolutivo (portado de tabMedidas). */
 @Component({
   selector: 'app-tab-medidas',
-  imports: [FormsModule, Modal, SvgSeguroPipe],
+  imports: [FormsModule, Modal, SvgSeguroPipe, GraficaLinea],
   template: `
     @let a = atleta();
     <div class="layout-avatar">
@@ -79,7 +80,7 @@ import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
                 @let ant = anterior(i);
                 <tr>
                   <td>{{ fecha(m.fecha) }}</td>
-                  <td><b>{{ m.peso }}</b> @if (d(m.peso, ant?.peso, false); as x) { <span [class]="x.cls">{{ x.txt }}</span> }</td>
+                  <td><b>{{ m.peso }}</b> @if (dp(m.peso, ant?.peso); as x) { <span [class]="x.cls">{{ x.txt }}</span> }</td>
                   @for (z of zonas; track z[0]) {
                     <td>{{ m[z[0]] ?? '—' }} @if (d(m[z[0]], ant?.[z[0]], invertida(z[0])); as x) { <span [class]="x.cls">{{ x.txt }}</span> }</td>
                   }
@@ -95,7 +96,7 @@ import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
               <div class="tabla-scroll"><table>
                 <tr><th>Zona</th><th>Inicio</th><th>Actual</th><th>Cambio</th></tr>
                 <tr><td>Peso</td><td>{{ prim.peso }} lb</td><td>{{ ult.peso }} lb</td>
-                  <td>@if (d(ult.peso, prim.peso, false); as x) { <span [class]="x.cls" style="font-size:14px;">{{ x.txt }}</span> }</td></tr>
+                  <td>@if (dp(ult.peso, prim.peso); as x) { <span [class]="x.cls" style="font-size:14px;">{{ x.txt }}</span> }</td></tr>
                 @for (z of zonas; track z[0]) {
                   <tr><td>{{ z[1] }}</td><td>{{ prim[z[0]] ?? '—' }} in</td><td>{{ ult[z[0]] ?? '—' }} in</td>
                     <td>@if (d(ult[z[0]], prim[z[0]], invertida(z[0])); as x) { <span [class]="x.cls" style="font-size:14px;">{{ x.txt }}</span> }</td></tr>
@@ -109,15 +110,23 @@ import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
 
     @if (metricasDisponibles().length) {
       <div class="tarjeta" style="margin-top:18px;">
-        <div style="font-weight:800;margin-bottom:10px;">📈 Evolución</div>
-        <div class="filtros-grupo" style="margin-bottom:12px;">
+        <div class="grafica-cab">
+          <span class="t">📈 Evolución · {{ metricaActiva()[1] }}</span>
+          <span class="s">
+            {{ serieActiva().length }} mediciones
+            @if (cambioTotal(); as c) { · <b [class]="c.cls">{{ c.txt }} {{ metricaActiva()[2] }}</b> desde el inicio }
+          </span>
+        </div>
+        <div class="filtros-grupo" style="margin-bottom:8px;">
           @for (m of metricasDisponibles(); track m[0]) {
             <div class="chip-filtro" [class.activo]="m[0] === metricaActiva()[0]" (click)="metrica.set(m[0])">{{ m[1] }}</div>
           }
         </div>
-        <div [innerHTML]="grafica() | svgSeguro"></div>
-        <div style="font-size:12px;color:var(--tenue);margin-top:8px;">
-          {{ serieActiva().length }} mediciones de {{ metricaActiva()[1].toLowerCase() }}.
+        <app-grafica-linea [puntos]="serieActiva()" [unidad]="metricaActiva()[2]" [titulo]="'Evolución de ' + metricaActiva()[1]"
+          [meta]="metaActiva()" />
+        <div style="font-size:12px;color:var(--tenue);margin-top:6px;">
+          Pasa el dedo o el mouse por la gráfica para ver cada medición.
+          @if (metaActiva() !== null) { La línea punteada es la meta del objetivo. }
         </div>
       </div>
     }
@@ -157,6 +166,7 @@ export class TabMedidas {
   protected readonly etiqueta = etiquetaZona;
   protected readonly fecha = fmtFecha;
   protected readonly d = delta;
+  protected dp(actual: unknown, anterior: unknown) { return deltaPeso(this.atleta().objetivo, actual, anterior); }
   protected invertida(z: string) { return ZONAS_INVERTIDAS.has(z); }
 
   protected readonly vistas: [VistaAvatar, string][] = [['frente', 'Frente'], ['lado', 'Lado'], ['espalda', 'Espalda']];
@@ -185,7 +195,18 @@ export class TabMedidas {
     return disp.find((m) => m[0] === this.metrica()) ?? disp[0];
   });
   protected readonly serieActiva = computed(() => serieMedida(this.atleta(), this.metricaActiva()[0]));
-  protected readonly grafica = computed(() => graficaLineaSVG(this.serieActiva(), this.metricaActiva()[2]));
+  /** Meta del primer objetivo que sigue esta métrica (peso o zona). */
+  protected readonly metaActiva = computed(() => {
+    const clave = this.metricaActiva()[0];
+    const ob = this.atleta().objetivos.find((o) => (clave === 'peso' ? o.tipo === 'peso' : o.tipo === 'zona' && o.zona === clave));
+    return ob ? ob.valorObjetivo : null;
+  });
+  protected readonly cambioTotal = computed(() => {
+    const s = this.serieActiva();
+    if (s.length < 2) return null;
+    const clave = this.metricaActiva()[0];
+    return clave === 'peso' ? this.dp(s[s.length - 1].valor, s[0].valor) : delta(s[s.length - 1].valor, s[0].valor, ZONAS_INVERTIDAS.has(clave));
+  });
 
   /* ---------- Alta de medición ---------- */
   protected readonly modal = signal(false);

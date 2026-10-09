@@ -145,6 +145,13 @@ export function delta(actual: unknown, anterior: unknown, invertido: boolean) {
   return { txt: (d > 0 ? '+' : '') + d, cls: bueno ? 'delta-pos' : 'delta-neg' };
 }
 
+/** Delta de peso coloreado según el objetivo: perder → bajar es bueno; ganar → subir; recomp/mantener → neutro. */
+export function deltaPeso(objetivo: Objetivo, actual: unknown, anterior: unknown) {
+  const d = delta(actual, anterior, objetivo === 'perder');
+  if (d && (objetivo === 'recomp' || objetivo === 'mantener')) return { ...d, cls: 'delta-cero' };
+  return d;
+}
+
 /* ---------- Nutrición (Mifflin-St Jeor) ---------- */
 export interface PlanNutricional {
   kg: number;

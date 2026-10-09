@@ -10,14 +10,15 @@ import { PdfService } from '../../core/pdf.service';
 import { UiService } from '../../core/ui.service';
 import { Modal } from '../../shared/modal';
 import { abrirWhatsApp, primerNombre } from '../../core/whatsapp';
-import { diasDesde, fmtDinero, fmtFecha, hoyISO, normalizar, proximoCumple } from '../../core/util';
+import { MESES_CORTOS, MESES_ES, diasDesde, fmtDinero, fmtFecha, hoyISO, isoDe, normalizar, proximoCumple } from '../../core/util';
+import { GraficaBarras } from '../../shared/graficas/grafica-barras';
 import { AvatarIniciales } from '../../shared/avatar-iniciales';
 import { GruposModal } from './grupos-modal';
 
 /** Dashboard — balance global del entrenador (portado de renderDashboard). */
 @Component({
   selector: 'app-panel',
-  imports: [FormsModule, AvatarIniciales, GruposModal, Modal],
+  imports: [FormsModule, AvatarIniciales, GruposModal, Modal, GraficaBarras],
   template: `
     <div class="grid-metricas">
       <div class="metrica m-verde">
@@ -36,6 +37,39 @@ import { GruposModal } from './grupos-modal';
         <div class="sub">{{ dinero(porCobrar()) }} pendiente</div>
       </div>
     </div>
+
+    @if (datos.atletas().length) {
+      <div class="grid-graficas" style="margin-bottom:6px;">
+        <div class="tarjeta">
+          <div class="grafica-cab">
+            <span class="t">💰 Ingresos por mes</span>
+            <span class="s">Últimos 6 meses · {{ dinero(totalSeisMeses()) }}</span>
+          </div>
+          <app-grafica-barras [barras]="ingresosMes()" titulo="Ingresos por mes, últimos 6 meses" color="var(--serie-ambar)"
+            [formato]="dinero" />
+          <details class="ver-datos"><summary>Ver datos</summary>
+            <div class="tabla-scroll"><table>
+              <tr><th>Mes</th><th>Ingresos</th><th>Pagos</th></tr>
+              @for (b of ingresosMes(); track b.etiqueta) { <tr><td>{{ b.detalle }}</td><td>{{ dinero(b.valor) }}</td><td>{{ b.pagos }}</td></tr> }
+            </table></div>
+          </details>
+        </div>
+        <div class="tarjeta">
+          <div class="grafica-cab">
+            <span class="t">🏋️ Entrenamientos por semana</span>
+            <span class="s">Últimas 8 semanas · asistencia {{ pctAsistencia8() === null ? '—' : pctAsistencia8() + '%' }}</span>
+          </div>
+          <app-grafica-barras [barras]="entrenosSemana()" titulo="Entrenamientos registrados por semana, últimas 8 semanas" color="var(--serie-azul)"
+            [formato]="formatoEntrenos" />
+          <details class="ver-datos"><summary>Ver datos</summary>
+            <div class="tabla-scroll"><table>
+              <tr><th>Semana</th><th>Entrenos</th><th>Faltas</th></tr>
+              @for (b of entrenosSemana(); track b.etiqueta) { <tr><td>{{ b.detalle }}</td><td>{{ b.valor }}</td><td>{{ b.faltas }}</td></tr> }
+            </table></div>
+          </details>
+        </div>
+      </div>
+    }
 
     @if (vencidos().length) {
       <div class="titulo-seccion">🔔 Alertas de cobro</div>
@@ -214,6 +248,41 @@ export class Panel {
       if (fg === 'singrupo') return !a.grupoId;
       return a.grupoId === fg;
     });
+  });
+
+  /* ---------- Tendencias (gráficas) ---------- */
+  protected readonly formatoEntrenos = (n: number) => `${n} entreno${n === 1 ? '' : 's'}`;
+
+  protected readonly ingresosMes = computed(() => {
+    const hoy = new Date(hoyISO() + 'T00:00:00');
+    return Array.from({ length: 6 }, (_, k) => {
+      const f = new Date(hoy.getFullYear(), hoy.getMonth() - (5 - k), 1);
+      const pref = f.getFullYear() + '-' + String(f.getMonth() + 1).padStart(2, '0');
+      let valor = 0, pagos = 0;
+      this.datos.atletas().forEach((a) => a.pagos.forEach((p) => { if (p.fecha.startsWith(pref)) { valor += p.monto; pagos++; } }));
+      return { etiqueta: MESES_CORTOS[f.getMonth()], valor, pagos, detalle: `${MESES_ES[f.getMonth()]} ${f.getFullYear()} · ${pagos} pago${pagos === 1 ? '' : 's'}` };
+    });
+  });
+  protected readonly totalSeisMeses = computed(() => this.ingresosMes().reduce((s, b) => s + b.valor, 0));
+
+  protected readonly entrenosSemana = computed(() => {
+    const hoy = new Date(hoyISO() + 'T00:00:00');
+    const lunes = new Date(hoy);
+    lunes.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));
+    return Array.from({ length: 8 }, (_, k) => {
+      const ini = new Date(lunes);
+      ini.setDate(lunes.getDate() - 7 * (7 - k));
+      const dias = Array.from({ length: 7 }, (_, d) => { const x = new Date(ini); x.setDate(ini.getDate() + d); return isoDe(x); });
+      let valor = 0, faltas = 0;
+      this.datos.atletas().forEach((a) => dias.forEach((iso) => { if (a.asistencia[iso] === 'E') valor++; else if (a.asistencia[iso] === 'F') faltas++; }));
+      const etiqueta = `${ini.getDate()} ${MESES_CORTOS[ini.getMonth()]}`;
+      return { etiqueta, valor, faltas, detalle: `Semana del ${etiqueta} · ${faltas} falta${faltas === 1 ? '' : 's'}` };
+    });
+  });
+  protected readonly pctAsistencia8 = computed(() => {
+    const e = this.entrenosSemana().reduce((s, b) => s + b.valor, 0);
+    const f = this.entrenosSemana().reduce((s, b) => s + b.faltas, 0);
+    return e + f ? Math.round((e / (e + f)) * 100) : null;
   });
 
   /* ---------- Reporte mensual (PDF) ---------- */

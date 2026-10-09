@@ -23,6 +23,11 @@
   --radio:12px;
   --radio-sm:8px;
   --sombra:0 8px 24px rgba(0,0,0,.35);
+  /* Series de gráficas: validadas (dataviz) contra la superficie oscura #1a1e26 */
+  --serie-ambar:#d0731f;
+  --serie-azul:#4a8bd8;
+  --serie-verde:#36a877;
+  --rejilla:#2a303c;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;}
@@ -661,3 +666,33 @@ html{-webkit-text-size-adjust:100%;}
 .cargando{text-align:center;padding:60px 20px;color:var(--tenue);}
 /* Las tablas anchas deben hacer scroll dentro de su tarjeta, no estirar la página */
 .layout-avatar > *, .grid-pagos > *, .grid-dias > *{min-width:0;}
+
+/* ---------- GRÁFICAS (componentes shared/graficas) ---------- */
+.grafica{position:relative;width:100%;}
+.grafica svg{display:block;width:100%;height:auto;overflow:visible;}
+.grafica .eje{font-size:11px;fill:var(--tenue);font-variant-numeric:tabular-nums;}
+.grafica .valor-fin{font-size:12.5px;font-weight:800;fill:var(--texto);}
+.grafica .meta-txt{font-size:11px;font-weight:700;fill:var(--texto-suave);}
+.grafica .zona-hit{fill:transparent;cursor:crosshair;}
+.grafica .barra{transition:filter .12s;}
+.grafica .barra.activa{filter:brightness(1.25);}
+.tooltip-graf{
+  position:absolute;pointer-events:none;z-index:5;transform:translate(-50%,calc(-100% - 12px));
+  background:#252b37;border:1px solid var(--borde);border-radius:8px;box-shadow:var(--sombra);
+  padding:7px 10px;font-size:12px;white-space:nowrap;
+}
+.tooltip-graf b{display:block;font-size:14px;color:var(--texto);}
+.tooltip-graf span{color:var(--texto-suave);}
+.tooltip-graf .clave{display:inline-block;width:12px;height:2px;border-radius:1px;vertical-align:middle;margin-right:6px;}
+.grafica-cab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.grafica-cab .t{font-weight:800;}
+.grafica-cab .s{font-size:12px;color:var(--texto-suave);}
+.ver-datos{margin-top:8px;font-size:12px;color:var(--texto-suave);}
+.ver-datos summary{cursor:pointer;user-select:none;}
+.ver-datos table{margin-top:6px;font-size:12.5px;}
+.grid-graficas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;}
+.grid-graficas > *{min-width:0;}
+.sparkline{display:flex;align-items:center;gap:10px;margin:2px 0 8px;}
+.sparkline svg{flex:1;min-width:0;height:36px;}
+.sparkline .rango{font-size:12px;color:var(--texto-suave);white-space:nowrap;}
+.sparkline .rango b{color:var(--texto);}

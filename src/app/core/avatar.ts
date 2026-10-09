@@ -52,9 +52,10 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
   const r2 = n => Math.round(n*10)/10;
 
   // Estilo lámina anatómica
-  const FONDO="#e7ebf3", CUERPO="#f4f5f9", L="#3d4468";
+  const FONDO="url(#avFondo)", CUERPO="url(#avCuerpo)", L="#2e3558";
   const TRAZO=`fill="${CUERPO}" stroke="${L}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"`;
-  const MUSC=`fill="none" stroke="${L}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity=".85"`;
+  const PELO=`fill="#9aa2b8" stroke="${L}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"`;
+  const MUSC=`fill="none" stroke="${L}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".55"`;
 
   // ---- Mapa de calor ----
   function crecimiento(zona){
@@ -72,7 +73,18 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
     pant: glow("pantorrilla"),
     abd: Math.max(reduc("abdomenAlto"), reduc("abdomenOmbligo"))
   };
-  const DEFS = `<defs><filter id="difum" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="10"/></filter></defs>`;
+  // Volumen: cada pieza (torso, brazo, pierna) se sombrea hacia sus bordes como un cilindro.
+  const DEFS = `<defs>
+    <filter id="difum" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="10"/></filter>
+    <filter id="avSuave" x="-50%" y="-200%" width="200%" height="500%"><feGaussianBlur stdDeviation="4"/></filter>
+    <linearGradient id="avCuerpo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d9deea"/><stop offset=".32" stop-color="#fbfcfe"/>
+      <stop offset=".62" stop-color="#f4f6fa"/><stop offset="1" stop-color="#cfd5e3"/>
+    </linearGradient>
+    <radialGradient id="avFondo" cx=".5" cy=".42" r=".75">
+      <stop offset="0" stop-color="#f3f5fa"/><stop offset="1" stop-color="#dce1ec"/>
+    </radialGradient>
+  </defs>`;
 
   // Contorno simétrico: recibe inicio [x,y] y tramos [c1x,c1y,c2x,c2y,px,py]
   // con x como desplazamiento desde CX; genera lado derecho + izquierdo espejado.
@@ -91,6 +103,7 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
     return `<svg viewBox="0 0 320 640" width="${ANCHO}" xmlns="http://www.w3.org/2000/svg" aria-label="${etiqueta}">
       ${DEFS}
       <rect x="3" y="3" width="314" height="634" rx="18" fill="${FONDO}"/>
+      <ellipse cx="160" cy="600" rx="74" ry="9" fill="#2e3558" opacity=".18" filter="url(#avSuave)"/>
       ${contenido}
     </svg>`;
   }
@@ -285,7 +298,7 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
     if(OP.abd) calor += `<ellipse cx="${CX}" cy="${(Y.abdAlto+Y.ombligo)/2}" rx="${r2(wAbdO+panza+6)}" ry="30" fill="var(--verde)" opacity="${OP.abd}" filter="url(#difum)"/>`;
 
     const cuerpo = `
-      ${esMujer && !esEspalda ? peloMujer.replace(TRAZO, TRAZO) : ""}
+      ${esMujer && !esEspalda ? peloMujer.replace(TRAZO, PELO) : ""}
       <path d="${pierna(-1)}" ${TRAZO}/>
       <path d="${pierna(1)}" ${TRAZO}/>
       <path d="${torso}" ${TRAZO}/>
@@ -293,7 +306,7 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
       <path d="${brazo(1)}" ${TRAZO}/>
       <path d="${cuello}" ${TRAZO}/>
       <path d="${cabeza}" ${TRAZO}/>
-      ${esMujer ? (esEspalda ? peloMujer : "") : peloHombre}
+      ${esMujer ? (esEspalda ? peloMujer.replace(TRAZO, PELO) : "") : peloHombre.replace(TRAZO, PELO)}
       ${calor}
       ${m}`;
     return svgEnvoltura(cuerpo, `Avatar anatómico — vista ${esEspalda?'espalda':'frontal'}`);
@@ -401,7 +414,7 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
       <path d="${piernaLado()}" ${TRAZO}/>
       <path d="M 150 102 C 152 112, 150 116, 148 126 L 176 124 C 172 116, 172 110, 173 104 Z" ${TRAZO}/>
       <path d="${cabeza}" ${TRAZO}/>
-      ${pelo}
+      ${pelo.replace(TRAZO, PELO)}
       <path d="${brazoLado}" ${TRAZO}/>
       ${calor}
       ${m}`;

@@ -7,12 +7,29 @@
 
 export interface CapituloManual { id: string; t: string; h: string }
 
+// Mismo acabado que el avatar: fondo radial y volumen en las piezas.
+const DEFS_FIG = `<defs>
+  <linearGradient id="figCuerpo" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#d9deea"/><stop offset=".35" stop-color="#fbfcfe"/><stop offset="1" stop-color="#d3d9e6"/>
+  </linearGradient>
+  <radialGradient id="figFondo" cx=".5" cy=".4" r=".8">
+    <stop offset="0" stop-color="#f3f5fa"/><stop offset="1" stop-color="#dce1ec"/>
+  </radialGradient>
+</defs>`;
 function figManual(svg, pie){
-  return `<figure class="fig-manual">${svg}<figcaption>${pie}</figcaption></figure>`;
+  const conDefs = svg.replace(/<svg([^>]*)>/, '<svg$1>' + DEFS_FIG).replace('fill="#e7ebf3"', 'fill="url(#figFondo)"')
+    // Las leyendas largas al pie del dibujo se salían del recuadro: se parten en dos líneas
+    .replace(/<text x="(\d+)" y="(\d+)" ([^>]*)>([^<]{44,})<\/text>/g, (_m, x, y, attrs, txt) => {
+      const medio = txt.lastIndexOf(' ', Math.ceil(txt.length / 2) + 4);
+      const a = txt.slice(0, medio), b = txt.slice(medio + 1);
+      const at = attrs.replace(/font-size="[\d.]+"/, 'font-size="10"');
+      return `<text x="${x}" y="${+y - 7}" ${at}>${a}</text><text x="${x}" y="${+y + 6}" ${at}>${b}</text>`;
+    });
+  return `<figure class="fig-manual">${conDefs}<figcaption>${pie}</figcaption></figure>`;
 }
-const _FM = 'fill="#f4f5f9" stroke="#3d4468" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
-const _FL = 'fill="none" stroke="#3d4468" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
-const _FT = 'fill="#3d4468" font-family="system-ui" font-size="11" font-weight="700"';
+const _FM = 'fill="url(#figCuerpo)" stroke="#2e3558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
+const _FL = 'fill="none" stroke="#2e3558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
+const _FT = 'fill="#2e3558" font-family="system-ui" font-size="11" font-weight="700"';
 
 function svgGluteosAnatomia(){
   return `<svg viewBox="0 0 300 210" xmlns="http://www.w3.org/2000/svg">
