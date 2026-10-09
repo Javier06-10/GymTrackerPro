@@ -226,7 +226,7 @@ function maniqui(p){
     { forma: pecho, musculos: _vientre(pecho, .1, .78, -.45, .5, color('pecho'), .4) + _vientre(pecho, .06, .96, .45, .5, color('espalda'), .45) },
     { forma: cuello },
   ]);
-  s += _cabeza(p.cabeza, m);
+  s += p.giroCabeza ? `<g transform="rotate(${p.giroCabeza} ${p.cabeza[0]} ${p.cabeza[1]})">${_cabeza(p.cabeza, m)}</g>` : _cabeza(p.cabeza, m);
   // 3) Brazo cercano delante del cuerpo
   s += _grupo(brazo(p.hombro, p.codo, p.muneca));
   return s;
@@ -329,6 +329,150 @@ function svgBulgarian(){
     <text x="24" y="176" ${_FT}>Bulgarian split squat: el peso queda en la pierna delantera</text>
   </svg>`;
 }
+/* Cajón para step-up */
+function _cajon(x, y, w, h){
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#2a2e38" stroke="${LINEA}" stroke-width="1.6"/>
+    <line x1="${x + 6}" y1="${y + 6}" x2="${x + w - 6}" y2="${y + 6}" stroke="#8a90a0" stroke-width="1.2"/>`;
+}
+/* Máquina de polea: columna, polea baja y cable hasta el tobillo */
+function _polea(x, tobillo){
+  return `<rect x="${x}" y="16" width="14" height="136" rx="3" fill="#2a2e38" stroke="${LINEA}" stroke-width="1.6"/>
+    <rect x="${x - 4}" y="24" width="22" height="10" rx="2" fill="#3a3f4c" stroke="${LINEA}" stroke-width="1.2"/>
+    <circle cx="${x + 7}" cy="142" r="5" fill="#8a90a0" stroke="${LINEA}" stroke-width="1.2"/>
+    <line x1="${x + 2}" y1="142" x2="${tobillo[0]}" y2="${tobillo[1]}" stroke="#c9cfdd" stroke-width="1.4" stroke-dasharray="1 0"/>`;
+}
+
+/* Figura de frente (plano frontal) para la abducción: misma silueta y músculos. */
+function maniquiFrente(p){
+  const H = _GEN === 'hombre', cx = p.cx;
+  const foco = p.foco || {};
+  const color = (mu) => (foco.principal || []).includes(mu) ? FOCO.principal : (foco.secundario || []).includes(mu) ? FOCO.secundario : GRIS;
+  const yH = p.hombros, yC = p.cadera;
+  const pierna = (cad, rod, tob, pie) => {
+    const muslo = _pieza(cad, rod, 22, 14, 1.5, 1.5, .4, .4, 1);
+    const pant = _pieza(rod, tob, 13, 8, 2, 2, .3, .3, 1);
+    const pieF = _pieza(tob, pie, 9, 8, 0, 0, .5, .5, 1);
+    return [
+      { forma: muslo, musculos: _vientre(muslo, .08, .9, -.4, .5, color('cuadriceps')) + _vientre(muslo, .1, .82, .45, .42, color('aductor')) },
+      { forma: pant, musculos: _vientre(pant, .05, .7, 0, .72, color('gemelo'), .35) },
+      { forma: pieF },
+    ];
+  };
+  const brazo = (h, c, w) => {
+    const sup = _pieza(h, c, H ? 13 : 11.5, H ? 9.4 : 8.2, 1.4, 1.4, .45, .45, 1);
+    const ante = _pieza(c, w, H ? 9.6 : 8.4, 6, 1, 1, .3, .3, 1);
+    return [
+      { forma: sup, musculos: _vientre(sup, -.05, .38, 0, 1, color('hombro'), .4) + _vientre(sup, .3, .92, 0, .62, color('biceps')) },
+      { forma: ante, musculos: _vientre(ante, .05, .8, 0, .76, color('antebrazo'), .3) },
+    ];
+  };
+  const ancho = H ? 23 : 19;
+  const torso = _pieza([cx, yH], [cx, yC - 8], H ? 44 : 36, H ? 32 : 32, 0, 0, .5, .5, 1);
+  const pelvis = _pieza([cx - (H ? 11 : 13), yC - 4], [cx + (H ? 11 : 13), yC - 4], 24, 24, 0, 0, .5, .5, 1);
+  const cuello = _pieza([cx, yH - 12], [cx, yH], 10, 12, 0, 0, .5, .5, 1);
+  let out = _grupo([
+    ...pierna(...p.piernaIzq), ...pierna(...p.piernaDer),
+    { forma: pelvis,
+      musculos: _vientre(pelvis, -.22, .16, 0, .9, color('gluteo_medio'), .5) + _vientre(pelvis, .84, 1.22, 0, .9, color('gluteo_medio'), .5) },
+    { forma: torso,
+      musculos: _vientre(torso, .05, .4, 0, .78, color('pecho'), .5)
+        + _vientre(torso, .5, .98, 0, .34, color('core'), .5) },
+    { forma: cuello },
+    ...brazo([cx - ancho, yH + 4], [cx - ancho - 5, yH + 26], [cx - ancho - 7, yH + 46]),
+    ...brazo([cx + ancho, yH + 4], [cx + ancho + 5, yH + 26], [cx + ancho + 7, yH + 46]),
+  ]);
+  // Cabeza de frente
+  const yc = yH - 22;
+  out += (H ? '' : `<ellipse cx="${cx}" cy="${yc - 12}" rx="7" ry="5" fill="#3a3e48" stroke="${LINEA}" stroke-width="1.4"/>`)
+    + `<ellipse cx="${cx}" cy="${yc}" rx="10.5" ry="12.5" fill="${CUERPO}" stroke="${LINEA}" stroke-width="1.6"/>
+    <path d="M ${cx - 10.5} ${yc - 2} C ${cx - 11} ${yc - 15}, ${cx + 11} ${yc - 15}, ${cx + 10.5} ${yc - 2} C ${cx + 6} ${yc - 8}, ${cx - 6} ${yc - 8}, ${cx - 10.5} ${yc - 2} Z" fill="#3a3e48" stroke="${LINEA}" stroke-width="1.4"/>`;
+  return out;
+}
+
+function svgPuente(){
+  return `<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg" data-leyenda="1">
+    <rect x="2" y="2" width="296" height="186" rx="14" fill="#e7ebf3"/>
+    ${_suelo(152)}
+    ${maniqui({ cabeza:[60,138], giroCabeza:-90, hombro:[82,144], codo:[106,148], muneca:[130,148], cadera:[150,110],
+      rodilla:[196,96], tobillo:[204,146], punta:[222,150], mira:1, lejos:[-4,-2],
+      foco:{ principal:['gluteo'], secundario:['isquio','core'] } })}
+    ${_flecha('M 150 146 L 150 124')}
+    <text x="130" y="72" ${_FT}>Cadera arriba</text>
+    <text x="214" y="96" ${_FT}>Talones</text><text x="214" y="108" ${_FT}>apoyados</text>
+    <text x="24" y="176" ${_FT}>Puente de glúteo: hombros en el suelo, aprieta arriba sin arquear la lumbar</text>
+  </svg>`;
+}
+function svgZancada(){
+  return `<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg" data-leyenda="1">
+    <rect x="2" y="2" width="296" height="186" rx="14" fill="#e7ebf3"/>
+    ${_suelo(152)}
+    ${maniqui({ cabeza:[138,34], hombro:[136,52], codo:[138,76], muneca:[140,98], cadera:[140,100],
+      rodilla:[178,104], tobillo:[180,146], punta:[198,150], mira:1, lejos:[2,-2],
+      piernaLejos:[[142,99],[124,140],[96,136],[86,150]],
+      brazoLejos:[[137,51],[139,75],[141,97]],
+      foco:{ principal:['cuadriceps','gluteo'], secundario:['isquio','core'] } })}
+    ${_mancuerna(140, 102)}
+    ${_flecha('M 54 92 L 54 134', true)}
+    <text x="158" y="40" ${_FT}>Torso erguido</text>
+    <text x="206" y="98" ${_FT}>Rodilla ~90°</text>
+    <text x="24" y="176" ${_FT}>Zancada: baja recto, la rodilla de atrás casi toca el suelo</text>
+  </svg>`;
+}
+function svgStepUp(){
+  return `<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg" data-leyenda="1">
+    <rect x="2" y="2" width="296" height="186" rx="14" fill="#e7ebf3"/>
+    ${_suelo(152)}
+    ${_cajon(150, 124, 86, 28)}
+    ${maniqui({ cabeza:[128,24], hombro:[126,42], codo:[128,66], muneca:[130,88], cadera:[130,88],
+      rodilla:[170,84], tobillo:[176,120], punta:[194,124], mira:1, lejos:[-2,-2],
+      piernaLejos:[[131,87],[124,118],[114,146],[130,150]],
+      brazoLejos:[[127,41],[129,65],[131,87]],
+      foco:{ principal:['gluteo','cuadriceps'], secundario:['isquio','gemelo'] } })}
+    ${_mancuerna(130, 90)}
+    ${_flecha('M 252 116 L 252 70')}
+    <text x="242" y="62" ${_FT} text-anchor="middle">Sube</text>
+    <text x="20" y="62" ${_FT}>Empuja con el</text><text x="20" y="74" ${_FT}>pie de arriba</text>
+    <line x1="86" y1="78" x2="170" y2="118" stroke="${LINEA}" stroke-width="1.3" opacity=".6"/>
+    <text x="24" y="176" ${_FT}>Step-up: pie completo sobre el cajón, sin impulsarte con la pierna de abajo</text>
+  </svg>`;
+}
+function svgPatadaPolea(){
+  return `<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg" data-leyenda="1">
+    <rect x="2" y="2" width="296" height="186" rx="14" fill="#e7ebf3"/>
+    ${_suelo(152)}
+    ${_polea(250, [84, 114])}
+    ${maniqui({ cabeza:[170,38], hombro:[158,56], codo:[190,64], muneca:[222,66], cadera:[140,98],
+      rodilla:[110,106], tobillo:[80,114], punta:[74,128], mira:1, lejos:[2,-2],
+      piernaLejos:[[142,97],[144,124],[146,146],[164,150]],
+      brazoLejos:[[159,55],[192,62],[224,64]],
+      foco:{ principal:['gluteo'], secundario:['isquio','core'] } })}
+    <rect x="222" y="60" width="30" height="5" rx="2" fill="#8a90a0" stroke="${LINEA}" stroke-width="1"/>
+    ${_flecha('M 92 136 C 76 134, 64 124, 58 108')}
+    <text x="70" y="80" ${_FT}>Cadera fija</text>
+    <line x1="104" y1="84" x2="134" y2="96" stroke="${LINEA}" stroke-width="1.3" opacity=".6"/>
+    <text x="14" y="96" ${_FT}>Patada</text><text x="14" y="108" ${_FT}>atrás</text>
+    <text x="24" y="176" ${_FT}>Patada en polea: lleva la pierna atrás sin arquear la espalda</text>
+  </svg>`;
+}
+function svgAbduccion(){
+  return `<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg" data-leyenda="1">
+    <rect x="2" y="2" width="296" height="186" rx="14" fill="#e7ebf3"/>
+    ${_suelo(152)}
+    ${maniquiFrente({ cx:140, hombros:44, cadera:88,
+      piernaIzq:[[130,88],[128,118],[126,146],[118,150]],
+      piernaDer:[[150,88],[164,116],[178,142],[188,146]],
+      foco:{ principal:['gluteo_medio'], secundario:['core'] } })}
+    <path d="M 127 138 Q 152 134 176 134" fill="none" stroke="#c9cfdd" stroke-width="3" opacity=".9" stroke-linecap="round"/>
+    ${_flecha('M 196 148 C 210 140, 216 128, 216 114')}
+    <text x="206" y="62" ${_FT}>Glúteo medio</text>
+    <line x1="208" y1="66" x2="164" y2="84" stroke="${LINEA}" stroke-width="1.3" opacity=".6"/>
+    <text x="22" y="62" ${_FT}>Pelvis</text><text x="22" y="74" ${_FT}>estable</text>
+    <text x="22" y="132" ${_FT}>Banda</text>
+    <line x1="56" y1="129" x2="124" y2="137" stroke="${LINEA}" stroke-width="1.3" opacity=".6"/>
+    <text x="24" y="176" ${_FT}>Abducción: separa la pierna sin inclinar el tronco</text>
+  </svg>`;
+}
+
 function svgOrdenSesion(){
   return `<svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="296" height="146" rx="14" fill="#e7ebf3"/>
@@ -436,51 +580,56 @@ pasos:["Espalda apoyada en el banco justo bajo los omóplatos; barra acolchada s
 errores:["Hiperextender la lumbar arriba en vez de terminar con el glúteo.","Pies demasiado lejos (se va a isquios) o demasiado cerca (cuádriceps).","Subir de golpe, rebotando y sin pausa arriba.","Mirar al techo, lo que arquea cuello y lumbar."],
 seguridad:["Usa siempre protector para la barra.","Con molestia lumbar, reduce el rango final y revisa mentón/pelvis.","La carga sube solo cuando la pausa arriba se mantiene limpia."],
 progresion:"Doble progresión: al completar el tope de repeticiones en todas las series con RIR 1–2, sube 2.5–5 kg y vuelve al rango bajo. Avances alternativos: pausas de 2–3 seg arriba o una serie extra semanal."})}
+${figManual(svgPuente(),"Fig. 3.2 — Puente de glúteo: la versión sin carga del empuje de cadera.")}
 ${fichaEj({nombre:"Puente de glúteo (en el suelo)", series:"3 × 10–20", descanso:"60–90 seg",
 principal:"Glúteo mayor", secundarios:"Isquiotibiales, core",
 pasos:["Boca arriba, rodillas flexionadas, pies cerca del glúteo.","Pelvis en ligera retroversión (aplanar la lumbar contra el suelo).","Empujar con talones y subir la cadera hasta alinear rodilla-cadera-hombro.","Apretar arriba 1–2 segundos y bajar sin apoyar del todo entre repeticiones."],
 errores:["Empujar con la punta del pie.","Arquear la lumbar para 'subir más'.","Hacerlo tan rápido que se vuelve rebote."],
 seguridad:["Puerta de entrada ideal antes del hip thrust con barra.","Apto para casi cualquier nivel; con molestia lumbar, revisar la retroversión pélvica."],
 progresion:"Peso corporal → mancuerna/disco sobre la cadera → a una pierna → pasar al hip thrust con barra."})}
-${figManual(svgSentadilla(),"Fig. 3.2 — Sentadilla: profundidad con columna neutra.")}
+${figManual(svgSentadilla(),"Fig. 3.3 — Sentadilla: profundidad con columna neutra.")}
 ${fichaEj({nombre:"Sentadilla (libre o goblet)", series:"3–4 × 6–12", descanso:"2–3 min",
 principal:"Cuádriceps y glúteo mayor", secundarios:"Aductores, erectores, core",
 pasos:["Pies al ancho de hombros, puntas ligeramente hacia fuera.","Pecho arriba y core firme; iniciar bajando cadera y rodillas a la vez.","Bajar al menos a muslos paralelos si la movilidad lo permite, con las rodillas siguiendo la punta del pie.","Subir empujando el suelo con todo el pie, sin despegar talones."],
 errores:["Rodillas colapsando hacia dentro (valgo).","Talones que se levantan por falta de movilidad de tobillo.","Inclinar tanto el torso que se convierte en 'buenos días'.","Cortar profundidad con una carga que no controla abajo."],
 seguridad:["Enseña primero sentadilla al cajón y goblet antes de barra libre.","Con valgo marcado: banda sobre las rodillas, trabajo de glúteo medio y menos carga.","Dolor agudo en rodilla o ingle = parar y evaluar, no 'aguantar'."],
 progresion:"Goblet → barra alta → carga con doble progresión. Para más glúteo: más profundidad controlada y postura algo más ancha."})}
-${figManual(svgRDL(),"Fig. 3.3 — Peso muerto rumano: bisagra de cadera con espalda neutra.")}
+${figManual(svgRDL(),"Fig. 3.4 — Peso muerto rumano: bisagra de cadera con espalda neutra.")}
 ${fichaEj({nombre:"Peso muerto rumano (RDL)", series:"3–4 × 8–12", descanso:"2–3 min",
 principal:"Isquiotibiales y glúteo mayor", secundarios:"Erectores espinales, agarre",
 pasos:["De pie, barra o mancuernas pegadas a los muslos, rodillas semiflexionadas.","Llevar la cadera hacia atrás manteniendo la espalda neutra y la barra rozando las piernas.","Bajar hasta sentir estiramiento de isquios (media espinilla aprox.) sin redondear la espalda.","Subir empujando la cadera hacia delante y apretando el glúteo al final."],
 errores:["Convertirlo en sentadilla flexionando mucho las rodillas.","Redondear la lumbar buscando profundidad.","Alejar la barra del cuerpo (multiplica el estrés lumbar).","Hiperextensión exagerada arriba."],
 seguridad:["El rango lo marca la flexibilidad de isquios con espalda neutra, no el suelo.","Enséñalo con palo o mancuernas ligeras primero.","Molestia lumbar persistente = revisar técnica y bajar carga antes que nada."],
 progresion:"Carga con doble progresión solo si la espalda se mantiene neutra (obsérvala o grábala). Variante de avance: RDL a una pierna."})}
+${figManual(svgZancada(),"Fig. 3.5 — Zancada: tronco erguido y rodilla delantera alineada con el pie.")}
 ${fichaEj({nombre:"Zancadas (caminando o estáticas)", series:"3 × 8–12 por pierna", descanso:"90 seg–2 min",
 principal:"Glúteo mayor y cuádriceps", secundarios:"Glúteo medio (estabilidad), aductores",
 pasos:["Paso amplio al frente; torso ligeramente inclinado adelante para más glúteo.","Bajar vertical hasta que la rodilla trasera casi toque el suelo.","La rodilla delantera sigue la punta del pie.","Empujar con el talón delantero para volver o continuar el paso."],
 errores:["Paso demasiado corto (todo va a cuádriceps y rodilla).","Empujar con la pierna trasera.","Tambaleo lateral por exceso de carga."],
 seguridad:["Con dolor de rodilla prueba la zancada inversa: suele ser mucho más amable.","Domina el peso corporal antes de añadir mancuernas."],
 progresion:"Peso corporal → mancuernas → más rango subiendo el pie delantero a un step bajo."})}
-${figManual(svgBulgarian(),"Fig. 3.4 — Bulgarian split squat: la unilateral estrella para glúteo.")}
+${figManual(svgBulgarian(),"Fig. 3.6 — Bulgarian split squat: la unilateral estrella para glúteo.")}
 ${fichaEj({nombre:"Bulgarian split squat", series:"3 × 8–12 por pierna", descanso:"90 seg–2 min",
 principal:"Glúteo mayor y cuádriceps", secundarios:"Glúteo medio, aductores, core",
 pasos:["Empeine trasero sobre el banco; pie delantero adelantado (la tibia queda vertical abajo).","Torso ligeramente inclinado al frente para acentuar el glúteo.","Bajar vertical con control hasta que la rodilla trasera quede cerca del suelo.","Subir empujando con el talón delantero."],
 errores:["Pie delantero demasiado cerca del banco (la rodilla sufre).","Rebotar abajo.","Mirar al suelo y perder el equilibrio: mirada al frente."],
 seguridad:["Exigente en equilibrio: introdúcelo tras dominar las zancadas.","Una mano en soporte las primeras sesiones si hace falta."],
 progresion:"Peso corporal → mancuerna en la mano contraria → dos mancuernas. Aquí funciona muy bien subir repeticiones antes que carga."})}
+${figManual(svgStepUp(),"Fig. 3.7 — Step-up: el trabajo lo hace la pierna de arriba.")}
 ${fichaEj({nombre:"Step-up al banco", series:"3 × 8–12 por pierna", descanso:"90 seg",
 principal:"Glúteo mayor y cuádriceps", secundarios:"Glúteo medio",
 pasos:["Banco a la altura de la rodilla (o menos para empezar).","Subir empujando SOLO con la pierna del banco, sin impulso de la de abajo.","Extender la cadera por completo arriba.","Bajar despacio controlando la fase excéntrica."],
 errores:["Impulsarse con la pierna del suelo (el error nº1).","Banco demasiado alto para su control.","Dejarse caer en la bajada."],
 seguridad:["Empieza con step bajo y sin peso: el control importa más que la altura."],
 progresion:"Subir la altura del banco → añadir mancuernas → bajada de 3 segundos."})}
+${figManual(svgPatadaPolea(),"Fig. 3.8 — Patada en polea: extensión de cadera aislada.")}
 ${fichaEj({nombre:"Patada de glúteo en polea", series:"3 × 10–15 por pierna", descanso:"60–90 seg",
 principal:"Glúteo mayor", secundarios:"Isquiotibiales",
 pasos:["Tobillera en la polea baja; torso inclinado, apoyado en la máquina.","Llevar la pierna atrás y arriba con la rodilla casi extendida.","Apretar el glúteo al final SIN arquear la lumbar.","Volver con control resistiendo el cable."],
 errores:["Arquear la lumbar para ganar rango falso.","Patear con impulso.","Cargar tanto que el movimiento se acorta."],
 seguridad:["Ejercicio de aislamiento: carga moderada y ejecución estricta."],
 progresion:"Más repeticiones y pausas de 1 seg arriba antes que subir mucho el peso."})}
+${figManual(svgAbduccion(),"Fig. 3.9 — Abducción con banda (vista de frente): trabajo del glúteo medio.")}
 ${fichaEj({nombre:"Abducción de cadera (máquina o banda)", series:"3 × 12–20", descanso:"45–90 seg",
 principal:"Glúteo medio y menor", secundarios:"Fibras superiores del glúteo mayor, tensor de la fascia lata",
 pasos:["En máquina: torso ligeramente inclinado al frente para orientar más glúteo.","Abrir contra la resistencia con control y pausa breve en la apertura máxima.","Volver despacio sin que las placas golpeen.","Con banda: pasos laterales con tensión constante y rodillas semiflexionadas."],
