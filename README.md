@@ -1,0 +1,64 @@
+# GymTracker Pro — SaaS para entrenadores
+
+App web para entrenadores personales: atletas, medidas con avatar anatómico, rutinas, nutrición,
+asistencia, objetivos y cobros. Se vende por **suscripción mensual** al entrenador.
+
+Nació de la plantilla `gymtracker_pro_5.html` (un solo archivo con `localStorage`) y se portó a
+**Angular 20 + Supabase** (Postgres + Auth + RLS multi-entrenador).
+
+## Correr en local
+
+```bash
+npm install
+npm start          # http://localhost:4200
+```
+
+La conexión a Supabase está en `src/environments/environment.ts` (URL + clave publicable; es segura
+en el cliente porque el acceso lo controla RLS). Ahí también va `whatsappVentas`, el número al que
+llegan las solicitudes de plan.
+
+## Estructura
+
+```
+src/app/
+  core/         modelos, util (fechas/dinero), dominio (reglas de negocio de la plantilla),
+                catalogo (93 ejercicios), avatar (SVG anatómico + gráfica), supabase,
+                auth.service (sesión/perfil/suscripción), datos.service (atletas y relaciones),
+                ui.service (toast/confirmar), guards, whatsapp
+  layout/shell  encabezado, navegación, aviso de suscripción
+  pages/
+    auth/       login (con recuperar contraseña) y registro (14 días de prueba)
+    panel/      dashboard: ingresos, cobros vencidos, cumpleaños, mediciones pendientes, atletas, grupos
+    atleta/     ficha con 8 pestañas: perfil, medidas, rutinas, nutrición, asistencia, objetivos, bitácora, pagos
+    cuenta/     plan actual, planes, historial de pagos del plan, perfil y logo, contraseña
+    admin/      (solo rol admin) entrenadores, estado de suscripción, registrar pago manual, +7 días, cancelar
+supabase/migrations/   SQL aplicado al proyecto (en orden)
+```
+
+## Modelo SaaS
+
+- Cada entrenador es un tenant: todas las tablas llevan `trainer_id` y **RLS** solo deja ver lo propio.
+- Al registrarse, un trigger crea su `perfil` y una `suscripcion` en **prueba de 14 días** (plan *prueba*, 10 atletas).
+- Escribir (crear/editar/borrar) exige `suscripcion_vigente()`; con el plan vencido el entrenador
+  puede **ver** pero no guardar.
+- El límite de atletas por plan lo valida un trigger en la base de datos.
+- **Cobro manual** (por ahora): el entrenador pide el plan por WhatsApp desde *Mi cuenta*; el admin
+  registra el pago en *Admin* (RPC `admin_registrar_pago_suscripcion`), que guarda el pago y extiende la vigencia.
+
+Planes semilla: Prueba (10 atletas) · Básico $9.99 (25) · Pro $19.99 (100) · Élite $34.99 (ilimitado).
+Se editan en la tabla `planes`.
+
+### Hacer admin a una cuenta
+
+```sql
+update public.perfiles set rol = 'admin' where email = 'tu-correo@ejemplo.com';
+```
+
+## Pendiente (siguientes fases)
+
+- PDFs (progreso, reporte mensual, recibos) y resumen de progreso por WhatsApp — están en la plantilla, falta portarlos.
+- Manual del entrenador (13 capítulos de la plantilla).
+- Importar el respaldo JSON de la plantilla vieja a la nube.
+- Pasarela de pago automática (Stripe / PayPal) con webhooks.
+- Portal del atleta, PWA instalable, unidades kg/cm.
+- Despliegue (Vercel/Netlify/Firebase Hosting) y configurar URL del sitio y SMTP propio en Supabase Auth.
