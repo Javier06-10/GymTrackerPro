@@ -52,10 +52,13 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
   const r2 = n => Math.round(n*10)/10;
 
   // Estilo lámina anatómica
-  const FONDO="url(#avFondo)", CUERPO="url(#avCuerpo)", L="#2e3558";
+  const FONDO="url(#avFondo)", CUERPO="#15171c", L="#eef0f4";
+  const GRIS_MUSCULO="#6f6d6b";
   const TRAZO=`fill="${CUERPO}" stroke="${L}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"`;
-  const PELO=`fill="#9aa2b8" stroke="${L}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"`;
-  const MUSC=`fill="none" stroke="${L}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".55"`;
+  const PELO=`fill="#3a3e48" stroke="${L}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"`;
+  const MUSC=`fill="none" stroke="${L}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".6"`;
+  // Vista lateral: cuerpo gris como los músculos del mapa
+  const TRAZO_GRIS=`fill="${GRIS_MUSCULO}" stroke="${L}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"`;
 
   // ---- Mapa de calor ----
   function crecimiento(zona){
@@ -82,7 +85,7 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
       <stop offset=".62" stop-color="#f4f6fa"/><stop offset="1" stop-color="#cfd5e3"/>
     </linearGradient>
     <radialGradient id="avFondo" cx=".5" cy=".42" r=".75">
-      <stop offset="0" stop-color="#f3f5fa"/><stop offset="1" stop-color="#dce1ec"/>
+      <stop offset="0" stop-color="#20242d"/><stop offset="1" stop-color="#0f1115"/>
     </radialGradient>
   </defs>`;
 
@@ -103,7 +106,7 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
     return `<svg viewBox="0 0 320 640" width="${ANCHO}" xmlns="http://www.w3.org/2000/svg" aria-label="${etiqueta}">
       ${DEFS}
       <rect x="3" y="3" width="314" height="634" rx="18" fill="${FONDO}"/>
-      <ellipse cx="160" cy="600" rx="74" ry="9" fill="#2e3558" opacity=".18" filter="url(#avSuave)"/>
+      <ellipse cx="160" cy="600" rx="74" ry="9" fill="#eef0f4" opacity=".08" filter="url(#avSuave)"/>
       ${contenido}
     </svg>`;
   }
@@ -174,9 +177,8 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
       ? `<path d="M ${CX-26} 64 C ${CX-27} 40, ${CX+27} 40, ${CX+26} 64 C ${CX+26} 80, ${CX+20} 92, ${CX+10} 97 C ${CX} 100, ${CX-10} 99, ${CX-10} 97 C ${CX-20} 92, ${CX-26} 80, ${CX-26} 64 Z" ${TRAZO}/>`
       : `<path d="M ${CX-26} 62 C ${CX-27} 38, ${CX+27} 38, ${CX+26} 62 C ${CX+20} 50, ${CX-20} 50, ${CX-26} 62 Z" ${TRAZO}/>`;
     const peloMujer = esEspalda
-      ? `<path d="M ${CX-27} 60 C ${CX-30} 36, ${CX+30} 36, ${CX+27} 60
-          C ${CX+33} 96, ${CX+31} 142, ${CX+23} 172 C ${CX+8} 182, ${CX-8} 182, ${CX-23} 172
-          C ${CX-31} 142, ${CX-33} 96, ${CX-27} 60 Z" ${TRAZO}/>`
+      ? `<path d="M ${CX-26} 64 C ${CX-27} 40, ${CX+27} 40, ${CX+26} 64 C ${CX+26} 80, ${CX+20} 92, ${CX+10} 97 C ${CX} 100, ${CX-10} 99, ${CX-10} 97 C ${CX-20} 92, ${CX-26} 80, ${CX-26} 64 Z" ${TRAZO}/>
+          <path d="M ${CX-6} 90 C ${CX-10} 104, ${CX-8} 122, ${CX} 134 C ${CX+8} 122, ${CX+10} 104, ${CX+6} 90 Z" ${TRAZO}/>`
       : `<path d="M ${CX-27} 60 C ${CX-30} 34, ${CX+30} 34, ${CX+27} 60
           C ${CX+34} 88, ${CX+34} 122, ${CX+28} 150 C ${CX+24} 158, ${CX+16} 158, ${CX+14} 150
           C ${CX+22} 122, ${CX+22} 94, ${CX+15} 66
@@ -307,13 +309,96 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
       <path d="${cuello}" ${TRAZO}/>
       <path d="${cabeza}" ${TRAZO}/>
       ${esMujer ? (esEspalda ? peloMujer.replace(TRAZO, PELO) : "") : peloHombre.replace(TRAZO, PELO)}
-      ${calor}
-      ${m}`;
-    return svgEnvoltura(cuerpo, `Avatar anatómico — vista ${esEspalda?'espalda':'frontal'}`);
+      ${mapaMusculos(esEspalda)}`;
+    return svgEnvoltura(cuerpo, `Mapa muscular — vista ${esEspalda?'espalda':'frontal'}`);
+  }
+
+
+  /* ================= MAPA MUSCULAR (FRENTE / ESPALDA) =================
+     Cada músculo es una forma propia (gris, contorno blanco) calculada con las
+     mismas medidas del atleta. Los que crecieron se tiñen de ámbar según cuánto;
+     el abdomen, de verde si bajó. */
+  function mapaMusculos(esEspalda){
+    const AMBAR=[208,115,31], VERDE=[54,168,119], BASE=[111,109,107];
+    const mezcla=(hacia,t)=>{ t=Math.max(0,Math.min(.9,t)); return "rgb("+BASE.map((b,i)=>Math.round(b+(hacia[i]-b)*t)).join(",")+")"; };
+    // OP.* va de 0 a .5 → intensidad de 0 a ~.9
+    const tono = { pecho:mezcla(AMBAR,OP.pecho*1.8), brazo:mezcla(AMBAR,OP.brazo*1.8), ante:mezcla(AMBAR,OP.ante*1.8),
+      cadera:mezcla(AMBAR,OP.cadera*1.8), muslo:mezcla(AMBAR,OP.muslo*1.8), pant:mezcla(AMBAR,OP.pant*1.8),
+      abd:mezcla(VERDE,OP.abd*2), base:mezcla(AMBAR,0) };
+    const musc=(d,color)=>`<path d="${d}" fill="${color}" stroke="${L}" stroke-width="1.5" stroke-linejoin="round"/>`;
+    // Huso (vientre muscular) entre A y B, ancho máx w (media anchura), máximo en t
+    function huso(A,B,w,t=.45,asim=1){
+      const dx=B[0]-A[0], dy=B[1]-A[1], Lg=Math.hypot(dx,dy)||1, u=[dx/Lg,dy/Lg], n=[-u[1],u[0]];
+      const P=(tt,k)=>[r2(A[0]+dx*tt+n[0]*w*k), r2(A[1]+dy*tt+n[1]*w*k)];
+      const a=Math.max(.04,t-.34), b=Math.min(.96,t+.34);
+      const p1=P(a,1.42), p2=P(b,1.42), p3=P(b,-1.42*asim), p4=P(a,-1.42*asim);
+      return `M ${r2(A[0])} ${r2(A[1])} C ${p1[0]} ${p1[1]}, ${p2[0]} ${p2[1]}, ${r2(B[0])} ${r2(B[1])} C ${p3[0]} ${p3[1]}, ${p4[0]} ${p4[1]}, ${r2(A[0])} ${r2(A[1])} Z`;
+    }
+    let out="";
+    [-1,1].forEach(s=>{
+      const sx=v=>r2(CX+s*v);
+      const xc=CX+s*wCad*.52;
+      const xBic=wH+3, xMun=wH+11, xCodo=(xBic+xMun)/2;
+      // Deltoides (ambas vistas)
+      out+=musc(`M ${sx(wH-20)} 150 C ${sx(wH-6)} 140, ${sx(wH+wB*.75)} 150, ${sx(wH+wB*.7)} 178 C ${sx(wH+wB*.6)} 194, ${sx(wH+2)} 200, ${sx(wH-3)} 200 C ${sx(wH-8)} 186, ${sx(wH-14)} 164, ${sx(wH-20)} 150 Z`, tono.brazo);
+      // Antebrazo (ambas vistas)
+      out+=musc(huso([sx(xCodo+wA*.1),256],[sx(xMun),328],wA*.82,.3), tono.ante);
+      if(!esEspalda){
+        // Trapecio superior (asoma por delante)
+        out+=musc(`M ${sx(14)} 124 Q ${sx(30)} 134 ${sx(wH-16)} 146 L ${sx(wH-22)} 150 Q ${sx(28)} 146 ${sx(16)} 140 Z`, tono.base);
+        // Pectoral
+        const bajoPec = esMujer ? 216 : 206;
+        out+=musc(`M ${sx(3)} 154 C ${sx(wPec*.45)} 146, ${sx(wPec-8)} 150, ${sx(wPec-6)} 164 C ${sx(wPec-2)} 184, ${sx(wPec*.66)} ${bajoPec}, ${sx(12)} ${bajoPec+2} C ${sx(4)} ${bajoPec}, ${sx(3)} 180, ${sx(3)} 154 Z`, tono.pecho);
+        if(esMujer) out+=`<path d="M ${sx(wPec*.78)} 190 Q ${sx(wPec*.45)} 224 ${sx(10)} 214" fill="none" stroke="${L}" stroke-width="1.4" opacity=".8"/>`;
+        // Abdominales en bloques y oblicuo
+        const ancho=Math.min(16, wAbdA*.52), top=esMujer?226:216;
+        for(let i=0;i<3;i++){
+          const y0=top+i*24, y1=y0+21, x0=Math.min(CX+s*3,CX+s*ancho), x1=Math.max(CX+s*3,CX+s*ancho);
+          out+=`<rect x="${r2(x0)}" y="${y0}" width="${r2(x1-x0)}" height="${y1-y0}" rx="5" fill="${tono.abd}" stroke="${L}" stroke-width="1.5"/>`;
+        }
+        const yb=top+72;
+        out+=musc(`M ${sx(3)} ${yb} L ${sx(ancho)} ${yb} Q ${sx(ancho-1)} ${yb+30} ${sx(4)} 334 L ${sx(3)} 334 Z`, tono.abd);
+        out+=musc(`M ${sx(wPec-8)} 202 C ${sx(wAbdA+2)} 226, ${sx(wAbdO+panza)} 262, ${sx(wCad-9)} 306 C ${sx(wCad-20)} 314, ${sx(ancho+6)} 300, ${sx(ancho+4)} 262 C ${sx(ancho+3)} 238, ${sx(ancho+6)} 216, ${sx(wPec-16)} 206 Z`, tono.abd);
+        // Bíceps
+        out+=musc(huso([sx(xBic+wB*.05),184],[sx(xCodo-1),248],wB*.8,.45), tono.brazo);
+        // Cuádriceps: vasto lateral, recto femoral y vasto medial (gota); aductor
+        out+=musc(huso([xc+s*wM*.5,338],[xc+s*wM*.46,448],wM*.42,.45), tono.muslo);
+        out+=musc(huso([xc+s*wM*.0,332],[xc-s*wM*.06,442],wM*.36,.42), tono.muslo);
+        out+=musc(huso([xc-s*wM*.46,388],[xc-s*wM*.14,456],wM*.33,.62), tono.muslo);
+        out+=musc(huso([CX+s*12,350],[xc-s*wM*.66,418],7.5,.35), tono.cadera);
+        // Rótula y pierna (tibial + gemelo que asoma)
+        out+=`<ellipse cx="${r2(xc)}" cy="${Y.rodilla+4}" rx="6" ry="8" fill="none" stroke="${L}" stroke-width="1.4" opacity=".85"/>`;
+        out+=musc(huso([xc+s*wP*.12,468],[xc+s*wP*.04,558],wP*.72,.3), tono.pant);
+      }else{
+        // Infraespinoso, dorsal y erectores
+        out+=musc(huso([sx(14),168],[sx(wPec-5),200],10,.45), tono.base);
+        out+=musc(`M ${sx(wPec-3)} 190 C ${sx(wAbdA+4)} 228, ${sx(wAbdO+1)} 262, ${sx(18)} 300 C ${sx(9)} 286, ${sx(10)} 232, ${sx(26)} 206 C ${sx(32)} 200, ${sx(wPec-10)} 194, ${sx(wPec-3)} 190 Z`, tono.base);
+        out+=musc(huso([sx(7),246],[sx(8),314],6.5,.5), tono.base);
+        // Tríceps
+        out+=musc(huso([sx(xBic-1),180],[sx(xCodo-2),248],wB*.82,.4), tono.brazo);
+        // Glúteo
+        out+=musc(`M ${sx(3)} 304 C ${sx(wCad*.82)} 294, ${sx(wCad*.98)} 330, ${sx(wCad*.62)} ${Y.entre+4} C ${sx(wCad*.3)} ${Y.entre+12}, ${sx(5)} 358, ${sx(3)} 334 Z`, tono.cadera);
+        // Isquiotibiales (bíceps femoral y semitendinoso)
+        out+=musc(huso([xc+s*wM*.4,362],[xc+s*wM*.22,454],wM*.44,.42), tono.muslo);
+        out+=musc(huso([xc-s*wM*.4,362],[xc-s*wM*.18,454],wM*.42,.42), tono.muslo);
+        // Gemelo: dos cabezas
+        out+=musc(huso([xc+s*wP*.36,468],[xc+s*wP*.1,536],wP*.52,.38), tono.pant);
+        out+=musc(huso([xc-s*wP*.36,468],[xc-s*wP*.08,532],wP*.5,.38), tono.pant);
+      }
+    });
+    if(esEspalda){
+      // Trapecio en rombo (una sola pieza)
+      out=musc(`M ${CX} 118 C ${CX+18} 124, ${r2(CX+wH-14)} 138, ${r2(CX+wH-10)} 150 C ${r2(CX+wH*.55)} 158, ${CX+24} 176, ${CX} 214 C ${CX-24} 176, ${r2(CX-wH*.55)} 158, ${r2(CX-wH+10)} 150 C ${r2(CX-wH+14)} 138, ${CX-18} 124, ${CX} 118 Z`, tono.base)+out;
+    }else{
+      // Línea alba entre los abdominales
+      out+=`<line x1="${CX}" y1="${esMujer?226:216}" x2="${CX}" y2="334" stroke="${L}" stroke-width="1" opacity=".5"/>`;
+    }
+    return out;
   }
 
   /* ================= VISTA DE PERFIL (LADO) ================= */
   function vistaLado(){
+    const TRAZO = TRAZO_GRIS;
     const X=160;
     const dPec  = (esMujer?24:30) * escala("pecho") * compGlobal;
     const dAbdA = ((esMujer?19:24) * escala("abdomenAlto") * compCintura + panza*.6) * compGlobal;
