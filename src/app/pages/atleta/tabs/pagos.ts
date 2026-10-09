@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth.service';
 import { DatosService } from '../../../core/datos.service';
 import { Atleta, PagoAtleta } from '../../../core/modelos';
+import { PdfService } from '../../../core/pdf.service';
 import { UiService } from '../../../core/ui.service';
 import { abrirWhatsApp, primerNombre } from '../../../core/whatsapp';
 import { diasDesde, fmtDinero, fmtFecha, hoyISO, sumarDias } from '../../../core/util';
@@ -50,7 +51,10 @@ import { Modal } from '../../../shared/modal';
                 <td><b style="color:var(--verde)">{{ dinero(p.monto) }}</b></td>
                 <td>{{ p.metodo }}</td>
                 <td>{{ p.concepto }}</td>
-                <td><button class="btn-x" (click)="eliminar(p)">✕</button></td>
+                <td style="white-space:nowrap;">
+                  <button class="btn-x" title="Descargar recibo" style="color:var(--acero);" (click)="recibo(p)">🧾</button>
+                  <button class="btn-x" (click)="eliminar(p)">✕</button>
+                </td>
               </tr>
             }
           </table></div>
@@ -98,6 +102,12 @@ export class TabPagos {
   private readonly datos = inject(DatosService);
   private readonly ui = inject(UiService);
   private readonly auth = inject(AuthService);
+  private readonly pdf = inject(PdfService);
+
+  async recibo(p: PagoAtleta) {
+    await this.pdf.recibo(this.atleta(), p);
+    this.ui.toast('Recibo descargado ✓');
+  }
 
   protected readonly dinero = fmtDinero;
   protected readonly fecha = fmtFecha;

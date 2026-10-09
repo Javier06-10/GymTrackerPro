@@ -4,7 +4,11 @@ import { VistaAvatar, dibujarAvatar, graficaLineaSVG } from '../../../core/avata
 import { DatosService } from '../../../core/datos.service';
 import { GRUPOS_MEDIDA, ZONAS, ZONAS_INVERTIDAS, delta, etiquetaZona, medicionPendiente, serieMedida, ultimaMedida } from '../../../core/dominio';
 import { Atleta, Medida } from '../../../core/modelos';
+import { AuthService } from '../../../core/auth.service';
+import { compararProgreso } from '../../../core/pdf';
+import { PdfService } from '../../../core/pdf.service';
 import { UiService } from '../../../core/ui.service';
+import { abrirWhatsApp } from '../../../core/whatsapp';
 import { fmtFecha, hoyISO } from '../../../core/util';
 import { Modal } from '../../../shared/modal';
 import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
@@ -39,7 +43,13 @@ import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
         <div class="tarjeta">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap;">
             <div style="font-weight:800;">📏 Historial de Progreso Corporal</div>
-            <button class="btn btn-primario btn-mini" (click)="abrirModal()">＋ Nueva medición</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              @if (a.medidas.length >= 2) {
+                <button class="btn btn-suave btn-mini" (click)="resumenWhatsApp()">💬 Resumen</button>
+                <button class="btn btn-suave btn-mini" (click)="exportarPDF()">📄 Exportar PDF</button>
+              }
+              <button class="btn btn-primario btn-mini" (click)="abrirModal()">＋ Nueva medición</button>
+            </div>
           </div>
           @if (pendiente(); as mp) {
             @if (mp.vencida) {
@@ -139,6 +149,8 @@ export class TabMedidas {
   readonly atleta = input.required<Atleta>();
   private readonly datos = inject(DatosService);
   private readonly ui = inject(UiService);
+  private readonly pdf = inject(PdfService);
+  private readonly auth = inject(AuthService);
 
   protected readonly zonas = ZONAS;
   protected readonly gruposMedida = GRUPOS_MEDIDA;
@@ -217,6 +229,29 @@ export class TabMedidas {
     } catch (e) {
       this.ui.error(e);
     }
+  }
+
+  /* ---------- Exportar / compartir el progreso ---------- */
+  async exportarPDF() {
+    if (await this.pdf.progreso(this.atleta())) this.ui.toast('PDF de progreso descargado ✓');
+    else this.ui.toast('Las dos últimas mediciones no tienen zonas en común', 'err');
+  }
+
+  resumenWhatsApp() {
+    const a = this.atleta();
+    const cmp = compararProgreso(a);
+    if (!cmp) return this.ui.toast('Se necesitan al menos 2 mediciones para comparar', 'err');
+    const emoji = { AVANCE: '✅', RETROCESO: '🔻', IGUAL: '➖', CAMBIO: 'ℹ️' };
+    let t = `📊 *TU PROGRESO — ${a.nombre.toUpperCase()}*\n`;
+    t += `${fmtFecha(cmp.ant.fecha)} → ${fmtFecha(cmp.act.fecha)} (${cmp.dias} días)\n\n`;
+    cmp.filas.forEach((f) => {
+      t += `${f.zona}: ${f.antes} → ${f.ahora} ${emoji[f.ev.texto]} ${f.delta === 0 ? '' : (f.delta > 0 ? '+' : '') + f.delta}\n`;
+    });
+    t += `\n*${cmp.avances} zona${cmp.avances === 1 ? '' : 's'} mejoraron · ${cmp.iguales} sin cambio · ${cmp.retros} retroceso${cmp.retros === 1 ? '' : 's'}*\n`;
+    t += cmp.frase;
+    const firma = this.auth.perfil()?.nombre;
+    if (firma) t += '\n— ' + firma;
+    if (!abrirWhatsApp(a, t)) this.ui.toast('Este atleta no tiene teléfono. Agrégalo con ✏️ en su Perfil', 'err');
   }
 
   async guardarFrecuencia(valor: string) {

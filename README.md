@@ -54,9 +54,16 @@ Se editan en la tabla `planes`.
 update public.perfiles set rol = 'admin' where email = 'tu-correo@ejemplo.com';
 ```
 
+## PDFs
+
+Generados sin librerías en `core/pdf.ts` (portado de la plantilla), firmados con el nombre, negocio y logo del entrenador:
+- **Progreso físico** (Medidas → 📄 Exportar PDF): comparación de las 2 últimas mediciones, objetivos y gráficas (2 páginas).
+- **Recibo de pago** (Pagos → 🧾 en cada fila).
+- **Reporte mensual del negocio** (Panel → 📊 Reporte).
+
 ## Pendiente (siguientes fases)
 
-- PDFs (progreso, reporte mensual, recibos) y resumen de progreso por WhatsApp — están en la plantilla, falta portarlos.
+
 - Manual del entrenador (13 capítulos de la plantilla).
 - Importar el respaldo JSON de la plantilla vieja a la nube.
 - Pasarela de pago automática (Stripe / PayPal) con webhooks.

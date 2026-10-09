@@ -5,7 +5,10 @@ import { AuthService } from '../../core/auth.service';
 import { DatosService } from '../../core/datos.service';
 import { medicionPendiente, pagoVencido, ultimaMedida } from '../../core/dominio';
 import { Atleta } from '../../core/modelos';
+import { mesesReporte } from '../../core/pdf';
+import { PdfService } from '../../core/pdf.service';
 import { UiService } from '../../core/ui.service';
+import { Modal } from '../../shared/modal';
 import { abrirWhatsApp, primerNombre } from '../../core/whatsapp';
 import { diasDesde, fmtDinero, fmtFecha, hoyISO, normalizar, proximoCumple } from '../../core/util';
 import { AvatarIniciales } from '../../shared/avatar-iniciales';
@@ -14,7 +17,7 @@ import { GruposModal } from './grupos-modal';
 /** Dashboard — balance global del entrenador (portado de renderDashboard). */
 @Component({
   selector: 'app-panel',
-  imports: [FormsModule, AvatarIniciales, GruposModal],
+  imports: [FormsModule, AvatarIniciales, GruposModal, Modal],
   template: `
     <div class="grid-metricas">
       <div class="metrica m-verde">
@@ -94,6 +97,7 @@ import { GruposModal } from './grupos-modal';
           <input type="text" placeholder="Buscar atleta por nombre..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
         </div>
         <button class="btn btn-suave" (click)="gruposAbierto.set(true)">👥 Grupos</button>
+        <button class="btn btn-suave" (click)="mesReporte = meses[0].valor; reporteAbierto.set(true)">📊 Reporte</button>
       </div>
 
       @if (datos.grupos().length) {
@@ -129,6 +133,21 @@ import { GruposModal } from './grupos-modal';
           <div class="vacio" style="grid-column:1/-1;padding:30px;"><p>No se encontraron atletas con ese nombre.</p></div>
         }
       </div>
+    }
+
+    @if (reporteAbierto()) {
+      <app-modal titulo="📊 Reporte Mensual del Negocio" (cerrar)="reporteAbierto.set(false)">
+        <p style="color:var(--texto-suave);font-size:13.5px;">
+          La foto del negocio en una página: ingresos, cuentas por cobrar, atletas, asistencia y seguimiento del mes elegido.
+        </p>
+        <div class="campo"><label>Mes del reporte</label>
+          <select [(ngModel)]="mesReporte">@for (m of meses; track m.valor) { <option [value]="m.valor">{{ m.etiqueta }}</option> }</select>
+        </div>
+        <ng-container pie>
+          <button class="btn btn-fantasma" (click)="reporteAbierto.set(false)">Cancelar</button>
+          <button class="btn btn-primario" (click)="generarReporte()">📄 Generar PDF</button>
+        </ng-container>
+      </app-modal>
     }
 
     @if (gruposAbierto()) {
@@ -196,6 +215,18 @@ export class Panel {
       return a.grupoId === fg;
     });
   });
+
+  /* ---------- Reporte mensual (PDF) ---------- */
+  private readonly pdf = inject(PdfService);
+  protected readonly reporteAbierto = signal(false);
+  protected readonly meses = mesesReporte();
+  protected mesReporte = this.meses[0].valor;
+
+  async generarReporte() {
+    await this.pdf.reporteMensual(this.datos.atletas(), this.mesReporte);
+    this.reporteAbierto.set(false);
+    this.ui.toast('Reporte de ' + this.meses.find((m) => m.valor === this.mesReporte)!.etiqueta.replace(' (mes actual)', '') + ' descargado ✓');
+  }
 
   ir(id: string, tab?: string) {
     this.router.navigate(['/atletas', id], tab ? { queryParams: { tab } } : {});
