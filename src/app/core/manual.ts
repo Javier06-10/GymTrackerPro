@@ -31,22 +31,66 @@ const _FL = 'fill="none" stroke="#eef0f4" stroke-width="1.8" stroke-linecap="rou
 const _FT = 'fill="#e8eaee" font-family="system-ui" font-size="11" font-weight="700"';
 const _FT10 = _FT.replace('font-size="11"', 'font-size="9.5"');
 
+/* Anatomía de los glúteos (vista posterior): mitad izquierda capa superficial,
+   mitad derecha capa profunda (sin el glúteo mayor) para ver medio y menor.
+   Colores categóricos validados: mayor ámbar, medio azul, menor verde. */
 function svgGluteosAnatomia(){
-  return `<svg viewBox="0 0 300 210" xmlns="http://www.w3.org/2000/svg">
-    <rect x="2" y="2" width="296" height="206" rx="14" fill="#e7ebf3"/>
-    <path d="M 115 22 C 112 60, 112 80, 118 96 L 182 96 C 188 80, 188 60, 185 22" ${_FL}/>
-    <line x1="150" y1="26" x2="150" y2="94" stroke="#eef0f4" stroke-width="2" opacity=".5"/>
-    <path d="M 148 96 C 96 90, 82 128, 96 158 C 106 176, 134 178, 148 158 C 152 146, 152 116, 148 96 Z" ${_FM}/>
-    <path d="M 152 96 C 204 90, 218 128, 204 158 C 194 176, 166 178, 152 158 C 148 146, 148 116, 152 96 Z" ${_FM}/>
-    <path d="M 196 96 C 204 84, 196 70, 180 68 C 166 67, 156 76, 154 88" ${_FL}/>
-    <path d="M 116 86 C 112 78, 118 70, 128 70" fill="none" stroke="#eef0f4" stroke-width="2" stroke-dasharray="4 4" opacity=".8"/>
-    <text x="14" y="70" ${_FT}>Glúteo</text><text x="14" y="82" ${_FT}>medio</text>
-    <line x1="46" y1="76" x2="106" y2="80" stroke="#eef0f4" stroke-width="1.4" opacity=".6"/>
-    <text x="216" y="56" ${_FT}>Glúteo menor</text>
-    <line x1="238" y1="60" x2="186" y2="76" stroke="#eef0f4" stroke-width="1.4" opacity=".6"/>
-    <text x="230" y="148" ${_FT}>Glúteo</text><text x="230" y="160" ${_FT}>mayor</text>
-    <line x1="228" y1="150" x2="200" y2="140" stroke="#eef0f4" stroke-width="1.4" opacity=".6"/>
-    <text x="92" y="198" ${_FT}>Vista posterior de la pelvis</text>
+  const L = '#eef0f4', CU = '#15171c', GR = '#6f6d6b';
+  const MAYOR = '#d0731f', MEDIO = '#4a8bd8', MENOR = '#36a877';
+  const m = (d, c, extra = '') => `<path d="${d}" fill="${c}" stroke="${L}" stroke-width="1.5" stroke-linejoin="round" ${extra}/>`;
+  const guia = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${L}" stroke-width="1" opacity=".55"/><circle cx="${x2}" cy="${y2}" r="1.8" fill="${L}"/>`;
+  const T = 'fill="#e8eaee" font-family="system-ui" font-size="10" font-weight="700"';
+  const Ts = 'fill="#9aa3b2" font-family="system-ui" font-size="9" font-weight="700" letter-spacing=".08em"';
+  // Fibras del glúteo mayor (diagonales hacia el fémur)
+  let fibras = '';
+  [[140,70,96,104],[146,86,94,124],[147,104,98,140],[146,122,108,154]].forEach(([a,b,c,d]) => {
+    fibras += `<path d="M ${a} ${b} Q ${(a+c)/2+6} ${(b+d)/2-4} ${c} ${d}" fill="none" stroke="#f3b27a" stroke-width="1" opacity=".55"/>`;
+  });
+  return `<svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="296" height="216" rx="14" fill="#e7ebf3"/>
+    <text x="78" y="16" ${Ts} text-anchor="middle">SUPERFICIAL</text>
+    <text x="222" y="16" ${Ts} text-anchor="middle">PROFUNDA</text>
+
+    <!-- Silueta: espalda baja, cadera y medio muslo -->
+    <path d="M 104 22 C 102 44, 92 70, 76 100 C 68 130, 72 166, 80 200 L 146 200 C 148 184, 149 172, 150 162
+             C 151 172, 152 184, 154 200 L 220 200 C 228 166, 232 130, 224 100 C 208 70, 198 44, 196 22 Z"
+      fill="${CU}" stroke="${L}" stroke-width="2.2" stroke-linejoin="round"/>
+
+    <!-- Columna, erectores, sacro y cresta ilíaca -->
+    ${m('M 136 22 C 132 34, 132 48, 138 58 C 142 50, 144 34, 143 22 Z', GR)}
+    ${m('M 164 22 C 168 34, 168 48, 162 58 C 158 50, 156 34, 157 22 Z', GR)}
+    <path d="M 139 56 L 161 56 L 150 98 Z" fill="none" stroke="${L}" stroke-width="1.2" opacity=".6" stroke-linejoin="round"/>
+    <path d="M 98 60 C 110 46, 130 42, 140 50" fill="none" stroke="${L}" stroke-width="1.3" stroke-dasharray="3 3" opacity=".7"/>
+    <path d="M 202 60 C 190 46, 170 42, 160 50" fill="none" stroke="${L}" stroke-width="1.3" stroke-dasharray="3 3" opacity=".7"/>
+
+    <!-- Isquiotibiales de contexto -->
+    ${m('M 88 160 C 92 172, 100 192, 112 199 L 140 199 C 140 186, 138 172, 132 162 C 118 168, 100 166, 88 160 Z', GR)}
+    ${m('M 212 160 C 208 172, 200 192, 188 199 L 160 199 C 160 186, 162 172, 168 162 C 182 168, 200 166, 212 160 Z', GR)}
+
+    <!-- IZQUIERDA (superficial): glúteo medio asomando y glúteo mayor -->
+    ${m('M 98 62 C 110 50, 132 50, 142 60 C 138 72, 118 80, 94 86 C 92 76, 94 68, 98 62 Z', MEDIO)}
+    ${m('M 147 62 C 128 60, 100 74, 84 100 C 76 124, 84 148, 104 160 C 120 168, 140 166, 148 152 C 151 130, 151 90, 147 62 Z', MAYOR)}
+    ${fibras}
+
+    <!-- DERECHA (profunda): contorno del mayor retirado, medio y menor -->
+    <path d="M 153 62 C 172 60, 200 74, 216 100 C 224 124, 216 148, 196 160 C 180 168, 160 166, 152 152"
+      fill="none" stroke="${L}" stroke-width="1.2" stroke-dasharray="4 3" opacity=".5"/>
+    ${m('M 202 60 C 190 48, 166 48, 156 60 C 156 82, 170 102, 208 112 C 218 96, 212 72, 202 60 Z', MEDIO)}
+    ${m('M 162 78 C 178 72, 198 80, 206 100 C 196 106, 176 102, 164 92 C 162 88, 161 82, 162 78 Z', MENOR)}
+    <circle cx="214" cy="118" r="4.5" fill="${CU}" stroke="${L}" stroke-width="1.3"/>
+
+    <!-- Etiquetas -->
+    <text x="8" y="58" ${T}>Glúteo</text><text x="8" y="70" ${T}>medio</text>
+    ${guia(42, 64, 104, 70)}
+    <text x="8" y="122" ${T}>Glúteo</text><text x="8" y="134" ${T}>mayor</text>
+    ${guia(42, 128, 98, 120)}
+    <text x="234" y="54" ${T}>Glúteo</text><text x="234" y="66" ${T}>medio</text>
+    ${guia(232, 60, 200, 70)}
+    <text x="234" y="96" ${T}>Glúteo</text><text x="234" y="108" ${T}>menor</text>
+    ${guia(232, 102, 194, 92)}
+    <text x="234" y="140" ${Ts}>TROCÁNTER</text>
+    ${guia(232, 137, 218, 121)}
+    <text x="150" y="212" ${T} text-anchor="middle">Vista posterior de la pelvis</text>
   </svg>`;
 }
 /* ---------- Figuras de ejercicios en estilo "mapa muscular" ----------
