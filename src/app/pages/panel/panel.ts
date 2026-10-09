@@ -14,27 +14,60 @@ import { MESES_CORTOS, MESES_ES, diasDesde, fmtDinero, fmtFecha, hoyISO, isoDe, 
 import { GraficaBarras } from '../../shared/graficas/grafica-barras';
 import { AvatarIniciales } from '../../shared/avatar-iniciales';
 import { GruposModal } from './grupos-modal';
+import { Icono } from '../../shared/icono';
 
 /** Dashboard — balance global del entrenador (portado de renderDashboard). */
 @Component({
   selector: 'app-panel',
-  imports: [FormsModule, AvatarIniciales, GruposModal, Modal, GraficaBarras],
+  imports: [FormsModule, AvatarIniciales, GruposModal, Modal, GraficaBarras, Icono],
   template: `
+    <section class="hero-panel">
+      <div class="texto">
+        <div class="hero-fecha">{{ fechaLarga }}</div>
+        <h1>{{ saludo }}{{ primerNombreEntrenador() ? ', ' + primerNombreEntrenador() : '' }}</h1>
+        <p>{{ resumenHoy() }}</p>
+        <div class="hero-acciones">
+          <button class="btn btn-primario" (click)="ui.formAtleta.set({ id: null })" [disabled]="!auth.vigente()">
+            <app-icono nombre="mas" [tam]="16" /> Nuevo atleta
+          </button>
+          <button class="btn btn-suave" (click)="mesReporte = meses[0].valor; reporteAbierto.set(true)"><app-icono nombre="grafico" [tam]="16" /> Reporte del mes</button>
+          <button class="btn btn-fantasma" (click)="irManual()"><app-icono nombre="libro" [tam]="16" /> Manual</button>
+        </div>
+      </div>
+      <div class="hero-arte" aria-hidden="true">
+        <!-- Barra con discos y pulso: ilustración decorativa -->
+        <svg viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 92 H70 L82 70 L96 108 L110 52 L124 92 H234" fill="none" stroke="rgba(255,154,61,.55)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+          <rect x="30" y="36" width="180" height="6" rx="3" fill="#8a90a0"/>
+          <rect x="44" y="14" width="14" height="50" rx="3" fill="#2a2e38" stroke="#eef0f4" stroke-width="1.6"/>
+          <rect x="60" y="20" width="10" height="38" rx="3" fill="#d0731f" stroke="#eef0f4" stroke-width="1.6"/>
+          <rect x="182" y="14" width="14" height="50" rx="3" fill="#2a2e38" stroke="#eef0f4" stroke-width="1.6"/>
+          <rect x="170" y="20" width="10" height="38" rx="3" fill="#d0731f" stroke="#eef0f4" stroke-width="1.6"/>
+          <rect x="22" y="33" width="10" height="12" rx="2" fill="#6f6d6b"/><rect x="208" y="33" width="10" height="12" rx="2" fill="#6f6d6b"/>
+        </svg>
+      </div>
+    </section>
+
     <div class="grid-metricas">
       <div class="metrica m-verde">
-        <div class="etiqueta">Ingresos · Últimos 30 días</div>
+        <div class="etiqueta"><span class="ico"><app-icono nombre="dinero" /></span> Ingresos · 30 días</div>
         <div class="valor">{{ dinero(ingresos30()) }}</div>
         <div class="sub">Suma de pagos registrados</div>
       </div>
       <div class="metrica m-acero">
-        <div class="etiqueta">Atletas Activos</div>
+        <div class="etiqueta"><span class="ico"><app-icono nombre="usuarios" /></span> Atletas activos</div>
         <div class="valor">{{ activos() }}{{ limite() ? ' / ' + limite() : '' }}</div>
         <div class="sub">{{ inactivos() }} inactivo{{ inactivos() === 1 ? '' : 's' }}{{ limite() ? ' · límite de tu plan' : '' }}</div>
       </div>
       <div class="metrica m-rojo">
-        <div class="etiqueta">Cuentas por Cobrar</div>
+        <div class="etiqueta"><span class="ico"><app-icono nombre="alerta" /></span> Por cobrar</div>
         <div class="valor">{{ vencidos().length }}</div>
         <div class="sub">{{ dinero(porCobrar()) }} pendiente</div>
+      </div>
+      <div class="metrica">
+        <div class="etiqueta"><span class="ico"><app-icono nombre="actividad" /></span> Asistencia · 8 semanas</div>
+        <div class="valor">{{ pctAsistencia8() === null ? '—' : pctAsistencia8() + '%' }}</div>
+        <div class="sub">Entrenos vs. faltas marcados</div>
       </div>
     </div>
 
@@ -169,6 +202,11 @@ import { GruposModal } from './grupos-modal';
       </div>
     }
 
+    <div class="sello-seguridad">
+      <app-icono nombre="escudo" />
+      <span><b>Tus datos están protegidos:</b> conexión cifrada y cada entrenador solo puede ver su propia información.</span>
+    </div>
+
     @if (reporteAbierto()) {
       <app-modal titulo="📊 Reporte Mensual del Negocio" (cerrar)="reporteAbierto.set(false)">
         <p style="color:var(--texto-suave);font-size:13.5px;">
@@ -249,6 +287,27 @@ export class Panel {
       return a.grupoId === fg;
     });
   });
+
+  /* ---------- Cabecera de bienvenida ---------- */
+  protected readonly saludo = (() => {
+    const h = new Date().getHours();
+    return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  })();
+  protected readonly fechaLarga = new Date().toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' });
+  protected readonly primerNombreEntrenador = computed(() => primerNombre(this.auth.perfil()?.nombre ?? ''));
+  protected readonly resumenHoy = computed(() => {
+    const n = this.activos();
+    if (!this.datos.atletas().length) return 'Empieza agregando a tu primer atleta: medidas, rutinas, nutrición y cobros en un solo lugar.';
+    const partes = [`${n} atleta${n === 1 ? '' : 's'} activo${n === 1 ? '' : 's'}`];
+    const v = this.vencidos().length;
+    partes.push(v ? `${v} cobro${v === 1 ? '' : 's'} pendiente${v === 1 ? '' : 's'}` : 'cobros al día');
+    const m = this.pendMed().length;
+    if (m) partes.push(`${m} medición${m === 1 ? '' : 'es'} por hacer`);
+    const c = this.cumples().length;
+    if (c) partes.push(`${c} cumpleaños esta semana`);
+    return partes.join(' · ') + '.';
+  });
+  irManual() { this.router.navigateByUrl('/manual'); }
 
   /* ---------- Tendencias (gráficas) ---------- */
   protected readonly formatoEntrenos = (n: number) => `${n} entreno${n === 1 ? '' : 's'}`;

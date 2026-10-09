@@ -3,12 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { mensajeError } from '../../core/supabase';
+import { MarcaAuth } from '../../shared/marca-auth';
 
 @Component({
   selector: 'app-registro',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, MarcaAuth],
   template: `
-    <div class="auth-wrap">
+    <div class="auth-split">
+      <app-marca-auth />
+      <div class="auth-wrap">
       <div class="auth-card">
         <div class="logo">
           <div class="icono">🏋️</div>
@@ -39,6 +42,7 @@ import { mensajeError } from '../../core/supabase';
           }
         </div>
         <div class="pie-auth">¿Ya tienes cuenta? <a routerLink="/login">Entrar</a></div>
+      </div>
       </div>
     </div>
   `,
