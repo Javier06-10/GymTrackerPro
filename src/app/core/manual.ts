@@ -49,35 +49,95 @@ function svgGluteosAnatomia(){
     <text x="92" y="198" ${_FT}>Vista posterior de la pelvis</text>
   </svg>`;
 }
-/* ---------- Maniquí anatómico para las figuras de ejercicios ----------
-   Cada extremidad es una cadena de "cápsulas" (contorno + relleno + brillo),
-   así el cuerpo tiene grosor y volumen en vez de palitos. El lado lejano va
-   más oscuro y detrás para dar profundidad. Coordenadas en el viewBox 300×190. */
-const TINTA = '#2e3558';
-const PIEL = '#f8f9fc';
-const PIEL_LEJOS = '#c3cad9';
-const PELO = '#8e97ae';
+/* ---------- Deportista ilustrada para las figuras de ejercicios ----------
+   Cada pieza del cuerpo es una forma orgánica (se afina hacia muñecas y tobillos
+   y tiene el vientre del músculo: cuádriceps, isquios, gemelo, bíceps, pecho…).
+   Se pinta en capas: silueta de contorno → color del material → degradado
+   perpendicular a la pieza (sombra-luz-sombra, como un cilindro iluminado).
+   Ropa: top deportivo, leggings y tenis. El lado lejano va en sombra.
+   Coordenadas en el viewBox 300×190. */
+const TINTA = '#23283f';
+const MATERIAL = {
+  piel:     { base: '#d9a07f', luz: '#f2c9ad', sombra: '#a8704f' },
+  top:      { base: '#e07f2e', luz: '#f7a560', sombra: '#a9561a' },
+  legging:  { base: '#3a4262', luz: '#606a92', sombra: '#232842' },
+  zapato:   { base: '#eef1f6', luz: '#ffffff', sombra: '#aab2c4' },
+  pelo:     { base: '#3b2a22', luz: '#6a4c3e', sombra: '#21160f' },
+};
+let _idFig = 0;
 
-function _capPartes(puntos, grosores, relleno, brillo = true){
-  let contorno = '', cuerpo = '', luz = '';
-  for(let i = 0; i < puntos.length - 1; i++){
-    const [x1, y1] = puntos[i], [x2, y2] = puntos[i + 1], g = grosores[i];
-    const seg = `M ${x1} ${y1} L ${x2} ${y2}`;
-    contorno += `<path d="${seg}" stroke="${TINTA}" stroke-width="${g + 3.4}" stroke-linecap="round" fill="none"/>`;
-    cuerpo += `<path d="${seg}" stroke="${relleno}" stroke-width="${g}" stroke-linecap="round" fill="none"/>`;
-    if(brillo){
-      // Brillo desplazado hacia "arriba" de la pieza: simula luz cenital sobre un cilindro
-      const L = Math.hypot(x2 - x1, y2 - y1) || 1;
-      let nx = -(y2 - y1) / L, ny = (x2 - x1) / L;
-      if(ny > 0){ nx = -nx; ny = -ny; }
-      const d = g * 0.22, a = 0.18, b = 0.82;
-      luz += `<path d="M ${x1 + (x2 - x1) * a + nx * d} ${y1 + (y2 - y1) * a + ny * d} L ${x1 + (x2 - x1) * b + nx * d} ${y1 + (y2 - y1) * b + ny * d}" stroke="#fff" stroke-opacity=".7" stroke-width="${(g * 0.28).toFixed(1)}" stroke-linecap="round" fill="none"/>`;
-    }
-  }
-  return [contorno, cuerpo, luz];
+const _v = (a, b) => [b[0] - a[0], b[1] - a[1]];
+const _r = (n) => Math.round(n * 10) / 10;
+
+/** Forma de una pieza entre A y B: anchos wa→wb, vientres "post" (lado posterior) y "ant" en t. */
+function _pieza(A, B, wa, wb, post = 0, ant = 0, tPost = 0.4, tAnt = 0.45, lado = 1){
+  const d = _v(A, B), L = Math.hypot(d[0], d[1]) || 1;
+  const u = [d[0] / L, d[1] / L], n = [-u[1] * lado, u[0] * lado];
+  const ha = wa / 2, hb = wb / 2;
+  const P = (t, s, extra) => { const h = ha + (hb - ha) * t + extra; return [A[0] + d[0] * t + n[0] * h * s, A[1] + d[1] * t + n[1] * h * s]; };
+  const ctrl = (t, s, bulto) => { const m = P(t, s, bulto * 2); return m; };
+  const a1 = P(0, 1, 0), b1 = P(1, 1, 0), b2 = P(1, -1, 0), a2 = P(0, -1, 0);
+  const c1 = ctrl(tPost, 1, post), c2 = ctrl(tAnt, -1, ant);
+  const k = 1.33;
+  return {
+    d: `M ${_r(a1[0])} ${_r(a1[1])} Q ${_r(c1[0])} ${_r(c1[1])} ${_r(b1[0])} ${_r(b1[1])} `
+     + `C ${_r(b1[0] + u[0] * hb * k)} ${_r(b1[1] + u[1] * hb * k)} ${_r(b2[0] + u[0] * hb * k)} ${_r(b2[1] + u[1] * hb * k)} ${_r(b2[0])} ${_r(b2[1])} `
+     + `Q ${_r(c2[0])} ${_r(c2[1])} ${_r(a2[0])} ${_r(a2[1])} `
+     + `C ${_r(a2[0] - u[0] * ha * k)} ${_r(a2[1] - u[1] * ha * k)} ${_r(a1[0] - u[0] * ha * k)} ${_r(a1[1] - u[1] * ha * k)} ${_r(a1[0])} ${_r(a1[1])} Z`,
+    // Eje para el degradado: de un borde al otro por la mitad de la pieza
+    g1: P(0.5, 1, Math.max(post, 0)), g2: P(0.5, -1, Math.max(ant, 0)),
+  };
 }
-function _cap(puntos, grosores, relleno, brillo = true){
-  return _capPartes(puntos, grosores, relleno, brillo).join('');
+
+/** Pinta un grupo de piezas como una sola silueta (sin líneas internas) con su sombreado. */
+function _grupo(piezas, fid, oscuro = false){
+  let contorno = '', color = '', luz = '', defs = '';
+  piezas.forEach((p) => {
+    const id = `${fid}-${++_idFig}`;
+    const m = MATERIAL[p.mat];
+    contorno += `<path d="${p.forma.d}" fill="${TINTA}" stroke="${TINTA}" stroke-width="3.2" stroke-linejoin="round"/>`;
+    color += `<path d="${p.forma.d}" fill="${m.base}"/>`;
+    defs += `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${_r(p.forma.g1[0])}" y1="${_r(p.forma.g1[1])}" x2="${_r(p.forma.g2[0])}" y2="${_r(p.forma.g2[1])}">
+      <stop offset="0" stop-color="${m.sombra}"/><stop offset=".32" stop-color="${m.luz}"/><stop offset=".62" stop-color="${m.base}"/><stop offset="1" stop-color="${m.sombra}"/></linearGradient>`;
+    luz += `<path d="${p.forma.d}" fill="url(#${id})"/>`;
+    if(p.extra) luz += p.extra;
+  });
+  const sombra = oscuro ? piezas.map((p) => `<path d="${p.forma.d}" fill="#141829" opacity=".32"/>`).join('') : '';
+  return `<defs>${defs}</defs>${contorno}${color}${luz}${sombra}`;
+}
+
+/** Cabeza de perfil con nariz, mandíbula, oreja y cola de caballo. mira = 1 derecha / -1 izquierda. */
+function _cabeza(c, mira, fid){
+  const [x, y] = c, m = mira;
+  const id = `${fid}-cab`;
+  const X = (dx) => _r(x + dx * m);
+  const cara = `M ${X(-10)} ${y - 4} C ${X(-11)} ${y - 15}, ${X(4)} ${y - 17}, ${X(9)} ${y - 8} `
+    + `C ${X(10)} ${y - 5}, ${X(10)} ${y - 3}, ${X(12.5)} ${y + 1} L ${X(10)} ${y + 2.5} `
+    + `C ${X(10.5)} ${y + 6}, ${X(8)} ${y + 9}, ${X(4)} ${y + 11} C ${X(-1)} ${y + 12}, ${X(-6)} ${y + 10}, ${X(-8)} ${y + 6} `
+    + `C ${X(-11)} ${y + 3}, ${X(-11)} ${y}, ${X(-10)} ${y - 4} Z`;
+  const pelo = `M ${X(-10.5)} ${y + 1} C ${X(-12)} ${y - 14}, ${X(3)} ${y - 18}, ${X(9.5)} ${y - 8} `
+    + `C ${X(3)} ${y - 11}, ${X(-3)} ${y - 9}, ${X(-5)} ${y - 1} Z`;
+  const cola = `M ${X(-9)} ${y - 8} C ${X(-20)} ${y - 9}, ${X(-24)} ${y + 2}, ${X(-21)} ${y + 13} `
+    + `C ${X(-18)} ${y + 6}, ${X(-14)} ${y - 1}, ${X(-8)} ${y - 3} Z`;
+  return `<defs><radialGradient id="${id}" cx="${m > 0 ? .62 : .38}" cy=".38" r=".7">
+      <stop offset="0" stop-color="${MATERIAL.piel.luz}"/><stop offset=".6" stop-color="${MATERIAL.piel.base}"/><stop offset="1" stop-color="${MATERIAL.piel.sombra}"/></radialGradient></defs>
+    <path d="${cola}" fill="${MATERIAL.pelo.base}" stroke="${TINTA}" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="${cara}" fill="url(#${id})" stroke="${TINTA}" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="${pelo}" fill="${MATERIAL.pelo.base}" stroke="${TINTA}" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="M ${X(-9)} ${y - 6} C ${X(-4)} ${y - 13}, ${X(3)} ${y - 14}, ${X(7)} ${y - 9}" fill="none" stroke="${MATERIAL.pelo.luz}" stroke-width="1.4" stroke-linecap="round"/>
+    <ellipse cx="${X(-3)}" cy="${y + 1}" rx="2.4" ry="3.2" fill="${MATERIAL.piel.sombra}" stroke="${TINTA}" stroke-width="1.1"/>
+    <path d="M ${X(5)} ${y - 2} q ${2 * m} -1 ${3.5 * m} 0" fill="none" stroke="${TINTA}" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M ${X(7)} ${y + 6.5} q ${1.5 * m} 0.3 ${2.6 * m} -0.6" fill="none" stroke="#8a4b3a" stroke-width="1.2" stroke-linecap="round"/>`;
+}
+
+/** Tenis: del tobillo a la punta, con suela. */
+function _zapato(tobillo, punta){
+  const d = _v(tobillo, punta), L = Math.hypot(d[0], d[1]) || 1, u = [d[0] / L, d[1] / L];
+  const talon = [tobillo[0] - u[0] * 6, tobillo[1] + 4];
+  const forma = _pieza(talon, punta, 10, 8.5, 0, 0, .4, .45, 1);
+  const suela = `M ${_r(talon[0] - u[0] * 2)} ${_r(talon[1] + 5)} L ${_r(punta[0] + u[0] * 4)} ${_r(punta[1] + 4.5)}`;
+  return { forma, extra: `<path d="${suela}" stroke="${TINTA}" stroke-width="3.4" stroke-linecap="round"/>`
+    + `<path d="M ${_r(talon[0] + u[0] * 6)} ${_r(talon[1] - 2)} l ${_r(u[0] * 9)} ${_r(u[1] * 9 - 1)}" stroke="#9aa2b8" stroke-width="1.2" stroke-linecap="round"/>` };
 }
 
 /**
@@ -86,28 +146,46 @@ function _cap(puntos, grosores, relleno, brillo = true){
  *    brazoLejos / piernaLejos: articulaciones propias del lado lejano (opcional).
  */
 function maniqui(p){
+  const fid = 'dep' + (++_idFig);
+  const m = p.mira;
   const off = (pt) => [pt[0] + p.lejos[0], pt[1] + p.lejos[1]];
   const pl = p.piernaLejos || [p.cadera, p.rodilla, p.tobillo, p.punta].map(off);
   const bl = p.brazoLejos || [p.hombro, p.codo, p.muneca].map(off);
-  const [cx, cy] = p.cabeza;
+
+  const pierna = (c, r, t, pt) => {
+    const z = _zapato(t, pt);
+    return [
+      { mat: 'legging', forma: _pieza(c, r, 19, 12.5, 2.6, 3, .42, .45, m) },             // muslo: isquios / cuádriceps
+      { mat: 'legging', forma: _pieza(r, t, 12, 7.5, 3.6, 0.6, .28, .4, m),                // pierna: gemelo marcado
+        extra: '' },
+      { mat: 'zapato', forma: z.forma, extra: z.extra },
+    ];
+  };
+  const brazo = (h, c, w) => [
+    { mat: 'piel', forma: _pieza(h, c, 11.5, 8.2, 1.4, 1.8, .45, .4, m) },                 // tríceps / bíceps
+    { mat: 'piel', forma: _pieza(c, w, 8.4, 5.6, 1, 1.4, .3, .3, m) },                     // antebrazo
+    { mat: 'piel', forma: _pieza(w, [w[0] + (w[0] - c[0]) * .22, w[1] + (w[1] - c[1]) * .22], 6.8, 5.6, .8, .8, .5, .5, m) }, // mano
+  ];
+  const hombroBrazo = (h) => ({ mat: 'top', forma: _pieza(h, [h[0], h[1] + 1], 14, 14, 0, 0, .5, .5, m) }); // tirante del top sobre el deltoides
+
   let s = '';
-  // Lado lejano (detrás)
-  s += _cap(pl.slice(0, 3), [15, 11], PIEL_LEJOS, false) + _cap(pl.slice(2), [7], PIEL_LEJOS, false);
-  s += _cap(bl, [9, 7.5], PIEL_LEJOS, false) + `<circle cx="${bl[2][0]}" cy="${bl[2][1]}" r="4.6" fill="${PIEL_LEJOS}" stroke="${TINTA}" stroke-width="1.7"/>`;
-  // Torso: hombro → cadera con pecho/espalda, más glúteo en la cadera
-  const medio = [(p.hombro[0] + p.cadera[0]) / 2, (p.hombro[1] + p.cadera[1]) / 2];
-  const [tc, tf, tl] = _capPartes([p.hombro, medio, p.cadera], [27, 24], PIEL);
-  s += `<circle cx="${p.cadera[0]}" cy="${p.cadera[1]}" r="14.2" fill="${TINTA}"/>` + tc
-     + `<circle cx="${p.cadera[0]}" cy="${p.cadera[1]}" r="12.5" fill="${PIEL}"/>` + tf + tl;
-  // Cuello y cabeza (con pelo en la nuca y oreja)
-  s += _cap([[cx, cy + 9], p.hombro], [9], PIEL, false);
-  s += `<ellipse cx="${cx}" cy="${cy}" rx="10.5" ry="12" fill="${PIEL}" stroke="${TINTA}" stroke-width="1.8"/>`;
-  s += `<path d="M ${cx - 10.5 * p.mira} ${cy + 3} C ${cx - 12 * p.mira} ${cy - 12}, ${cx + 2 * p.mira} ${cy - 15}, ${cx + 8 * p.mira} ${cy - 8} C ${cx + 1 * p.mira} ${cy - 9}, ${cx - 4 * p.mira} ${cy - 4}, ${cx - 6 * p.mira} ${cy + 5} Z" fill="${PELO}" stroke="${TINTA}" stroke-width="1.4" stroke-linejoin="round"/>`;
-  s += `<ellipse cx="${cx - 2 * p.mira}" cy="${cy + 1}" rx="2.2" ry="3" fill="none" stroke="${TINTA}" stroke-width="1.2"/>`;
-  // Lado cercano (delante)
-  s += _cap([p.cadera, p.rodilla, p.tobillo], [15.5, 11], PIEL) + _cap([p.tobillo, p.punta], [7.5], PIEL, false);
-  s += _cap([p.hombro, p.codo, p.muneca], [9.5, 8], PIEL);
-  s += `<circle cx="${p.muneca[0]}" cy="${p.muneca[1]}" r="4.8" fill="${PIEL}" stroke="${TINTA}" stroke-width="1.7"/>`;
+  // 1) Lado lejano en sombra
+  s += _grupo([...pierna(...pl), ...brazo(...bl)], fid, true);
+  // 2) Cuerpo: torso (top + abdomen), glúteo, pierna cercana y cuello
+  const T = (t) => [p.hombro[0] + (p.cadera[0] - p.hombro[0]) * t, p.hombro[1] + (p.cadera[1] - p.hombro[1]) * t];
+  const dT = _v(p.hombro, p.cadera), LT = Math.hypot(dT[0], dT[1]) || 1;
+  const nT = [-dT[1] / LT * m, dT[0] / LT * m]; // lado posterior del torso
+  const gluteo = [p.cadera[0] + nT[0] * 4, p.cadera[1] + nT[1] * 4];
+  s += _grupo([
+    ...pierna(p.cadera, p.rodilla, p.tobillo, p.punta),
+    { mat: 'legging', forma: _pieza(T(.62), gluteo, 24, 25, 4, 1, .55, .5, m) },              // cadera y glúteo
+    { mat: 'piel', forma: _pieza(T(.45), T(.7), 24, 23, 0.5, 1, .5, .5, m) },                 // abdomen descubierto
+    { mat: 'top', forma: _pieza(p.hombro, T(.5), 27, 24, 1.6, 3.2, .3, .3, m) },              // espalda / pecho con top
+    { mat: 'piel', forma: _pieza([p.cabeza[0] - 2 * m, p.cabeza[1] + 8], p.hombro, 8.5, 10, 0, 0, .5, .5, m) }, // cuello
+  ], fid);
+  s += _cabeza(p.cabeza, m, fid);
+  // 3) Brazo cercano delante del cuerpo
+  s += _grupo([hombroBrazo(p.hombro), ...brazo(p.hombro, p.codo, p.muneca)], fid);
   return s;
 }
 
@@ -177,11 +255,11 @@ function svgBulgarian(){
     <rect x="2" y="2" width="296" height="186" rx="14" fill="#e7ebf3"/>
     ${_suelo(152)}
     ${_banco(186, 100, 76, 40)}
-    ${maniqui({ cabeza:[110,32], hombro:[112,50], codo:[114,74], muneca:[115,96], cadera:[116,98],
-      rodilla:[80,104], tobillo:[82,146], punta:[64,150], mira:-1, lejos:[3,-2],
-      piernaLejos:[[118,97],[146,136],[196,104],[214,98]],
-      brazoLejos:[[115,49],[118,73],[120,95]] })}
-    ${_mancuerna(115, 100)}
+    ${maniqui({ cabeza:[110,38], hombro:[112,56], codo:[114,80], muneca:[115,100], cadera:[118,104],
+      rodilla:[78,104], tobillo:[80,146], punta:[62,150], mira:-1, lejos:[3,-2],
+      piernaLejos:[[120,103],[150,138],[196,104],[214,98]],
+      brazoLejos:[[115,55],[118,79],[120,99]] })}
+    ${_mancuerna(115, 104)}
     <text x="24" y="84" ${_FT}>Rodilla ~90°</text>
     <text x="158" y="66" ${_FT}>Pie trasero elevado</text>
     <line x1="196" y1="70" x2="206" y2="96" stroke="${TINTA}" stroke-width="1.4" opacity=".6"/>
