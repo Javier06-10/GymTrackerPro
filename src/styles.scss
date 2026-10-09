@@ -696,3 +696,7 @@ html{-webkit-text-size-adjust:100%;}
 .sparkline svg{flex:1;min-width:0;height:36px;}
 .sparkline .rango{font-size:12px;color:var(--texto-suave);white-space:nowrap;}
 .sparkline .rango b{color:var(--texto);}
+/* Leyenda de las figuras de ejercicios del manual */
+.leyenda-fig{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:5px;font-size:11px;color:var(--texto-suave);}
+.leyenda-fig i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;}
+.leyenda-fig i.flecha{width:14px;height:2px;border-radius:1px;background:#4a8bd8;vertical-align:3px;}
