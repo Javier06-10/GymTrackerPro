@@ -22,6 +22,7 @@ import { AtletaForm } from '../pages/atleta/atleta-form';
         </a>
         <nav class="nav-top">
           <a routerLink="/panel" routerLinkActive="activo">Panel</a>
+          <a routerLink="/manual" routerLinkActive="activo">Manual</a>
           <a routerLink="/cuenta" routerLinkActive="activo">Mi cuenta</a>
           @if (auth.esAdmin()) { <a routerLink="/admin" routerLinkActive="activo">Admin</a> }
         </nav>
@@ -34,6 +35,7 @@ import { AtletaForm } from '../pages/atleta/atleta-form';
         @if (menu()) {
           <div class="menu-desplegable" (click)="menu.set(false)">
             <a routerLink="/panel">🏠 Panel</a>
+            <a routerLink="/manual">📖 Manual del entrenador</a>
             <a routerLink="/cuenta">👤 Mi cuenta y plan</a>
             @if (auth.esAdmin()) { <a routerLink="/admin">🛠️ Administración</a> }
             <button (click)="salir()">⎋ Cerrar sesión</button>

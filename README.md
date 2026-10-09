@@ -61,10 +61,13 @@ Generados sin librerías en `core/pdf.ts` (portado de la plantilla), firmados co
 - **Recibo de pago** (Pagos → 🧾 en cada fila).
 - **Reporte mensual del negocio** (Panel → 📊 Reporte).
 
+## Manual del entrenador
+
+`/manual` (menú *Manual*): los 13 capítulos de la plantilla con figuras y fichas, navegables (`?cap=`). El contenido vive en `core/manual.ts`.
+
 ## Pendiente (siguientes fases)
 
 
-- Manual del entrenador (13 capítulos de la plantilla).
 - Importar el respaldo JSON de la plantilla vieja a la nube.
 - Pasarela de pago automática (Stripe / PayPal) con webhooks.
 - Portal del atleta, PWA instalable, unidades kg/cm.
