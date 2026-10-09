@@ -63,8 +63,27 @@ const MATERIAL = {
   legging:  { base: '#3a4262', luz: '#606a92', sombra: '#232842' },
   zapato:   { base: '#eef1f6', luz: '#ffffff', sombra: '#aab2c4' },
   pelo:     { base: '#3b2a22', luz: '#6a4c3e', sombra: '#21160f' },
+  topH:     { base: '#4a8bd8', luz: '#7fb2ec', sombra: '#2c5f9f' },
+  short:    { base: '#323a57', luz: '#565f83', sombra: '#1f2439' },
 };
 let _idFig = 0;
+/** Género de las figuras ('mujer' | 'hombre'); lo fija construirManual(). */
+let _GEN = 'mujer';
+const MOV = '#d0731f'; // flechas de movimiento: ámbar validado para lectura
+
+/** Línea interior de una pieza (definición muscular). pts: [t, s] a lo largo y a lo ancho (s=1 posterior, -1 anterior). */
+function _musculo(f, pts, color, w = 1.15, op = .55){
+  const [a, b, c] = pts.map(([t, sd]) => f.P(t, sd, 0).map(_r));
+  return `<path d="M ${a[0]} ${a[1]} Q ${b[0]} ${b[1]} ${c[0]} ${c[1]}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" opacity="${op}"/>`;
+}
+
+/** Flecha de movimiento (simple o doble). */
+function _flecha(d, doble = false){
+  const id = 'mv' + (++_idFig);
+  return `<defs><marker id="${id}" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="${MOV}"/></marker></defs>
+    <path d="${d}" fill="none" stroke="${MOV}" stroke-width="2.6" stroke-linecap="round" marker-end="url(#${id})" ${doble ? `marker-start="url(#${id})"` : ''}/>`;
+}
 
 const _v = (a, b) => [b[0] - a[0], b[1] - a[1]];
 const _r = (n) => Math.round(n * 10) / 10;
@@ -86,6 +105,7 @@ function _pieza(A, B, wa, wb, post = 0, ant = 0, tPost = 0.4, tAnt = 0.45, lado 
      + `C ${_r(a2[0] - u[0] * ha * k)} ${_r(a2[1] - u[1] * ha * k)} ${_r(a1[0] - u[0] * ha * k)} ${_r(a1[1] - u[1] * ha * k)} ${_r(a1[0])} ${_r(a1[1])} Z`,
     // Eje para el degradado: de un borde al otro por la mitad de la pieza
     g1: P(0.5, 1, Math.max(post, 0)), g2: P(0.5, -1, Math.max(ant, 0)),
+    P,
   };
 }
 
@@ -117,17 +137,21 @@ function _cabeza(c, mira, fid){
     + `C ${X(-11)} ${y + 3}, ${X(-11)} ${y}, ${X(-10)} ${y - 4} Z`;
   const pelo = `M ${X(-10.5)} ${y + 1} C ${X(-12)} ${y - 14}, ${X(3)} ${y - 18}, ${X(9.5)} ${y - 8} `
     + `C ${X(3)} ${y - 11}, ${X(-3)} ${y - 9}, ${X(-5)} ${y - 1} Z`;
+  const hombre = _GEN === 'hombre';
+  const peloH = `M ${X(-10.5)} ${y - 1} C ${X(-12)} ${y - 14}, ${X(3)} ${y - 17}, ${X(9.5)} ${y - 8} `
+    + `C ${X(4)} ${y - 10.5}, ${X(-2)} ${y - 10}, ${X(-6)} ${y - 4} Z`;
   const cola = `M ${X(-9)} ${y - 8} C ${X(-20)} ${y - 9}, ${X(-24)} ${y + 2}, ${X(-21)} ${y + 13} `
     + `C ${X(-18)} ${y + 6}, ${X(-14)} ${y - 1}, ${X(-8)} ${y - 3} Z`;
   return `<defs><radialGradient id="${id}" cx="${m > 0 ? .62 : .38}" cy=".38" r=".7">
       <stop offset="0" stop-color="${MATERIAL.piel.luz}"/><stop offset=".6" stop-color="${MATERIAL.piel.base}"/><stop offset="1" stop-color="${MATERIAL.piel.sombra}"/></radialGradient></defs>
-    <path d="${cola}" fill="${MATERIAL.pelo.base}" stroke="${TINTA}" stroke-width="1.6" stroke-linejoin="round"/>
+    ${hombre ? '' : `<path d="${cola}" fill="${MATERIAL.pelo.base}" stroke="${TINTA}" stroke-width="1.6" stroke-linejoin="round"/>`}
     <path d="${cara}" fill="url(#${id})" stroke="${TINTA}" stroke-width="1.8" stroke-linejoin="round"/>
-    <path d="${pelo}" fill="${MATERIAL.pelo.base}" stroke="${TINTA}" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="${hombre ? peloH : pelo}" fill="${MATERIAL.pelo.base}" stroke="${TINTA}" stroke-width="1.6" stroke-linejoin="round"/>
     <path d="M ${X(-9)} ${y - 6} C ${X(-4)} ${y - 13}, ${X(3)} ${y - 14}, ${X(7)} ${y - 9}" fill="none" stroke="${MATERIAL.pelo.luz}" stroke-width="1.4" stroke-linecap="round"/>
     <ellipse cx="${X(-3)}" cy="${y + 1}" rx="2.4" ry="3.2" fill="${MATERIAL.piel.sombra}" stroke="${TINTA}" stroke-width="1.1"/>
     <path d="M ${X(5)} ${y - 2} q ${2 * m} -1 ${3.5 * m} 0" fill="none" stroke="${TINTA}" stroke-width="1.3" stroke-linecap="round"/>
-    <path d="M ${X(7)} ${y + 6.5} q ${1.5 * m} 0.3 ${2.6 * m} -0.6" fill="none" stroke="#8a4b3a" stroke-width="1.2" stroke-linecap="round"/>`;
+    <path d="M ${X(7)} ${y + 6.5} q ${1.5 * m} 0.3 ${2.6 * m} -0.6" fill="none" stroke="#8a4b3a" stroke-width="1.2" stroke-linecap="round"/>`
+    + (hombre ? `<path d="M ${X(-7)} ${y + 4} C ${X(-4)} ${y + 11}, ${X(3)} ${y + 12}, ${X(8)} ${y + 9}" fill="none" stroke="${MATERIAL.piel.sombra}" stroke-width="1.4" opacity=".55"/>` : '');
 }
 
 /** Tenis: del tobillo a la punta, con suela. */
@@ -152,21 +176,37 @@ function maniqui(p){
   const pl = p.piernaLejos || [p.cadera, p.rodilla, p.tobillo, p.punta].map(off);
   const bl = p.brazoLejos || [p.hombro, p.codo, p.muneca].map(off);
 
+  const H = _GEN === 'hombre';
+  const matMuslo = H ? 'short' : 'legging', matPierna = H ? 'piel' : 'legging', matTop = H ? 'topH' : 'top';
+  const sombraDe = (mat) => MATERIAL[mat].sombra, luzDe = (mat) => MATERIAL[mat].luz;
   const pierna = (c, r, t, pt) => {
     const z = _zapato(t, pt);
+    const muslo = _pieza(c, r, 19, H ? 13 : 12.5, H ? 2.2 : 2.6, H ? 3.4 : 3, .42, .45, m);
+    const gemelo = _pieza(r, t, H ? 12.5 : 12, H ? 8 : 7.5, H ? 4 : 3.6, 0.6, .28, .4, m);
     return [
-      { mat: 'legging', forma: _pieza(c, r, 19, 12.5, 2.6, 3, .42, .45, m) },             // muslo: isquios / cuádriceps
-      { mat: 'legging', forma: _pieza(r, t, 12, 7.5, 3.6, 0.6, .28, .4, m),                // pierna: gemelo marcado
-        extra: '' },
+      { mat: matMuslo, forma: muslo, extra:                                     // cuádriceps, rótula y pliegue del glúteo
+          _musculo(muslo, [[.2, -.15], [.55, -.6], [.9, -.35]], sombraDe(matMuslo))
+        + _musculo(muslo, [[.84, -.92], [.97, -.75], [.95, -.3]], luzDe(matMuslo), 1.3, .7)
+        + _musculo(muslo, [[.06, .95], [.16, .5], [.12, .05]], sombraDe(matMuslo), 1.1, .5) },
+      { mat: matPierna, forma: gemelo, extra:                                   // gemelo y canto de la tibia
+          _musculo(gemelo, [[.1, .25], [.3, .8], [.62, .5]], sombraDe(matPierna))
+        + _musculo(gemelo, [[.15, -.6], [.5, -.72], [.85, -.6]], luzDe(matPierna), 1.2, .65) },
       { mat: 'zapato', forma: z.forma, extra: z.extra },
     ];
   };
-  const brazo = (h, c, w) => [
-    { mat: 'piel', forma: _pieza(h, c, 11.5, 8.2, 1.4, 1.8, .45, .4, m) },                 // tríceps / bíceps
-    { mat: 'piel', forma: _pieza(c, w, 8.4, 5.6, 1, 1.4, .3, .3, m) },                     // antebrazo
-    { mat: 'piel', forma: _pieza(w, [w[0] + (w[0] - c[0]) * .22, w[1] + (w[1] - c[1]) * .22], 6.8, 5.6, .8, .8, .5, .5, m) }, // mano
-  ];
-  const hombroBrazo = (h) => ({ mat: 'top', forma: _pieza(h, [h[0], h[1] + 1], 14, 14, 0, 0, .5, .5, m) }); // tirante del top sobre el deltoides
+  const brazo = (h, c, w) => {
+    const sup = _pieza(h, c, H ? 13 : 11.5, H ? 9.4 : 8.2, H ? 1.8 : 1.4, H ? 2.4 : 1.8, .45, .4, m);
+    const ante = _pieza(c, w, H ? 9.6 : 8.4, H ? 6.4 : 5.6, 1, 1.4, .3, .3, m);
+    return [
+      { mat: 'piel', forma: sup, extra:                                         // deltoides y surco bíceps/tríceps
+          _musculo(sup, [[.14, -1], [.36, 0], [.14, 1]], MATERIAL.piel.sombra, 1.1, .5)
+        + _musculo(sup, [[.32, .05], [.62, .2], [.9, 0]], MATERIAL.piel.sombra, 1.1, .5)
+        + _musculo(sup, [[.4, -.55], [.62, -.75], [.85, -.5]], MATERIAL.piel.luz, 1.2, .7) },
+      { mat: 'piel', forma: ante, extra: _musculo(ante, [[.1, -.2], [.42, -.45], [.85, -.1]], MATERIAL.piel.sombra, 1, .45) },
+      { mat: 'piel', forma: _pieza(w, [w[0] + (w[0] - c[0]) * .22, w[1] + (w[1] - c[1]) * .22], 6.8, 5.6, .8, .8, .5, .5, m) }, // mano
+    ];
+  };
+  const hombroBrazo = (h) => ({ mat: matTop, forma: _pieza(h, [h[0], h[1] + 1], H ? 15 : 14, H ? 15 : 14, 0, 0, .5, .5, m) }); // tirante sobre el deltoides
 
   let s = '';
   // 1) Lado lejano en sombra
@@ -176,12 +216,21 @@ function maniqui(p){
   const dT = _v(p.hombro, p.cadera), LT = Math.hypot(dT[0], dT[1]) || 1;
   const nT = [-dT[1] / LT * m, dT[0] / LT * m]; // lado posterior del torso
   const gluteo = [p.cadera[0] + nT[0] * 4, p.cadera[1] + nT[1] * 4];
+  const abdomen = _pieza(T(.45), T(.7), H ? 26 : 24, H ? 25 : 23, 0.5, 1, .5, .5, m);
+  const cadera = _pieza(T(.62), gluteo, 24, H ? 23 : 25, H ? 2.6 : 4, 1, .55, .5, m);
+  const pecho = _pieza(p.hombro, T(.5), H ? 31 : 27, H ? 26 : 24, H ? 2 : 1.6, H ? 3.6 : 3.2, .3, .3, m);
+  const ombligo = abdomen.P(.55, -.72, 0);
   s += _grupo([
     ...pierna(p.cadera, p.rodilla, p.tobillo, p.punta),
-    { mat: 'legging', forma: _pieza(T(.62), gluteo, 24, 25, 4, 1, .55, .5, m) },              // cadera y glúteo
-    { mat: 'piel', forma: _pieza(T(.45), T(.7), 24, 23, 0.5, 1, .5, .5, m) },                 // abdomen descubierto
-    { mat: 'top', forma: _pieza(p.hombro, T(.5), 27, 24, 1.6, 3.2, .3, .3, m) },              // espalda / pecho con top
-    { mat: 'piel', forma: _pieza([p.cabeza[0] - 2 * m, p.cabeza[1] + 8], p.hombro, 8.5, 10, 0, 0, .5, .5, m) }, // cuello
+    { mat: matMuslo, forma: cadera,                                             // cadera y glúteo
+      extra: _musculo(cadera, [[.5, .2], [.85, .7], [1, .2]], sombraDe(matMuslo), 1.1, .45) },
+    { mat: H ? matTop : 'piel', forma: abdomen,                                 // abdomen (descubierto en mujer)
+      extra: H ? '' : _musculo(abdomen, [[.15, -.55], [.5, -.68], [.85, -.55]], MATERIAL.piel.sombra, 1.1, .45)
+        + `<circle cx="${_r(ombligo[0])}" cy="${_r(ombligo[1])}" r="1" fill="${MATERIAL.piel.sombra}"/>` },
+    { mat: matTop, forma: pecho,                                                // espalda / pecho
+      extra: _musculo(pecho, [[.12, -.75], [.55, -.95], [.9, -.6]], sombraDe(matTop), 1.1, .45)
+        + _musculo(pecho, [[.1, .3], [.45, .55], [.85, .4]], luzDe(matTop), 1.2, .55) },
+    { mat: 'piel', forma: _pieza([p.cabeza[0] - 2 * m, p.cabeza[1] + 8], p.hombro, H ? 10 : 8.5, H ? 11.5 : 10, 0, 0, .5, .5, m) }, // cuello
   ], fid);
   s += _cabeza(p.cabeza, m, fid);
   // 3) Brazo cercano delante del cuerpo
@@ -206,8 +255,15 @@ function _mancuerna(x, y){
     <rect x="${x - 12}" y="${y - 6}" width="6" height="12" rx="2" fill="#3b4366" stroke="${TINTA}" stroke-width="1.4"/>
     <rect x="${x + 6}" y="${y - 6}" width="6" height="12" rx="2" fill="#3b4366" stroke="${TINTA}" stroke-width="1.4"/>`;
 }
-const _suelo = (y) => `<line x1="14" y1="${y}" x2="286" y2="${y}" stroke="${TINTA}" stroke-width="1.6" opacity=".35"/>
-  <ellipse cx="150" cy="${y + 1}" rx="120" ry="3" fill="${TINTA}" opacity=".06"/>`;
+const _suelo = (y) => {
+  let juntas = '';
+  for(let x = 42; x < 290; x += 48) juntas += `<line x1="${x}" y1="${y + 1}" x2="${x - 10}" y2="188" stroke="${TINTA}" stroke-width="1" opacity=".1"/>`;
+  return `<rect x="2" y="${y - 34}" width="296" height="3" fill="${TINTA}" opacity=".05"/>
+  <path d="M 2 ${y} H 298 V 174 Q 298 188 284 188 H 16 Q 2 188 2 174 Z" fill="#c5ccda" opacity=".55"/>
+  ${juntas}
+  <line x1="2" y1="${y}" x2="298" y2="${y}" stroke="${TINTA}" stroke-width="1.8" opacity=".38"/>
+  <ellipse cx="150" cy="${y + 1}" rx="120" ry="3" fill="${TINTA}" opacity=".08"/>`;
+};
 
 function svgHipThrust(){
   return `<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg">
@@ -217,6 +273,7 @@ function svgHipThrust(){
     ${maniqui({ cabeza:[82,68], hombro:[98,84], codo:[118,100], muneca:[146,84], cadera:[166,84],
       rodilla:[208,82], tobillo:[210,146], punta:[228,150], mira:1, lejos:[-4,-3] })}
     ${_disco(152, 70, 17)}
+    ${_flecha('M 186 132 L 186 102')}
     <text x="168" y="58" ${_FT}>Cadera extendida</text>
     <text x="222" y="112" ${_FT}>Tibia</text><text x="222" y="124" ${_FT}>vertical</text>
     <text x="24" y="176" ${_FT}>Hip thrust: hombros en el banco, mirada al frente, cadera arriba</text>
@@ -230,6 +287,7 @@ function svgSentadilla(){
     ${maniqui({ cabeza:[150,44], hombro:[140,64], codo:[122,76], muneca:[128,58], cadera:[118,108],
       rodilla:[168,106], tobillo:[156,146], punta:[176,150], mira:1, lejos:[5,-2] })}
     ${_disco(130, 62, 14)}
+    ${_flecha('M 84 78 L 84 134', true)}
     <text x="202" y="112" ${_FT}>Muslo paralelo</text>
     <text x="40" y="42" ${_FT}>Espalda</text><text x="40" y="54" ${_FT}>neutra</text>
     <line x1="80" y1="50" x2="120" y2="66" stroke="${TINTA}" stroke-width="1.4" opacity=".6"/>
@@ -243,7 +301,7 @@ function svgRDL(){
     ${maniqui({ cabeza:[106,64], hombro:[126,78], codo:[132,102], muneca:[138,124], cadera:[176,84],
       rodilla:[174,116], tobillo:[178,146], punta:[160,150], mira:-1, lejos:[-4,-2] })}
     ${_disco(140, 126, 14)}
-    <path d="M 186 72 C 198 64, 210 66, 216 76" fill="none" stroke="${TINTA}" stroke-width="1.6" stroke-dasharray="4 3"/>
+    ${_flecha('M 190 70 C 199 62, 208 63, 213 70')}
     <text x="218" y="74" ${_FT}>Cadera atrás</text>
     <text x="30" y="108" ${_FT}>Barra pegada</text><text x="30" y="120" ${_FT}>a las piernas</text>
     <line x1="96" y1="116" x2="124" y2="122" stroke="${TINTA}" stroke-width="1.4" opacity=".6"/>
@@ -260,6 +318,7 @@ function svgBulgarian(){
       piernaLejos:[[120,103],[150,138],[196,104],[214,98]],
       brazoLejos:[[115,55],[118,79],[120,99]] })}
     ${_mancuerna(115, 104)}
+    ${_flecha('M 46 98 L 46 138', true)}
     <text x="24" y="84" ${_FT}>Rodilla ~90°</text>
     <text x="158" y="66" ${_FT}>Pie trasero elevado</text>
     <line x1="196" y1="70" x2="206" y2="96" stroke="${TINTA}" stroke-width="1.4" opacity=".6"/>
@@ -304,7 +363,8 @@ function tablaM(cabeceras, filas){
 const calloutEv = t => `<div class="callout callout-ev">🔬 <b>Evidencia:</b> ${t}</div>`;
 const calloutPr = t => `<div class="callout callout-pr">🛠️ <b>Recomendación práctica:</b> ${t}</div>`;
 const calloutSg = t => `<div class="callout callout-sg">⚠️ <b>Seguridad:</b> ${t}</div>`;
-export function construirManual(): CapituloManual[] {
+export function construirManual(genero: 'mujer' | 'hombre' = 'mujer'): CapituloManual[] {
+_GEN = genero;
 return [
 {id:"intro", t:"Introducción", h:`
 <h2>Manual del Entrenador · Entrenamiento Femenino</h2>
