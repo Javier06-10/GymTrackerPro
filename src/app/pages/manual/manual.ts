@@ -2,6 +2,7 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { construirManual } from '../../core/manual';
 import { SvgSeguroPipe } from '../../shared/svg-seguro.pipe';
+import { Icono } from '../../shared/icono';
 
 type Genero = 'mujer' | 'hombre';
 const CLAVE_GENERO = 'gt-manual-genero';
@@ -17,19 +18,19 @@ function generoGuardado(): Genero {
 /** Manual del entrenador con capítulos navegables (portado de renderManual). */
 @Component({
   selector: 'app-manual',
-  imports: [RouterLink, SvgSeguroPipe],
+  imports: [RouterLink, SvgSeguroPipe, Icono],
   template: `
     <a class="volver" routerLink="/panel">← Volver al panel</a>
     <div class="manual-portada" style="flex-wrap:wrap;">
-      <div class="manual-icono">📖</div>
+      <div class="manual-icono"><app-icono nombre="libro" [tam]="26" /></div>
       <div style="flex:1;min-width:200px;">
         <div class="manual-titulo">Manual del Entrenador</div>
         <div class="manual-sub">Entrenamiento Femenino · Formación para entrenador personal</div>
       </div>
       <div class="filtros-grupo" style="margin:0;" role="group" aria-label="Figuras de los ejercicios">
         <span style="font-size:12px;color:var(--texto-suave);align-self:center;">Figuras:</span>
-        <div class="chip-filtro" [class.activo]="genero() === 'mujer'" (click)="cambiarGenero('mujer')">👩 Mujer</div>
-        <div class="chip-filtro" [class.activo]="genero() === 'hombre'" (click)="cambiarGenero('hombre')">👨 Hombre</div>
+        <div class="chip-filtro" [class.activo]="genero() === 'mujer'" (click)="cambiarGenero('mujer')"><app-icono nombre="mujer" [tam]="14" /> Mujer</div>
+        <div class="chip-filtro" [class.activo]="genero() === 'hombre'" (click)="cambiarGenero('hombre')"><app-icono nombre="hombre" [tam]="14" /> Hombre</div>
       </div>
     </div>
     <div class="manual-layout">

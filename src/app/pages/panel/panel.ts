@@ -75,7 +75,7 @@ import { Icono } from '../../shared/icono';
       <div class="grid-graficas" style="margin-bottom:6px;">
         <div class="tarjeta">
           <div class="grafica-cab">
-            <span class="t">💰 Ingresos por mes</span>
+            <span class="t"><app-icono nombre="dinero" [tam]="17" /> Ingresos por mes</span>
             <span class="s">Últimos 6 meses · {{ dinero(totalSeisMeses()) }}</span>
           </div>
           <app-grafica-barras [barras]="ingresosMes()" titulo="Ingresos por mes, últimos 6 meses" color="var(--serie-ambar)"
@@ -89,7 +89,7 @@ import { Icono } from '../../shared/icono';
         </div>
         <div class="tarjeta">
           <div class="grafica-cab">
-            <span class="t">🏋️ Entrenamientos por semana</span>
+            <span class="t"><app-icono nombre="pesa" [tam]="17" /> Entrenamientos por semana</span>
             <span class="s">Últimas 8 semanas · asistencia {{ pctAsistencia8() === null ? '—' : pctAsistencia8() + '%' }}</span>
           </div>
           <app-grafica-barras [barras]="entrenosSemana()" titulo="Entrenamientos registrados por semana, últimas 8 semanas" color="var(--serie-azul)"
@@ -105,7 +105,7 @@ import { Icono } from '../../shared/icono';
     }
 
     @if (vencidos().length) {
-      <div class="titulo-seccion">🔔 Alertas de cobro</div>
+      <div class="titulo-seccion"><app-icono nombre="campana" [tam]="16" /> Alertas de cobro</div>
       @for (a of vencidos(); track a.id) {
         <div class="alerta-cobro" (click)="ir(a.id, 'pagos')">
           <app-avatar-iniciales [nombre]="a.nombre" [genero]="a.genero" [tam]="38" />
@@ -113,32 +113,32 @@ import { Icono } from '../../shared/icono';
           <div class="dias">Vencido hace {{ dias(a.proximoPago) }} día{{ dias(a.proximoPago) === 1 ? '' : 's' }}</div>
           <div class="monto">{{ dinero(a.tarifa) }}</div>
           @if (a.telefono) {
-            <button class="btn-x" title="Recordar por WhatsApp" style="font-size:17px;" (click)="$event.stopPropagation(); recordarPago(a)">💬</button>
+            <button class="btn-x" title="Recordar por WhatsApp" (click)="$event.stopPropagation(); recordarPago(a)"><app-icono nombre="chat" [tam]="17" /></button>
           }
         </div>
       }
     }
 
     @if (cumples().length) {
-      <div class="titulo-seccion">🎂 Cumpleaños</div>
+      <div class="titulo-seccion"><app-icono nombre="cumple" [tam]="16" /> Cumpleaños</div>
       @for (x of cumples(); track x.a.id) {
         <div class="alerta-cobro" style="border-color:rgba(255,154,61,.4);border-left-color:var(--ambar);" (click)="ir(x.a.id)">
-          <div style="font-size:22px;">🎂</div>
+          <div style="color:var(--ambar);display:inline-flex"><app-icono nombre="cumple" [tam]="24" /></div>
           <div class="nombre">{{ x.a.nombre }}</div>
           <div class="dias" style="color:var(--ambar);">
-            @if (x.pc.dias === 0) { ¡Cumple HOY {{ x.pc.edadCumple }} años! 🎉 }
+            @if (x.pc.dias === 0) { ¡Cumple HOY {{ x.pc.edadCumple }} años! }
             @else if (x.pc.dias === 1) { Cumple mañana {{ x.pc.edadCumple }} años }
             @else { Cumple {{ x.pc.edadCumple }} en {{ x.pc.dias }} días ({{ fecha(x.pc.fecha) }}) }
           </div>
           @if (x.a.telefono && x.pc.dias === 0) {
-            <button class="btn btn-suave btn-mini" (click)="$event.stopPropagation(); felicitar(x.a, x.pc.edadCumple)">💬 Felicitar</button>
+            <button class="btn btn-suave btn-mini" (click)="$event.stopPropagation(); felicitar(x.a, x.pc.edadCumple)"><app-icono nombre="chat" [tam]="15" /> Felicitar</button>
           }
         </div>
       }
     }
 
     @if (pendMed().length) {
-      <div class="titulo-seccion">📏 Mediciones pendientes</div>
+      <div class="titulo-seccion"><app-icono nombre="regla" [tam]="16" /> Mediciones pendientes</div>
       @for (a of pendMed(); track a.id) {
         <div class="alerta-cobro" style="border-color:rgba(91,141,184,.35);border-left-color:var(--acero);" (click)="ir(a.id, 'medidas')">
           <app-avatar-iniciales [nombre]="a.nombre" [genero]="a.genero" [tam]="38" />
@@ -148,23 +148,23 @@ import { Icono } from '../../shared/icono';
       }
     }
 
-    <div class="titulo-seccion">👥 Mis Atletas</div>
+    <div class="titulo-seccion"><app-icono nombre="usuarios" [tam]="16" /> Mis atletas</div>
 
     @if (!datos.atletas().length) {
       <div class="vacio">
-        <span class="ic">🏋️‍♂️</span>
+        <span class="ic"><app-icono nombre="pesa" [tam]="44" /></span>
         <h3>Aún no tienes atletas registrados</h3>
         <p>Agrega tu primer cliente para empezar a llevar su progreso físico, rutinas y pagos.</p>
-        <button class="btn btn-primario" (click)="ui.formAtleta.set({ id: null })" [disabled]="!auth.vigente()">＋ Agregar primer atleta</button>
+        <button class="btn btn-primario" (click)="ui.formAtleta.set({ id: null })" [disabled]="!auth.vigente()"><app-icono nombre="mas" [tam]="16" /> Agregar primer atleta</button>
       </div>
     } @else {
       <div class="barra-busqueda">
         <div class="campo-buscar">
-          <span class="lupa">🔍</span>
+          <span class="lupa"><app-icono nombre="lupa" [tam]="16" /></span>
           <input type="text" placeholder="Buscar atleta por nombre..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
         </div>
-        <button class="btn btn-suave" (click)="gruposAbierto.set(true)">👥 Grupos</button>
-        <button class="btn btn-suave" (click)="mesReporte = meses[0].valor; reporteAbierto.set(true)">📊 Reporte</button>
+        <button class="btn btn-suave" (click)="gruposAbierto.set(true)"><app-icono nombre="usuarios" [tam]="16" /> Grupos</button>
+        <button class="btn btn-suave" (click)="mesReporte = meses[0].valor; reporteAbierto.set(true)"><app-icono nombre="grafico" [tam]="16" /> Reporte</button>
       </div>
 
       @if (datos.grupos().length) {
@@ -190,8 +190,8 @@ import { Icono } from '../../shared/icono';
               </div>
               <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
                 @if (a.activo) { <span class="chip chip-verde">Activo</span> } @else { <span class="chip chip-gris">Inactivo</span> }
-                @if (a.grupoId) { <span class="chip chip-acero">👥 {{ datos.nombreGrupo(a.grupoId) }}</span> }
-                @if (cumpleHoy(a)) { <span class="chip chip-ambar">🎂 ¡Hoy!</span> }
+                @if (a.grupoId) { <span class="chip chip-acero"><app-icono nombre="usuarios" [tam]="12" /> {{ datos.nombreGrupo(a.grupoId) }}</span> }
+                @if (cumpleHoy(a)) { <span class="chip chip-ambar"><app-icono nombre="cumple" [tam]="12" /> ¡Hoy!</span> }
                 @if (vencido(a)) { <span class="chip chip-rojo">Pago vencido</span> }
               </div>
             </div>
@@ -208,7 +208,7 @@ import { Icono } from '../../shared/icono';
     </div>
 
     @if (reporteAbierto()) {
-      <app-modal titulo="📊 Reporte Mensual del Negocio" (cerrar)="reporteAbierto.set(false)">
+      <app-modal titulo="Reporte mensual del negocio" (cerrar)="reporteAbierto.set(false)">
         <p style="color:var(--texto-suave);font-size:13.5px;">
           La foto del negocio en una página: ingresos, cuentas por cobrar, atletas, asistencia y seguimiento del mes elegido.
         </p>
@@ -217,7 +217,7 @@ import { Icono } from '../../shared/icono';
         </div>
         <ng-container pie>
           <button class="btn btn-fantasma" (click)="reporteAbierto.set(false)">Cancelar</button>
-          <button class="btn btn-primario" (click)="generarReporte()">📄 Generar PDF</button>
+          <button class="btn btn-primario" (click)="generarReporte()"><app-icono nombre="documento" [tam]="16" /> Generar PDF</button>
         </ng-container>
       </app-modal>
     }

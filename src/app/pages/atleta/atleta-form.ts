@@ -7,11 +7,12 @@ import { Atleta, Composicion, Genero, Objetivo } from '../../core/modelos';
 import { UiService } from '../../core/ui.service';
 import { edadDesde, hoyISO } from '../../core/util';
 import { Modal } from '../../shared/modal';
+import { Icono } from '../../shared/icono';
 
 /** Modal Nuevo / Editar atleta (portado de abrirModalAtleta). */
 @Component({
   selector: 'app-atleta-form',
-  imports: [FormsModule, Modal],
+  imports: [FormsModule, Modal, Icono],
   template: `
     <app-modal [titulo]="atletaId() ? 'Editar Atleta' : 'Nuevo Atleta'" (cerrar)="cerrar.emit()">
       <div class="campo"><label>Nombre completo</label>
@@ -31,24 +32,24 @@ import { Modal } from '../../shared/modal';
           </div></div>
       </div>
       <div class="form-grid">
-        <div class="campo"><label>Fecha de nacimiento 🎂</label>
+        <div class="campo"><label>Fecha de nacimiento</label>
           <input type="date" [(ngModel)]="f.fechaNacimiento" (ngModelChange)="alCambiarNacimiento($event)" /></div>
         <div class="campo"><label>Edad (años)</label>
           <input type="number" min="10" max="99" placeholder="Auto con la fecha" [(ngModel)]="f.edad" /></div>
         <div class="campo"><label>Objetivo a lograr</label>
           <select [(ngModel)]="f.objetivo">
             <option value="">— Según composición —</option>
-            <option value="perder">🔥 Perder grasa</option>
-            <option value="ganar">📈 Ganar masa muscular</option>
-            <option value="recomp">⚖️ Recomposición corporal</option>
-            <option value="mantener">🛡️ Mantenimiento</option>
+            <option value="perder">Perder grasa</option>
+            <option value="ganar">Ganar masa muscular</option>
+            <option value="recomp">Recomposición corporal</option>
+            <option value="mantener">Mantenimiento</option>
           </select></div>
       </div>
       <div class="campo"><label>Grupo (horario o segmentación)</label>
         <select [(ngModel)]="f.grupoId">
           <option value="">— Sin grupo —</option>
           @for (g of datos.grupos(); track g.id) { <option [value]="g.id">{{ g.nombre }}</option> }
-          <option value="__nuevo__">＋ Crear nuevo grupo...</option>
+          <option value="__nuevo__">+ Crear nuevo grupo...</option>
         </select>
         @if (f.grupoId === '__nuevo__') {
           <input type="text" style="margin-top:8px;" [(ngModel)]="grupoNuevo"
@@ -59,18 +60,18 @@ import { Modal } from '../../shared/modal';
         <div class="campo"><label>¿Cuánto tiempo duerme?</label>
           <select [(ngModel)]="f.horasSueno">
             <option value="">— Seleccionar —</option>
-            <option value="menos5">😵 Menos de 5 horas</option>
-            <option value="5a6">😪 5 a 6 horas</option>
-            <option value="7a8">😴 7 a 8 horas</option>
-            <option value="mas8">🛌 Más de 8 horas</option>
+            <option value="menos5">Menos de 5 horas</option>
+            <option value="5a6">5 a 6 horas</option>
+            <option value="7a8">7 a 8 horas</option>
+            <option value="mas8">Más de 8 horas</option>
           </select></div>
         <div class="campo"><label>¿Qué estilo de vida lleva?</label>
           <select [(ngModel)]="f.estiloVida">
             <option value="">— Seleccionar —</option>
-            <option value="sedentario">🪑 Sedentario (oficina, mucho tiempo sentado)</option>
-            <option value="ligero">🚶 Ligeramente activo (camina algo a diario)</option>
-            <option value="activo">🏃 Activo (de pie / camina mucho)</option>
-            <option value="muyactivo">💪 Muy activo (trabajo físico)</option>
+            <option value="sedentario">Sedentario (oficina, mucho tiempo sentado)</option>
+            <option value="ligero">Ligeramente activo (camina algo a diario)</option>
+            <option value="activo">Activo (de pie / camina mucho)</option>
+            <option value="muyactivo">Muy activo (trabajo físico)</option>
           </select></div>
       </div>
       <div class="campo"><label>Meta específica a alcanzar</label>
@@ -83,7 +84,7 @@ import { Modal } from '../../shared/modal';
         <div class="selector-comp">
           @for (o of composiciones; track o.v) {
             <div class="opcion-comp" [class.activa]="f.composicion === o.v" (click)="f.composicion = o.v">
-              <span class="ic">{{ o.ic }}</span><span class="t">{{ o.t }}</span><br /><span class="s">{{ o.s }}</span>
+              <span class="ic"><app-icono [nombre]="o.ic" [tam]="26" /></span><span class="t">{{ o.t }}</span><br /><span class="s">{{ o.s }}</span>
             </div>
           }
         </div>
@@ -107,9 +108,9 @@ export class AtletaForm implements OnInit {
   protected grupoNuevo = '';
 
   protected readonly composiciones: { v: Composicion; ic: string; t: string; s: string }[] = [
-    { v: 'delgado', ic: '🪶', t: 'Delgado / Flaco', s: 'Ectomorfo' },
-    { v: 'grasa', ic: '🧸', t: 'Volumen con Grasa', s: 'Endomorfo' },
-    { v: 'musculo', ic: '💪', t: 'Volumen Muscular', s: 'Mesomorfo' },
+    { v: 'delgado', ic: 'cuerpo-delgado', t: 'Delgado / Flaco', s: 'Ectomorfo' },
+    { v: 'grasa', ic: 'cuerpo-grueso', t: 'Volumen con Grasa', s: 'Endomorfo' },
+    { v: 'musculo', ic: 'cuerpo-atletico', t: 'Volumen Muscular', s: 'Mesomorfo' },
   ];
 
   protected f = {

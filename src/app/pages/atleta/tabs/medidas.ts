@@ -13,11 +13,12 @@ import { abrirWhatsApp } from '../../../core/whatsapp';
 import { fmtFecha, hoyISO } from '../../../core/util';
 import { Modal } from '../../../shared/modal';
 import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
+import { Icono } from '../../../shared/icono';
 
 /** Medidas + avatar anatómico evolutivo (portado de tabMedidas). */
 @Component({
   selector: 'app-tab-medidas',
-  imports: [FormsModule, Modal, SvgSeguroPipe, GraficaLinea],
+  imports: [FormsModule, Modal, SvgSeguroPipe, GraficaLinea, Icono],
   template: `
     @let a = atleta();
     <div class="layout-avatar">
@@ -43,23 +44,23 @@ import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
       <div>
         <div class="tarjeta">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap;">
-            <div style="font-weight:800;">📏 Historial de Progreso Corporal</div>
+            <div style="font-weight:800;display:flex;align-items:center;gap:8px;"><app-icono nombre="regla" [tam]="18" /> Historial de progreso corporal</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               @if (a.medidas.length >= 2) {
-                <button class="btn btn-suave btn-mini" (click)="resumenWhatsApp()">💬 Resumen</button>
-                <button class="btn btn-suave btn-mini" (click)="exportarPDF()">📄 Exportar PDF</button>
+                <button class="btn btn-suave btn-mini" (click)="resumenWhatsApp()"><app-icono nombre="chat" [tam]="15" /> Resumen</button>
+                <button class="btn btn-suave btn-mini" (click)="exportarPDF()"><app-icono nombre="documento" [tam]="15" /> Exportar PDF</button>
               }
-              <button class="btn btn-primario btn-mini" (click)="abrirModal()">＋ Nueva medición</button>
+              <button class="btn btn-primario btn-mini" (click)="abrirModal()"><app-icono nombre="mas" [tam]="15" /> Nueva medición</button>
             </div>
           </div>
           @if (pendiente(); as mp) {
             @if (mp.vencida) {
               <div style="font-size:12.5px;color:var(--rojo);background:var(--rojo-fondo);border-radius:8px;padding:8px 12px;margin-bottom:12px;">
-                📏 <b>Toca medir:</b> la última medición fue hace {{ mp.dias }} días ({{ fecha(mp.ultFecha) }}).
+                <app-icono nombre="alerta" [tam]="14" /> <b>Toca medir:</b> la última medición fue hace {{ mp.dias }} días ({{ fecha(mp.ultFecha) }}).
               </div>
             } @else {
               <div style="font-size:12.5px;color:var(--texto-suave);margin-bottom:12px;">
-                📏 Próxima medición en <b style="color:var(--verde)">{{ mp.proximaEn }} día{{ mp.proximaEn === 1 ? '' : 's' }}</b> · última: {{ fecha(mp.ultFecha) }}
+                <app-icono nombre="reloj" [tam]="14" /> Próxima medición en <b style="color:var(--verde)">{{ mp.proximaEn }} día{{ mp.proximaEn === 1 ? '' : 's' }}</b> · última: {{ fecha(mp.ultFecha) }}
               </div>
             }
           }
@@ -69,7 +70,7 @@ import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
 
           @if (!a.medidas.length) {
             <div class="vacio" style="padding:30px;">
-              <span class="ic">📐</span>
+              <span class="ic"><app-icono nombre="regla" [tam]="40" /></span>
               <h3>Sin mediciones todavía</h3>
               <p>Registra la primera toma de medidas para activar el avatar evolutivo.</p>
             </div>
@@ -84,7 +85,7 @@ import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
                   @for (z of zonas; track z[0]) {
                     <td>{{ m[z[0]] ?? '—' }} @if (d(m[z[0]], ant?.[z[0]], invertida(z[0])); as x) { <span [class]="x.cls">{{ x.txt }}</span> }</td>
                   }
-                  <td><button class="btn-x" title="Eliminar medición" (click)="eliminar(m)">✕</button></td>
+                  <td><button class="btn-x" title="Eliminar medición" (click)="eliminar(m)"><app-icono nombre="cerrar" [tam]="15" /></button></td>
                 </tr>
               }
             </table></div>
@@ -111,7 +112,7 @@ import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
     @if (metricasDisponibles().length) {
       <div class="tarjeta" style="margin-top:18px;">
         <div class="grafica-cab">
-          <span class="t">📈 Evolución · {{ metricaActiva()[1] }}</span>
+          <span class="t"><app-icono nombre="tendencia" [tam]="17" /> Evolución · {{ metricaActiva()[1] }}</span>
           <span class="s">
             {{ serieActiva().length }} mediciones
             @if (cambioTotal(); as c) { · <b [class]="c.cls">{{ c.txt }} {{ metricaActiva()[2] }}</b> desde el inicio }
@@ -272,7 +273,7 @@ export class TabMedidas {
     t += cmp.frase;
     const firma = this.auth.perfil()?.nombre;
     if (firma) t += '\n— ' + firma;
-    if (!abrirWhatsApp(a, t)) this.ui.toast('Este atleta no tiene teléfono. Agrégalo con ✏️ en su Perfil', 'err');
+    if (!abrirWhatsApp(a, t)) this.ui.toast('Este atleta no tiene teléfono. Agrégalo en Editar', 'err');
   }
 
   async guardarFrecuencia(valor: string) {

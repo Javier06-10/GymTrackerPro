@@ -5,9 +5,11 @@ import { diasConRutina, nombreComposicion, nombreEstiloVida, nombreObjetivo, nom
 import { Atleta } from '../../../core/modelos';
 import { UiService } from '../../../core/ui.service';
 import { esc, fmtDinero, fmtFecha } from '../../../core/util';
+import { Icono } from '../../../shared/icono';
 
 @Component({
   selector: 'app-tab-perfil',
+  imports: [Icono],
   template: `
     @let a = atleta();
     <div class="grid-metricas">
@@ -16,35 +18,30 @@ import { esc, fmtDinero, fmtFecha } from '../../../core/util';
       <div class="metrica m-verde"><div class="etiqueta">Total pagado histórico</div><div class="valor">{{ dinero(total()) }}</div></div>
     </div>
     <div class="tarjeta">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-        <div>
-          <div style="font-weight:800;font-size:15px;">Datos generales</div>
-          <div style="font-size:13px;color:var(--texto-suave);margin-top:4px;">
-            Género: <b style="color:var(--texto)">{{ a.genero === 'mujer' ? 'Mujer' : 'Hombre' }}</b> ·
-            Edad: <b style="color:var(--texto)">{{ a.edad ? a.edad + ' años' : '—' }}</b>
-            @if (a.fechaNacimiento) { · 🎂 <b style="color:var(--texto)">{{ fecha(a.fechaNacimiento) }}</b> } ·
-            Estatura: <b style="color:var(--texto)">{{ a.estaturaPies }} pies {{ a.estaturaPulg }} pulg</b> ·
-            Composición: <b style="color:var(--ambar)">{{ comp(a.composicion) }}</b> ·
-            Objetivo: <b style="color:var(--ambar)">{{ obj(a.objetivo) }}</b> ·
-            Sueño: <b style="color:var(--texto)">{{ sueno(a.horasSueno) }}</b> ·
-            Estilo de vida: <b style="color:var(--texto)">{{ estilo(a.estiloVida) }}</b>
-            @if (a.telefono) { · 📱 <b style="color:var(--texto)">{{ a.telefono }}</b> }
-          </div>
-          @if (a.objetivoTexto) {
-            <div style="font-size:13px;margin-top:9px;color:var(--ambar);background:var(--ambar-fondo);border-radius:8px;padding:8px 12px;">🎯 <b>Meta:</b> {{ a.objetivoTexto }}</div>
-          }
-          @if (a.condiciones.trim()) {
-            <div style="font-size:12.5px;margin-top:9px;color:var(--rojo);background:var(--rojo-fondo);border-radius:8px;padding:8px 12px;">⚠️ <b>Condiciones:</b> {{ a.condiciones }}</div>
-          }
-        </div>
-        <button class="btn btn-suave" (click)="ui.formAtleta.set({ id: a.id })">✏️ Editar perfil</button>
+      <div class="grafica-cab" style="margin-bottom:12px;">
+        <span class="t"><app-icono nombre="persona" [tam]="17" /> Datos generales</span>
+        <button class="btn btn-suave btn-mini" (click)="ui.formAtleta.set({ id: a.id })"><app-icono nombre="editar" [tam]="15" /> Editar perfil</button>
       </div>
+      <div class="datos-grid">
+        @for (d of datosPerfil(); track d.lbl) {
+          <div class="dato">
+            <span class="d-ico"><app-icono [nombre]="d.ico" [tam]="16" /></span>
+            <div><div class="d-lbl">{{ d.lbl }}</div><div class="d-val" [class.d-ambar]="d.destacar">{{ d.val }}</div></div>
+          </div>
+        }
+      </div>
+      @if (a.objetivoTexto) {
+        <div class="aviso aviso-ambar"><app-icono nombre="diana" [tam]="16" /> <span><b>Meta:</b> {{ a.objetivoTexto }}</span></div>
+      }
+      @if (a.condiciones.trim()) {
+        <div class="aviso aviso-rojo"><app-icono nombre="alerta" [tam]="16" /> <span><b>Condiciones de salud:</b> {{ a.condiciones }}</span></div>
+      }
     </div>
     <div class="fila-acciones">
       <button class="btn" [class.btn-fantasma]="a.activo" [class.btn-verde]="!a.activo" (click)="alternarActivo()">
-        {{ a.activo ? '⏸ Marcar como inactivo' : '▶ Reactivar atleta' }}
+        <app-icono [nombre]="a.activo ? 'prohibido' : 'check'" [tam]="16" /> {{ a.activo ? 'Marcar como inactivo' : 'Reactivar atleta' }}
       </button>
-      <button class="btn btn-peligro" (click)="eliminar()">🗑 Eliminar atleta</button>
+      <button class="btn btn-peligro" (click)="eliminar()"><app-icono nombre="papelera" [tam]="16" /> Eliminar atleta</button>
     </div>
   `,
 })
@@ -62,6 +59,22 @@ export class TabPerfil {
   protected readonly estilo = nombreEstiloVida;
   protected readonly dias = computed(() => diasConRutina(this.atleta()));
   protected readonly total = computed(() => this.atleta().pagos.reduce((s, p) => s + p.monto, 0));
+
+  /** Datos del perfil como cuadrícula (etiqueta, valor e icono). */
+  protected readonly datosPerfil = computed(() => {
+    const a = this.atleta();
+    return [
+      { ico: a.genero === 'mujer' ? 'mujer' : 'hombre', lbl: 'Género', val: a.genero === 'mujer' ? 'Mujer' : 'Hombre' },
+      { ico: 'cumple', lbl: 'Edad', val: (a.edad ? a.edad + ' años' : '—') + (a.fechaNacimiento ? ' · ' + this.fecha(a.fechaNacimiento) : '') },
+      { ico: 'regla', lbl: 'Estatura', val: `${a.estaturaPies} pies ${a.estaturaPulg} pulg` },
+      { ico: 'cuerpo-atletico', lbl: 'Composición', val: this.comp(a.composicion), destacar: true },
+      { ico: 'diana', lbl: 'Objetivo', val: this.obj(a.objetivo), destacar: true },
+      { ico: 'cama', lbl: 'Sueño', val: this.sueno(a.horasSueno) },
+      { ico: 'actividad', lbl: 'Estilo de vida', val: this.estilo(a.estiloVida) },
+      { ico: 'telefono', lbl: 'Teléfono', val: a.telefono || '—' },
+      { ico: 'calendario', lbl: 'Cliente desde', val: this.fecha(a.fechaRegistro) },
+    ];
+  });
 
   async alternarActivo() {
     const a = this.atleta();

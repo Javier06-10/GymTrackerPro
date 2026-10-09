@@ -6,13 +6,14 @@ import { supabase } from '../../core/supabase';
 import { UiService } from '../../core/ui.service';
 import { diasDesde, esc, fmtDinero, fmtFecha, hoyISO, normalizar, sumarDias } from '../../core/util';
 import { Modal } from '../../shared/modal';
+import { Icono } from '../../shared/icono';
 
 type Entrenador = Perfil & { created_at: string; suscripciones: Suscripcion | null };
 
 /** Administración del SaaS: entrenadores, estado de suscripción y registro de pagos manuales. */
 @Component({
   selector: 'app-admin',
-  imports: [FormsModule, Modal],
+  imports: [FormsModule, Modal, Icono],
   template: `
     <div class="grid-metricas">
       <div class="metrica"><div class="etiqueta">Entrenadores</div><div class="valor">{{ lista().length }}</div></div>
@@ -23,9 +24,9 @@ type Entrenador = Perfil & { created_at: string; suscripciones: Suscripcion | nu
     </div>
 
     <div class="barra-busqueda">
-      <div class="campo-buscar"><span class="lupa">🔍</span>
+      <div class="campo-buscar"><span class="lupa"><app-icono nombre="lupa" [tam]="16" /></span>
         <input type="text" placeholder="Buscar por nombre, negocio o correo..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" /></div>
-      <button class="btn btn-suave" (click)="cargar()">↻ Recargar</button>
+      <button class="btn btn-suave" (click)="cargar()"><app-icono nombre="recargar" [tam]="15" /> Recargar</button>
     </div>
 
     <div class="tabla-scroll"><table>
@@ -39,7 +40,7 @@ type Entrenador = Perfil & { created_at: string; suscripciones: Suscripcion | nu
           <td><span class="chip" [class]="'chip ' + chipEstado(s)">{{ estado(s) }}</span></td>
           <td>{{ fecha(s?.vence_el) }}</td>
           <td style="white-space:nowrap;">
-            <button class="btn btn-primario btn-mini" (click)="abrirPago(e)">💵 Registrar pago</button>
+            <button class="btn btn-primario btn-mini" (click)="abrirPago(e)"><app-icono nombre="dinero" [tam]="15" /> Registrar pago</button>
             <button class="btn btn-suave btn-mini" (click)="extenderPrueba(e)" title="Sumar 7 días">+7 días</button>
             @if (s?.estado !== 'cancelada') { <button class="btn btn-peligro btn-mini" (click)="cancelar(e)">Cancelar</button> }
           </td>

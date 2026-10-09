@@ -10,22 +10,23 @@ import { abrirWhatsApp, primerNombre } from '../../../core/whatsapp';
 import { fmtFecha, hoyISO, normalizar } from '../../../core/util';
 import { Modal } from '../../../shared/modal';
 import { Sparkline } from '../../../shared/graficas/sparkline';
+import { Icono } from '../../../shared/icono';
 
 interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls: string } }
 
 /** Carpeta de rutinas por día con catálogo e historial de carga (portado de tabRutinas). */
 @Component({
   selector: 'app-tab-rutinas',
-  imports: [FormsModule, Modal, Sparkline],
+  imports: [FormsModule, Modal, Sparkline, Icono],
   template: `
     @let a = atleta();
     <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
       <div class="nota-info" style="flex:1;min-width:240px;">
         Escribe el nombre de un ejercicio o de un músculo (ej. "sentadilla", "cuádriceps", "glúteo", "pecho") y el buscador te mostrará
-        todas las variantes agrupadas. El icono 📈 abre el historial de carga de cada ejercicio.
+        todas las variantes agrupadas. El botón de la gráfica abre el historial de carga de cada ejercicio.
       </div>
-      <button class="btn btn-suave" (click)="enviarWhatsApp()">💬 Enviar rutina</button>
-      <button class="btn btn-suave" (click)="abrirCompartir()">📤 Compartir rutina</button>
+      <button class="btn btn-suave" (click)="enviarWhatsApp()"><app-icono nombre="chat" [tam]="16" /> Enviar rutina</button>
+      <button class="btn btn-suave" (click)="abrirCompartir()"><app-icono nombre="compartir" [tam]="16" /> Compartir rutina</button>
     </div>
 
     <div class="grid-dias">
@@ -44,9 +45,9 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
               <div class="ejercicio-item" [style.border-color]="enEdicion(dia, i) ? 'var(--ambar)' : null" [style.opacity]="enEdicion(dia, i) ? 0.55 : null">
                 <div class="fila1">
                   <span class="nom">{{ ej.nombre }}</span>
-                  <button class="btn-x" title="Editar ejercicio" style="color:var(--texto-suave);" (click)="editar(dia, i)">✏️</button>
-                  <button class="btn-x" title="Historial de carga" [style.color]="histAbierto(dia, i) ? 'var(--ambar)' : 'var(--acero)'" (click)="toggleHist(dia, i)">📈</button>
-                  <button class="btn-x" (click)="quitar(dia, i)">✕</button>
+                  <button class="btn-x" title="Editar ejercicio" style="color:var(--texto-suave);" (click)="editar(dia, i)"><app-icono nombre="editar" [tam]="15" /></button>
+                  <button class="btn-x" title="Historial de carga" [style.color]="histAbierto(dia, i) ? 'var(--ambar)' : 'var(--acero)'" (click)="toggleHist(dia, i)"><app-icono nombre="grafico" [tam]="15" /></button>
+                  <button class="btn-x" (click)="quitar(dia, i)"><app-icono nombre="cerrar" [tam]="15" /></button>
                 </div>
                 <div class="specs">
                   <span>Series: <b>{{ ej.series || '—' }}</b></span>
@@ -54,14 +55,14 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
                     (change)="actualizarPeso(dia, i, $any($event.target).value)" /></span>
                   <span>Descanso: <b>{{ ej.descanso || '—' }}</b></span>
                 </div>
-                @if (ej.notas) { <div class="nota">📌 {{ ej.notas }}</div> }
+                @if (ej.notas) { <div class="nota"><app-icono nombre="pin" [tam]="13" /> {{ ej.notas }}</div> }
                 @if (histAbierto(dia, i)) {
                   <div class="hist-peso">
                     @let filas = historial(ej.historialPeso);
                     @if (!filas.length) {
                       <div class="hist-vacio">Sin historial todavía — registra un peso de trabajo para empezar la progresión.</div>
                     } @else {
-                      <div class="hist-titulo">📈 Carga progresiva</div>
+                      <div class="hist-titulo"><app-icono nombre="tendencia" [tam]="13" /> Carga progresiva</div>
                       <app-sparkline [registros]="ej.historialPeso" />
                       @for (f of filas; track $index) {
                         <div class="hist-fila"><span>{{ fecha(f.fecha) }}</span><b>{{ f.peso }}</b><span [class]="f.delta.cls">{{ f.delta.txt }}</span></div>
@@ -75,7 +76,7 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
             @if (formDia() === dia) {
               <div class="ejercicio-item" style="border-color:var(--ambar);">
                 @if (editando()) {
-                  <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ambar);margin-bottom:8px;">✏️ Editando ejercicio</div>
+                  <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ambar);margin-bottom:8px;"><app-icono nombre="editar" [tam]="13" /> Editando ejercicio</div>
                 }
                 <div class="campo auto-wrap" style="margin-bottom:8px;">
                   <label>Ejercicio</label>
@@ -90,7 +91,7 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
                         }
                       }
                       @if (!existeExacto()) {
-                        <div class="auto-crear" (mousedown)="abrirNuevoEjercicio()">＋ Crear "{{ form.nombre.trim() }}" en el catálogo</div>
+                        <div class="auto-crear" (mousedown)="abrirNuevoEjercicio()"><app-icono nombre="mas" [tam]="14" /> Crear "{{ form.nombre.trim() }}" en el catálogo</div>
                       }
                     </div>
                   }
@@ -106,11 +107,11 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
                 </div>
                 <div style="display:flex;gap:8px;justify-content:flex-end;">
                   <button class="btn btn-fantasma btn-mini" (click)="cancelarForm()">Cancelar</button>
-                  <button class="btn btn-primario btn-mini" (click)="guardarEjercicio(dia)">{{ editando() ? '💾 Guardar cambios' : 'Agregar' }}</button>
+                  <button class="btn btn-primario btn-mini" (click)="guardarEjercicio(dia)">{{ editando() ? 'Guardar cambios' : 'Agregar' }}</button>
                 </div>
               </div>
             } @else {
-              <button class="btn btn-suave btn-mini" style="align-self:flex-start;" (click)="abrirForm(dia)">＋ Ejercicio</button>
+              <button class="btn btn-suave btn-mini" style="align-self:flex-start;" (click)="abrirForm(dia)"><app-icono nombre="mas" [tam]="14" /> Ejercicio</button>
             }
           </div>
         </div>
@@ -139,7 +140,7 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
         } @else {
           <div class="campo"><label>¿Qué copiar de {{ a.nombre }}?</label>
             <select [(ngModel)]="cr.dia">
-              <option value="__todos__">📅 Toda la semana ({{ diasConEjercicios() }} día{{ diasConEjercicios() === 1 ? '' : 's' }} con ejercicios)</option>
+              <option value="__todos__">Toda la semana ({{ diasConEjercicios() }} día{{ diasConEjercicios() === 1 ? '' : 's' }} con ejercicios)</option>
               @for (d of dias; track d) {
                 <option [value]="d">{{ d }}{{ a.rutina[d].titulo ? ' — ' + a.rutina[d].titulo : '' }} ({{ a.rutina[d].ejercicios.length }} ej.)</option>
               }
@@ -164,7 +165,7 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
         }
         <ng-container pie>
           <button class="btn btn-fantasma" (click)="compartir.set(false)">{{ otros().length ? 'Cancelar' : 'Entendido' }}</button>
-          @if (otros().length) { <button class="btn btn-primario" (click)="ejecutarCompartir()">📤 Copiar rutina</button> }
+          @if (otros().length) { <button class="btn btn-primario" (click)="ejecutarCompartir()"><app-icono nombre="compartir" [tam]="15" /> Copiar rutina</button> }
         </ng-container>
       </app-modal>
     }
@@ -424,7 +425,7 @@ export class TabRutinas {
     }
     const firma = this.auth.perfil()?.nombre ? '\n— ' + this.auth.perfil()!.nombre : '';
     if (!abrirWhatsApp(a, 'Hola ' + primerNombre(a.nombre) + ' 👋\n\n' + cuerpo + '\n¡Nos vemos en el gym! 💪' + firma)) {
-      this.ui.toast('Este atleta no tiene teléfono. Agrégalo con ✏️ en su Perfil', 'err');
+      this.ui.toast('Este atleta no tiene teléfono. Agrégalo en Editar', 'err');
     }
   }
 }

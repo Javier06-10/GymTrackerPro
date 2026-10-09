@@ -8,16 +8,17 @@ import { UiService } from '../../../core/ui.service';
 import { abrirWhatsApp, primerNombre } from '../../../core/whatsapp';
 import { diasDesde, fmtDinero, fmtFecha, hoyISO, sumarDias } from '../../../core/util';
 import { Modal } from '../../../shared/modal';
+import { Icono } from '../../../shared/icono';
 
 /** Control financiero por atleta (portado de tabPagos). */
 @Component({
   selector: 'app-tab-pagos',
-  imports: [FormsModule, Modal],
+  imports: [FormsModule, Modal, Icono],
   template: `
     @let a = atleta();
     @if (a.telefono) {
       <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-        <button class="btn btn-suave btn-mini" (click)="recordar()">💬 Recordar pago por WhatsApp</button>
+        <button class="btn btn-suave btn-mini" (click)="recordar()"><app-icono nombre="chat" [tam]="15" /> Recordar pago por WhatsApp</button>
       </div>
     }
     <div class="grid-pagos">
@@ -35,13 +36,13 @@ import { Modal } from '../../../shared/modal';
           }
         </div>
         <div class="dato-pago"><div class="e">Total pagado histórico</div><div class="v" style="color:var(--verde)">{{ dinero(total()) }}</div></div>
-        <button class="btn btn-suave" (click)="abrirConfig()">⚙️ Configurar tarifa y corte</button>
-        <button class="btn btn-primario" (click)="abrirPago()">＋ Registrar pago</button>
+        <button class="btn btn-suave" (click)="abrirConfig()"><app-icono nombre="engranaje" [tam]="16" /> Configurar tarifa y corte</button>
+        <button class="btn btn-primario" (click)="abrirPago()"><app-icono nombre="mas" [tam]="16" /> Registrar pago</button>
       </div>
       <div class="tarjeta">
-        <div style="font-weight:800;margin-bottom:12px;">🧾 Historial de transacciones</div>
+        <div style="font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;"><app-icono nombre="recibo" [tam]="18" /> Historial de transacciones</div>
         @if (!a.pagos.length) {
-          <div class="vacio" style="padding:28px;"><span class="ic">💳</span><p>Sin pagos registrados todavía.</p></div>
+          <div class="vacio" style="padding:28px;"><span class="ic"><app-icono nombre="tarjeta" [tam]="40" /></span><p>Sin pagos registrados todavía.</p></div>
         } @else {
           <div class="tabla-scroll"><table>
             <tr><th>Fecha</th><th>Monto</th><th>Método</th><th>Concepto</th><th></th></tr>
@@ -52,8 +53,8 @@ import { Modal } from '../../../shared/modal';
                 <td>{{ p.metodo }}</td>
                 <td>{{ p.concepto }}</td>
                 <td style="white-space:nowrap;">
-                  <button class="btn-x" title="Descargar recibo" style="color:var(--acero);" (click)="recibo(p)">🧾</button>
-                  <button class="btn-x" (click)="eliminar(p)">✕</button>
+                  <button class="btn-x" title="Descargar recibo" style="color:var(--acero);" (click)="recibo(p)"><app-icono nombre="recibo" [tam]="15" /></button>
+                  <button class="btn-x" (click)="eliminar(p)"><app-icono nombre="cerrar" [tam]="15" /></button>
                 </td>
               </tr>
             }

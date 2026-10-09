@@ -25,7 +25,7 @@ const ARTE = dibujarAvatar(
     <aside class="marca-auth">
       <div class="marca-texto">
       <div class="logo">
-        <div class="icono">🏋️</div>
+        <div class="icono"><app-icono nombre="pesa" [tam]="22" /></div>
         <div><h1>GYMTRACKER <span>PRO</span></h1><small>Software para entrenadores</small></div>
       </div>
       <h2>Entrena mejor.<br />Mide el progreso.<br /><span>Cobra a tiempo.</span></h2>

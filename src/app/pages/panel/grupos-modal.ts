@@ -4,18 +4,19 @@ import { DatosService } from '../../core/datos.service';
 import { UiService } from '../../core/ui.service';
 import { esc, normalizar } from '../../core/util';
 import { Modal } from '../../shared/modal';
+import { Icono } from '../../shared/icono';
 
 /** Administración de grupos (portado de abrirModalGrupos). */
 @Component({
   selector: 'app-grupos-modal',
-  imports: [FormsModule, Modal],
+  imports: [FormsModule, Modal, Icono],
   template: `
-    <app-modal titulo="👥 Grupos de Atletas" (cerrar)="cerrar.emit()">
+    <app-modal titulo="Grupos de atletas" (cerrar)="cerrar.emit()">
       @for (g of datos.grupos(); track g.id) {
         <div class="grupo-fila">
           <input type="text" [value]="g.nombre" (change)="renombrar(g.id, $any($event.target).value)" />
           <span class="chip chip-gris" style="flex-shrink:0;">{{ contar(g.id) }} atleta{{ contar(g.id) === 1 ? '' : 's' }}</span>
-          <button class="btn-x" title="Eliminar grupo" (click)="eliminar(g.id, g.nombre)">✕</button>
+          <button class="btn-x" title="Eliminar grupo" (click)="eliminar(g.id, g.nombre)"><app-icono nombre="cerrar" [tam]="15" /></button>
         </div>
       } @empty {
         <p style="color:var(--texto-suave);font-size:13.5px;">
@@ -24,7 +25,7 @@ import { Modal } from '../../shared/modal';
       }
       <div class="grupo-fila" style="margin-top:6px;">
         <input type="text" [(ngModel)]="nuevo" placeholder='Nuevo grupo. Ej. "Mañana", "Tarde"...' (keyup.enter)="crear()" />
-        <button class="btn btn-primario btn-mini" (click)="crear()">＋ Crear</button>
+        <button class="btn btn-primario btn-mini" (click)="crear()"><app-icono nombre="mas" [tam]="14" /> Crear</button>
       </div>
       <div class="nota-info">Renombra un grupo editando su nombre directamente. Al eliminar un grupo, sus atletas quedan "sin grupo" (no se borran).</div>
       <ng-container pie><button class="btn btn-fantasma" (click)="cerrar.emit()">Cerrar</button></ng-container>

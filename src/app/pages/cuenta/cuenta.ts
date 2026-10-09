@@ -7,6 +7,7 @@ import { supabase } from '../../core/supabase';
 import { UiService } from '../../core/ui.service';
 import { fmtDinero, fmtFecha } from '../../core/util';
 import { ImportarRespaldo } from './importar-respaldo';
+import { Icono } from '../../shared/icono';
 
 interface PagoSuscripcion { id: string; monto: number; metodo: string; referencia: string; periodo_desde: string; periodo_hasta: string; plan_id: number }
 
@@ -15,9 +16,9 @@ const ETIQUETA_ESTADO: Record<string, string> = { prueba: 'Prueba gratis', activ
 /** Perfil del entrenador, plan actual y solicitud de renovación (pago manual). */
 @Component({
   selector: 'app-cuenta',
-  imports: [FormsModule, ImportarRespaldo],
+  imports: [FormsModule, ImportarRespaldo, Icono],
   template: `
-    <div class="titulo-seccion" style="margin-top:0;">💳 Mi plan</div>
+    <div class="titulo-seccion" style="margin-top:0;"><app-icono nombre="tarjeta" [tam]="16" /> Mi plan</div>
     @if (auth.suscripcion(); as s) {
       <div class="grid-metricas">
         <div class="metrica" [class.m-verde]="auth.vigente()" [class.m-rojo]="!auth.vigente()">
@@ -47,10 +48,10 @@ const ETIQUETA_ESTADO: Record<string, string> = { prueba: 'Prueba gratis', activ
           <div style="font-weight:800;font-size:15px;">{{ p.nombre }}</div>
           <div class="precio">{{ dinero(p.precio_mensual) }} <small>/ mes</small></div>
           <ul>
-            <li>👥 {{ p.max_atletas ? 'Hasta ' + p.max_atletas + ' atletas' : 'Atletas ilimitados' }}</li>
-            <li>📏 Medidas, avatar y rutinas</li>
-            <li>🍎 Nutrición, asistencia y objetivos</li>
-            <li>💰 Control de cobros y WhatsApp</li>
+            <li><app-icono nombre="usuarios" [tam]="14" /> {{ p.max_atletas ? 'Hasta ' + p.max_atletas + ' atletas' : 'Atletas ilimitados' }}</li>
+            <li><app-icono nombre="regla" [tam]="14" /> Medidas, mapa muscular y rutinas</li>
+            <li><app-icono nombre="manzana" [tam]="14" /> Nutrición, asistencia y objetivos</li>
+            <li><app-icono nombre="dinero" [tam]="14" /> Control de cobros y WhatsApp</li>
           </ul>
           <button class="btn" [class.btn-primario]="p.id !== auth.suscripcion()?.plan_id" [class.btn-suave]="p.id === auth.suscripcion()?.plan_id"
             style="justify-content:center;margin-top:auto;" (click)="solicitar(p)">
@@ -64,7 +65,7 @@ const ETIQUETA_ESTADO: Record<string, string> = { prueba: 'Prueba gratis', activ
     </div>
 
     @if (historial().length) {
-      <div class="titulo-seccion">🧾 Historial de pagos del plan</div>
+      <div class="titulo-seccion"><app-icono nombre="recibo" [tam]="16" /> Historial de pagos del plan</div>
       <div class="tabla-scroll"><table>
         <tr><th>Período</th><th>Plan</th><th>Monto</th><th>Método</th><th>Referencia</th></tr>
         @for (h of historial(); track h.id) {
@@ -79,7 +80,7 @@ const ETIQUETA_ESTADO: Record<string, string> = { prueba: 'Prueba gratis', activ
       </table></div>
     }
 
-    <div class="titulo-seccion">👤 Mi perfil de entrenador</div>
+    <div class="titulo-seccion"><app-icono nombre="persona" [tam]="16" /> Mi perfil de entrenador</div>
     <div class="tarjeta" style="display:flex;flex-direction:column;gap:14px;">
       <div class="form-grid">
         <div class="campo"><label>Tu nombre (firma de los mensajes)</label><input [(ngModel)]="perfil.nombre" /></div>
@@ -102,10 +103,10 @@ const ETIQUETA_ESTADO: Record<string, string> = { prueba: 'Prueba gratis', activ
       </div>
     </div>
 
-    <div class="titulo-seccion">📥 Importar desde la versión anterior</div>
+    <div class="titulo-seccion"><app-icono nombre="subir" [tam]="16" /> Importar desde la versión anterior</div>
     <app-importar-respaldo />
 
-    <div class="titulo-seccion">🔒 Seguridad</div>
+    <div class="titulo-seccion"><app-icono nombre="candado" [tam]="16" /> Seguridad</div>
     <div class="tarjeta" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
       <div class="campo" style="flex:1;min-width:220px;">
         <label>Nueva contraseña · {{ auth.perfil()?.email }}</label>

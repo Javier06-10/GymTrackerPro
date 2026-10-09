@@ -4,12 +4,14 @@ import { rachaActual } from '../../../core/dominio';
 import { Atleta, EstadoAsistencia } from '../../../core/modelos';
 import { UiService } from '../../../core/ui.service';
 import { MESES_ES, hoyISO } from '../../../core/util';
+import { Icono } from '../../../shared/icono';
 
 interface CeldaDia { iso: string; num: number; estado?: EstadoAsistencia; hoy: boolean; futuro: boolean }
 
 /** Calendario de asistencia: vacío → ✓ entrenó → ✕ faltó → vacío (portado de tabAsistencia). */
 @Component({
   selector: 'app-tab-asistencia',
+  imports: [Icono],
   template: `
     @let r = resumen();
     <div class="grid-metricas">
@@ -21,7 +23,7 @@ interface CeldaDia { iso: string; num: number; estado?: EstadoAsistencia; hoy: b
         <div class="valor">{{ r.pctMes === null ? '—' : r.pctMes + '%' }}</div>
         <div class="sub">{{ r.pctTotal === null ? 'Sin días marcados' : r.pctTotal + '% histórico' }}</div></div>
       <div class="metrica m-acero"><div class="etiqueta">Racha actual</div>
-        <div class="valor">🔥 {{ racha() }}</div><div class="sub">Entrenamientos seguidos sin faltar</div></div>
+        <div class="valor" style="display:flex;align-items:center;gap:6px;"><span style="color:#ff8a65;display:inline-flex"><app-icono nombre="fuego" [tam]="24" /></span> {{ racha() }}</div><div class="sub">Entrenamientos seguidos sin faltar</div></div>
     </div>
 
     <div class="tarjeta">
@@ -39,14 +41,14 @@ interface CeldaDia { iso: string; num: number; estado?: EstadoAsistencia; hoy: b
           <div class="cal-dia" [class.entrenado]="c.estado === 'E'" [class.falto]="c.estado === 'F'" [class.hoy]="c.hoy" [class.futuro]="c.futuro"
             [title]="c.estado === 'E' ? 'Entrenó' : c.estado === 'F' ? 'Faltó' : 'Sin marcar'" (click)="!c.futuro && ciclo(c.iso)">
             <span class="num">{{ c.num }}</span>
-            <span class="marca">{{ c.estado === 'E' ? '✓' : c.estado === 'F' ? '✕' : '' }}</span>
+            <span class="marca">@if (c.estado === 'E') { <app-icono nombre="check" [tam]="14" /> } @else if (c.estado === 'F') { <app-icono nombre="cerrar" [tam]="14" /> }</span>
           </div>
         }
       </div>
       <div class="cal-leyenda">
         <span><span class="punto" style="background:var(--verde)"></span>Entrenó</span>
         <span><span class="punto" style="background:var(--rojo)"></span>Faltó</span>
-        <span>Toca un día para alternar: vacío → ✓ entrenó → ✕ faltó → vacío</span>
+        <span>Toca un día para alternar: sin marcar → entrenó → faltó → sin marcar</span>
       </div>
     </div>
   `,

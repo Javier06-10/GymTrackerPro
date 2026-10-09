@@ -18,19 +18,19 @@ export const ZONAS: [string, string][] = [
 /** En estas zonas bajar es progreso. */
 export const ZONAS_INVERTIDAS = new Set(['abdomenAlto', 'abdomenOmbligo']);
 export const GRUPOS_MEDIDA: [string, string[]][] = [
-  ['💪 Brazos', ['brazoRelajado', 'brazoContraido', 'antebrazo']],
-  ['🫁 Torso', ['pecho', 'abdomenAlto', 'abdomenOmbligo']],
-  ['🦵 Tren inferior', ['cadera', 'pierna', 'pantorrilla']],
+  ['Brazos', ['brazoRelajado', 'brazoContraido', 'antebrazo']],
+  ['Torso', ['pecho', 'abdomenAlto', 'abdomenOmbligo']],
+  ['Tren inferior', ['cadera', 'pierna', 'pantorrilla']],
 ];
 export function etiquetaZona(id: string): string {
   return ZONAS.find((z) => z[0] === id)?.[1] ?? id;
 }
 
 export const OBJETIVOS: Record<Objetivo, { t: string; ic: string; ajuste: number; prot: [number, number] }> = {
-  perder: { t: 'Perder grasa', ic: '🔥', ajuste: -0.2, prot: [2.0, 2.2] },
-  ganar: { t: 'Ganar masa muscular', ic: '📈', ajuste: +0.12, prot: [1.8, 2.0] },
-  recomp: { t: 'Recomposición corporal', ic: '⚖️', ajuste: 0, prot: [2.0, 2.2] },
-  mantener: { t: 'Mantenimiento', ic: '🛡️', ajuste: 0, prot: [1.6, 1.8] },
+  perder: { t: 'Perder grasa', ic: 'fuego', ajuste: -0.2, prot: [2.0, 2.2] },
+  ganar: { t: 'Ganar masa muscular', ic: 'tendencia', ajuste: +0.12, prot: [1.8, 2.0] },
+  recomp: { t: 'Recomposición corporal', ic: 'balanza', ajuste: 0, prot: [2.0, 2.2] },
+  mantener: { t: 'Mantenimiento', ic: 'escudo', ajuste: 0, prot: [1.6, 1.8] },
 };
 
 export const CONSEJOS_OBJETIVO: Record<Objetivo, string[]> = {
@@ -209,10 +209,10 @@ export function lecturaProgreso(a: Atleta): { dPeso: number; dAbd: number | null
   const dPeso = Number((ult.peso - prim.peso).toFixed(1));
   const dAbd = ult.abdomenOmbligo != null && prim.abdomenOmbligo != null ? Number((ult.abdomenOmbligo - prim.abdomenOmbligo).toFixed(1)) : null;
   let lectura = '';
-  if (a.objetivo === 'perder') lectura = dPeso < 0 || (dAbd != null && dAbd < 0) ? 'La tendencia va en la dirección del objetivo. 👍' : 'La tendencia aún no muestra reducción — revisa la adherencia al plan.';
-  if (a.objetivo === 'ganar') lectura = dPeso > 0 ? 'La tendencia va en la dirección del objetivo. 👍' : 'El peso no está subiendo — probablemente falta comer más.';
-  if (a.objetivo === 'recomp') lectura = dAbd != null && dAbd < 0 ? 'El abdomen está bajando con el peso estable: recomposición en marcha. 👍' : 'Sigue midiendo: en recomposición las cintas dicen más que la báscula.';
-  if (a.objetivo === 'mantener') lectura = Math.abs(dPeso) <= 3 ? 'Peso estable: mantenimiento logrado. 👍' : 'El peso se está moviendo — ajusta calorías si no es intencional.';
+  if (a.objetivo === 'perder') lectura = dPeso < 0 || (dAbd != null && dAbd < 0) ? 'La tendencia va en la dirección del objetivo.' : 'La tendencia aún no muestra reducción — revisa la adherencia al plan.';
+  if (a.objetivo === 'ganar') lectura = dPeso > 0 ? 'La tendencia va en la dirección del objetivo.' : 'El peso no está subiendo — probablemente falta comer más.';
+  if (a.objetivo === 'recomp') lectura = dAbd != null && dAbd < 0 ? 'El abdomen está bajando con el peso estable: recomposición en marcha.' : 'Sigue midiendo: en recomposición las cintas dicen más que la báscula.';
+  if (a.objetivo === 'mantener') lectura = Math.abs(dPeso) <= 3 ? 'Peso estable: mantenimiento logrado.' : 'El peso se está moviendo — ajusta calorías si no es intencional.';
   return { dPeso, dAbd, lectura };
 }
 

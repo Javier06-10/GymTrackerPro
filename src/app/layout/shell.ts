@@ -4,16 +4,17 @@ import { AuthService } from '../core/auth.service';
 import { DatosService } from '../core/datos.service';
 import { UiService } from '../core/ui.service';
 import { AtletaForm } from '../pages/atleta/atleta-form';
+import { Icono } from '../shared/icono';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, AtletaForm],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, AtletaForm, Icono],
   template: `
     <div id="app">
       <header class="top">
         <a class="logo" routerLink="/panel" style="text-decoration:none;color:inherit;">
           <div class="icono" id="logo-caja">
-            @if (auth.perfil()?.logo_url; as logo) { <img [src]="logo" alt="logo" /> } @else { 🏋️ }
+            @if (auth.perfil()?.logo_url; as logo) { <img [src]="logo" alt="logo" /> } @else { <app-icono nombre="pesa" [tam]="22" /> }
           </div>
           <div>
             <h1>GYMTRACKER <span>PRO</span></h1>
@@ -28,16 +29,16 @@ import { AtletaForm } from '../pages/atleta/atleta-form';
         </nav>
         <div class="separador"></div>
         <button class="btn btn-primario" (click)="ui.formAtleta.set({ id: null })" [disabled]="!auth.vigente()">
-          ＋<span class="btn-txt"> Nuevo Atleta</span>
+          <app-icono nombre="mas" [tam]="16" /><span class="btn-txt"> Nuevo atleta</span>
         </button>
-        <button class="btn btn-fantasma menu-movil" (click)="menu.set(!menu())">☰</button>
+        <button class="btn btn-fantasma menu-movil" (click)="menu.set(!menu())" aria-label="Menú"><app-icono nombre="menu" [tam]="18" /></button>
         <button class="btn btn-fantasma btn-txt" (click)="salir()" title="Cerrar sesión">⎋</button>
         @if (menu()) {
           <div class="menu-desplegable" (click)="menu.set(false)">
-            <a routerLink="/panel">🏠 Panel</a>
-            <a routerLink="/manual">📖 Manual del entrenador</a>
-            <a routerLink="/cuenta">👤 Mi cuenta y plan</a>
-            @if (auth.esAdmin()) { <a routerLink="/admin">🛠️ Administración</a> }
+            <a routerLink="/panel"><app-icono nombre="casa" [tam]="16" /> Panel</a>
+            <a routerLink="/manual"><app-icono nombre="libro" [tam]="16" /> Manual del entrenador</a>
+            <a routerLink="/cuenta"><app-icono nombre="persona" [tam]="16" /> Mi cuenta y plan</a>
+            @if (auth.esAdmin()) { <a routerLink="/admin"><app-icono nombre="herramienta" [tam]="16" /> Administración</a> }
             <button (click)="salir()">⎋ Cerrar sesión</button>
           </div>
         }
@@ -45,7 +46,7 @@ import { AtletaForm } from '../pages/atleta/atleta-form';
 
       @if (banner(); as b) {
         <div class="banner-sus" [class.vencida]="b.vencida">
-          <span>{{ b.texto }}</span>
+          <span style="display:inline-flex;align-items:center;gap:7px;"><app-icono [nombre]="b.icono || 'reloj'" [tam]="16" /> {{ b.texto }}</span>
           <a routerLink="/cuenta">Ver planes →</a>
         </div>
       }
@@ -77,12 +78,12 @@ export class Shell {
     if (!s) return null;
     const d = this.auth.diasRestantes();
     if (!this.auth.vigente()) {
-      return { vencida: true, texto: '⛔ Tu suscripción no está vigente. Puedes ver tus datos, pero no guardar cambios hasta renovar.' };
+      return { vencida: true, icono: 'prohibido', texto: 'Tu suscripción no está vigente. Puedes ver tus datos, pero no guardar cambios hasta renovar.' };
     }
     if (s.estado === 'prueba') {
-      return { vencida: false, texto: `🎁 Prueba gratis: te quedan ${d} día${d === 1 ? '' : 's'}.` };
+      return { vencida: false, icono: 'regalo', texto: `Prueba gratis: te quedan ${d} día${d === 1 ? '' : 's'}.` };
     }
-    if (d <= 5) return { vencida: false, texto: `⏰ Tu plan vence en ${d} día${d === 1 ? '' : 's'}.` };
+    if (d <= 5) return { vencida: false, icono: 'reloj', texto: `Tu plan vence en ${d} día${d === 1 ? '' : 's'}.` };
     return null;
   });
 

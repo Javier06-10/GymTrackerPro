@@ -6,17 +6,18 @@ import { Atleta, ObjetivoMeta } from '../../../core/modelos';
 import { UiService } from '../../../core/ui.service';
 import { fmtFecha, hoyISO, uid } from '../../../core/util';
 import { Modal } from '../../../shared/modal';
+import { Icono } from '../../../shared/icono';
 
 /** Metas con porcentaje de avance (portado de tabObjetivos). */
 @Component({
   selector: 'app-tab-objetivos',
-  imports: [FormsModule, Modal],
+  imports: [FormsModule, Modal, Icono],
   template: `
     @let a = atleta();
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
       <div class="nota-info" style="flex:1;min-width:240px;">Los objetivos de <b>peso</b> y <b>medidas</b> se actualizan solos con cada medición.
         Los <b>manuales</b> (ej. dominadas) se actualizan tocando el valor actual.</div>
-      <button class="btn btn-primario" (click)="abrir()">＋ Nuevo objetivo</button>
+      <button class="btn btn-primario" (click)="abrir()"><app-icono nombre="mas" [tam]="16" /> Nuevo objetivo</button>
     </div>
 
     @for (ob of a.objetivos; track ob.id; let i = $index) {
@@ -24,11 +25,11 @@ import { Modal } from '../../../shared/modal';
       @let u = unidad(ob);
       <div class="tarjeta" style="margin-bottom:12px;" [style.border-color]="av.pct === 100 ? 'rgba(76,195,138,.5)' : null">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <div style="font-weight:800;font-size:15px;flex:1;min-width:180px;">{{ av.pct === 100 ? '✅' : '🎯' }} {{ ob.titulo }}</div>
+          <div style="font-weight:800;font-size:15px;flex:1;min-width:180px;display:flex;align-items:center;gap:8px;"><app-icono [nombre]="av.pct === 100 ? 'check' : 'diana'" [tam]="18" /> {{ ob.titulo }}</div>
           @if (av.pct === 100) { <span class="chip chip-verde">Logrado</span> }
           @else if (av.pct !== null) { <span class="chip chip-ambar">{{ av.pct }}% de avance</span> }
           @else { <span class="chip chip-gris">Sin datos</span> }
-          <button class="btn-x" title="Eliminar objetivo" (click)="eliminar(i)">✕</button>
+          <button class="btn-x" title="Eliminar objetivo" (click)="eliminar(i)"><app-icono nombre="cerrar" [tam]="15" /></button>
         </div>
         <div style="font-size:13px;color:var(--texto-suave);margin:8px 0 9px;">
           {{ ob.valorObjetivo < ob.valorInicial ? '↓' : '↑' }} De <b style="color:var(--texto)">{{ ob.valorInicial }} {{ u }}</b>
@@ -44,10 +45,10 @@ import { Modal } from '../../../shared/modal';
       </div>
     } @empty {
       <div class="vacio">
-        <span class="ic">🎯</span>
+        <span class="ic"><app-icono nombre="diana" [tam]="40" /></span>
         <h3>Sin objetivos definidos</h3>
         <p>Crea metas medibles: "Bajar 20 lb", "Reducir 3 in de cintura", "Lograr 10 dominadas"... y el avance se calculará automáticamente.</p>
-        <button class="btn btn-primario" (click)="abrir()">＋ Crear primer objetivo</button>
+        <button class="btn btn-primario" (click)="abrir()"><app-icono nombre="mas" [tam]="16" /> Crear primer objetivo</button>
       </div>
     }
 
@@ -57,9 +58,9 @@ import { Modal } from '../../../shared/modal';
           <input type="text" [(ngModel)]="f.titulo" placeholder='Ej. "Bajar 20 lb", "Reducir cintura", "10 dominadas"' /></div>
         <div class="campo"><label>Tipo de seguimiento</label>
           <select [(ngModel)]="f.tipo" (ngModelChange)="alCambiarTipo()">
-            <option value="peso">⚖️ Peso corporal (automático con las mediciones)</option>
-            <option value="zona">📏 Medida corporal (automático con las mediciones)</option>
-            <option value="manual">✍️ Manual (ej. dominadas, repeticiones, tiempo)</option>
+            <option value="peso">Peso corporal (automático con las mediciones)</option>
+            <option value="zona">Medida corporal (automático con las mediciones)</option>
+            <option value="manual">Manual (ej. dominadas, repeticiones, tiempo)</option>
           </select></div>
         @if (f.tipo === 'zona') {
           <div class="campo"><label>Zona corporal</label>
@@ -142,7 +143,7 @@ export class TabObjetivos {
     const objetivos = structuredClone(this.atleta().objetivos);
     objetivos[i].valorActual = valor === '' ? null : Number(valor);
     const { pct } = avanceObjetivo(this.atleta(), objetivos[i]);
-    await this.guardarObjetivos(objetivos, pct === 100 ? '🎉 ¡Objetivo logrado!' : 'Avance actualizado ✓');
+    await this.guardarObjetivos(objetivos, pct === 100 ? '¡Objetivo logrado!' : 'Avance actualizado ✓');
   }
 
   async eliminar(i: number) {

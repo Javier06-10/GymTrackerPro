@@ -4,17 +4,18 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { mensajeError } from '../../core/supabase';
 import { MarcaAuth } from '../../shared/marca-auth';
+import { Icono } from '../../shared/icono';
 
 @Component({
   selector: 'app-registro',
-  imports: [FormsModule, RouterLink, MarcaAuth],
+  imports: [FormsModule, RouterLink, MarcaAuth, Icono],
   template: `
     <div class="auth-split">
       <app-marca-auth />
       <div class="auth-wrap">
       <div class="auth-card">
         <div class="logo">
-          <div class="icono">🏋️</div>
+          <div class="icono"><app-icono nombre="pesa" [tam]="22" /></div>
           <div><h1>GYMTRACKER <span>PRO</span></h1><small>Crea tu cuenta de entrenador</small></div>
         </div>
         <div class="tarjeta">

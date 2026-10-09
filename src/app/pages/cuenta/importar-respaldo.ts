@@ -14,7 +14,7 @@ import { Modal } from '../../shared/modal';
   template: `
     <div class="tarjeta" style="display:flex;flex-direction:column;gap:12px;">
       <div style="font-size:13.5px;color:var(--texto-suave);">
-        ¿Usabas la versión anterior de GymTracker Pro (el archivo HTML)? Sube aquí el respaldo que descargabas con 💾
+        ¿Usabas la versión anterior de GymTracker Pro (el archivo HTML)? Sube aquí el respaldo que descargabas con el botón de guardar
         (<b>GymTracker_Respaldo_….json</b>) y pasamos tus atletas, medidas, rutinas, asistencia, objetivos y pagos a tu cuenta.
       </div>
       <input type="file" accept=".json,application/json" (change)="leer($event)" [disabled]="!auth.vigente()"
@@ -23,7 +23,7 @@ import { Modal } from '../../shared/modal';
     </div>
 
     @if (respaldo(); as r) {
-      <app-modal titulo="📥 Importar respaldo" (cerrar)="respaldo.set(null)">
+      <app-modal titulo="Importar respaldo" (cerrar)="respaldo.set(null)">
         <div style="font-size:13.5px;color:var(--texto-suave);">
           Respaldo{{ r.fecha ? ' del ' + fecha(r.fecha) : '' }} con:
           <ul style="margin:8px 0 0 18px;display:flex;flex-direction:column;gap:3px;">

@@ -852,3 +852,99 @@ app-marca-auth{display:block;}
   .metrica .etiqueta{font-size:9.5px;letter-spacing:.1em;}
   .metrica .ico{width:24px;height:24px;}
 }
+
+/* ---------- ICONOS ---------- */
+.icono-app{display:inline-flex;align-items:center;justify-content:center;line-height:0;}
+.ico-inline{display:inline-block;vertical-align:-3px;margin-right:2px;}
+.btn .icono-app{margin:-2px 0;}
+.titulo-seccion .icono-app, .grafica-cab .t .icono-app{color:var(--ambar);}
+.vacio .ic .icono-app{color:var(--tenue);}
+
+/* ---------- FICHA DEL ATLETA ---------- */
+.perfil-cab{
+  border-radius:18px;padding:22px;margin-bottom:16px;
+  background:
+    radial-gradient(520px 200px at 0% 0%, rgba(255,154,61,.16), transparent 70%),
+    linear-gradient(135deg, #1c2028, #15181f);
+  border:1px solid var(--borde-vidrio);
+  box-shadow:0 14px 40px rgba(0,0,0,.32);
+}
+.ficha-identidad{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.ficha-avatar{
+  position:relative;flex-shrink:0;width:76px;height:76px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fuente-titulo);font-size:30px;font-weight:800;letter-spacing:.02em;
+  color:#cfe1f7;background:linear-gradient(145deg,#2c4664,#1d2b3d);
+  box-shadow:0 0 0 3px #15181f, 0 0 0 5px rgba(91,141,184,.55), 0 10px 24px rgba(0,0,0,.4);
+}
+.ficha-avatar.mujer{color:#ffe0c2;background:linear-gradient(145deg,#6a4220,#3a2614);box-shadow:0 0 0 3px #15181f, 0 0 0 5px rgba(255,154,61,.6), 0 10px 24px rgba(0,0,0,.4);}
+.ficha-avatar .punto-estado{position:absolute;right:3px;bottom:3px;width:15px;height:15px;border-radius:50%;background:var(--verde);border:3px solid #15181f;}
+.ficha-avatar.inactivo .punto-estado{background:var(--tenue);}
+.ficha-datos{flex:1;min-width:220px;}
+.ficha-datos h2{font-family:var(--fuente-titulo);font-size:32px;font-weight:800;line-height:1.05;letter-spacing:.01em;}
+.ficha-etiquetas{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.etq{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;
+  font-size:12px;font-weight:600;color:var(--texto-suave);
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+}
+.etq-ambar{color:var(--ambar);background:var(--ambar-fondo);border-color:rgba(255,154,61,.3);}
+.etq-azul{color:#7fb2ec;background:var(--acero-fondo);border-color:rgba(91,141,184,.3);}
+.etq-verde{color:var(--verde);background:var(--verde-fondo);border-color:rgba(76,195,138,.3);}
+.ficha-sub{font-size:13px;color:var(--tenue);margin-top:8px;}
+.ficha-acciones{display:flex;gap:8px;flex-wrap:wrap;}
+
+.ficha-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px;}
+.kpi{
+  display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border-radius:12px;
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);
+}
+.kpi-alerta{border-color:rgba(229,96,96,.35);background:rgba(229,96,96,.06);}
+.k-ico{width:32px;height:32px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--ambar-fondo);color:var(--ambar);}
+.k-fuego{background:rgba(229,96,96,.12);color:#ff8a65;}
+.k-azul{background:var(--acero-fondo);color:#7fb2ec;}
+.k-verde{background:var(--verde-fondo);color:var(--verde);}
+.k-rojo{background:var(--rojo-fondo);color:var(--rojo);}
+.k-lbl{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tenue);}
+.k-val{font-family:var(--fuente-titulo);font-size:24px;font-weight:800;line-height:1.15;}
+.k-sub{font-size:11.5px;color:var(--texto-suave);}
+@media(max-width:900px){ .ficha-kpis{grid-template-columns:repeat(2,minmax(0,1fr));} }
+
+/* Pestañas tipo píldora */
+.tabs-ficha{
+  display:flex;gap:6px;overflow-x:auto;padding:5px;margin-bottom:18px;border-radius:14px;
+  background:rgba(255,255,255,.03);border:1px solid var(--borde-vidrio);scrollbar-width:none;
+}
+.tabs-ficha::-webkit-scrollbar{display:none;}
+.tab-ficha{
+  display:inline-flex;align-items:center;gap:7px;flex-shrink:0;
+  padding:9px 14px;border-radius:10px;border:1px solid transparent;cursor:pointer;
+  background:transparent;color:var(--texto-suave);
+  font-family:var(--fuente-titulo);font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  transition:background .15s, color .15s;
+}
+.tab-ficha:hover{color:var(--texto);background:rgba(255,255,255,.04);}
+.tab-ficha.activa{color:#1b1206;background:linear-gradient(135deg,var(--ambar),var(--ambar-osc));box-shadow:0 6px 16px rgba(255,154,61,.25);}
+@media(max-width:640px){
+  .perfil-cab{padding:16px;}
+  .ficha-avatar{width:60px;height:60px;font-size:24px;}
+  .ficha-datos h2{font-size:26px;}
+  .tab-ficha{padding:8px 10px;font-size:13px;}
+  .tab-ficha > span{display:none;}
+  .tab-ficha.activa > span{display:inline;}
+  .k-val{font-size:20px;}
+  .kpi{padding:10px;gap:8px;}
+}
+.logo .icono{color:#1b1206;}
+/* Datos del perfil en cuadrícula */
+.datos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;}
+.dato{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);}
+.d-ico{width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.05);color:var(--texto-suave);}
+.d-lbl{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tenue);}
+.d-val{font-size:14px;font-weight:600;color:var(--texto);}
+.d-val.d-ambar{color:var(--ambar);}
+.aviso{display:flex;gap:9px;align-items:flex-start;margin-top:12px;padding:10px 12px;border-radius:10px;font-size:13px;}
+.aviso-ambar{color:var(--ambar);background:var(--ambar-fondo);border:1px solid rgba(255,154,61,.25);}
+.aviso-rojo{color:#f08a8a;background:var(--rojo-fondo);border:1px solid rgba(229,96,96,.3);}
+.grafica-cab .t{display:inline-flex;align-items:center;gap:8px;}
+.titulo-seccion{display:flex;}
