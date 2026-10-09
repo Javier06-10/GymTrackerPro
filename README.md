@@ -65,10 +65,13 @@ Generados sin librerías en `core/pdf.ts` (portado de la plantilla), firmados co
 
 `/manual` (menú *Manual*): los 13 capítulos de la plantilla con figuras y fichas, navegables (`?cap=`). El contenido vive en `core/manual.ts`.
 
+## Importar respaldo de la versión anterior
+
+*Mi cuenta → 📥 Importar*: sube el `GymTracker_Respaldo_….json` de la plantilla HTML. `core/respaldo.ts` valida y limpia el archivo (lo trata como dato no confiable) y la RPC `importar_respaldo` lo inserta en una sola transacción respetando RLS y el límite del plan (si no caben todos, primero los activos). Los atletas se agregan; no se borra nada.
+
 ## Pendiente (siguientes fases)
 
 
-- Importar el respaldo JSON de la plantilla vieja a la nube.
 - Pasarela de pago automática (Stripe / PayPal) con webhooks.
 - Portal del atleta, PWA instalable, unidades kg/cm.
 - Despliegue (Vercel/Netlify/Firebase Hosting) y configurar URL del sitio y SMTP propio en Supabase Auth.

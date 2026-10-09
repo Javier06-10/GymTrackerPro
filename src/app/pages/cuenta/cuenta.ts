@@ -6,6 +6,7 @@ import { Plan } from '../../core/modelos';
 import { supabase } from '../../core/supabase';
 import { UiService } from '../../core/ui.service';
 import { fmtDinero, fmtFecha } from '../../core/util';
+import { ImportarRespaldo } from './importar-respaldo';
 
 interface PagoSuscripcion { id: string; monto: number; metodo: string; referencia: string; periodo_desde: string; periodo_hasta: string; plan_id: number }
 
@@ -14,7 +15,7 @@ const ETIQUETA_ESTADO: Record<string, string> = { prueba: 'Prueba gratis', activ
 /** Perfil del entrenador, plan actual y solicitud de renovación (pago manual). */
 @Component({
   selector: 'app-cuenta',
-  imports: [FormsModule],
+  imports: [FormsModule, ImportarRespaldo],
   template: `
     <div class="titulo-seccion" style="margin-top:0;">💳 Mi plan</div>
     @if (auth.suscripcion(); as s) {
@@ -100,6 +101,9 @@ const ETIQUETA_ESTADO: Record<string, string> = { prueba: 'Prueba gratis', activ
         <button class="btn btn-primario" (click)="guardarPerfil()">Guardar perfil</button>
       </div>
     </div>
+
+    <div class="titulo-seccion">📥 Importar desde la versión anterior</div>
+    <app-importar-respaldo />
 
     <div class="titulo-seccion">🔒 Seguridad</div>
     <div class="tarjeta" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">

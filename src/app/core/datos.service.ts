@@ -2,6 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { CATALOGO_BASE } from './catalogo';
 import { normalizarRutina } from './dominio';
 import { Atleta, EjercicioCatalogo, Grupo, Medida, PagoAtleta } from './modelos';
+import { RespaldoNormalizado } from './respaldo';
 import { supabase } from './supabase';
 import { normalizar } from './util';
 
@@ -228,6 +229,18 @@ export class DatosService {
       .single();
     if (error) throw error;
     this.ejerciciosExtra.update((l) => [...l, { id: data.id, nombre, grupo, familia: 'Personalizado', musculos: data.musculos }]);
+  }
+
+  /** Importa un respaldo de la plantilla vieja en una sola transacción y recarga los datos. */
+  async importarRespaldo(r: Pick<RespaldoNormalizado, 'grupos' | 'atletas' | 'ejercicios'>) {
+    const { data, error } = await supabase.rpc('importar_respaldo', {
+      p_grupos: r.grupos,
+      p_atletas: r.atletas,
+      p_ejercicios: r.ejercicios,
+    });
+    if (error) throw error;
+    await this.cargar();
+    return data as { atletas: number; medidas: number; pagos: number; grupos: number; ejercicios: number };
   }
 
   buscarEjercicios(consulta: string): EjercicioCatalogo[] {
