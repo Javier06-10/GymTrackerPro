@@ -948,3 +948,192 @@ app-marca-auth{display:block;}
 .aviso-rojo{color:#f08a8a;background:var(--rojo-fondo);border:1px solid rgba(229,96,96,.3);}
 .grafica-cab .t{display:inline-flex;align-items:center;gap:8px;}
 .titulo-seccion{display:flex;}
+
+/* ============================================================
+   REDISEÑO DEL RESTO DE PANTALLAS (cuenta, admin, manual, lista)
+   ============================================================ */
+
+/* Encabezado de página reutilizable */
+.cab-pagina{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:20px 22px;margin-bottom:18px;border-radius:16px;
+  background:
+    radial-gradient(420px 160px at 0% 0%, rgba(255,154,61,.14), transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)), var(--panel);
+  border:1px solid var(--borde-vidrio);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04), 0 10px 28px rgba(0,0,0,.28);
+}
+.cab-ico{
+  width:52px;height:52px;border-radius:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:#1b1206;
+  background:linear-gradient(135deg,var(--ambar),var(--ambar-osc));
+  box-shadow:0 8px 20px rgba(255,154,61,.3);
+}
+.cab-texto{flex:1;min-width:220px;}
+.cab-texto h1{font-family:var(--fuente-titulo);font-size:28px;font-weight:800;letter-spacing:.03em;line-height:1.1;text-transform:uppercase;}
+.cab-texto p{font-size:13.5px;color:var(--texto-suave);margin-top:3px;}
+.cab-acciones{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.cab-etq{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tenue);font-weight:700;}
+.cab-progreso{display:flex;align-items:center;gap:10px;margin-top:10px;max-width:360px;}
+.cab-progreso span{font-size:11.5px;color:var(--texto-suave);white-space:nowrap;font-weight:600;}
+.cab-progreso .barra-uso{flex:1;}
+
+/* Control segmentado */
+.segmentado{display:inline-flex;padding:3px;border-radius:10px;background:var(--panel2);border:1px solid var(--borde);}
+.segmentado button{
+  display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;cursor:pointer;
+  font-family:var(--fuente);font-size:13px;font-weight:700;color:var(--texto-suave);
+  padding:7px 13px;border-radius:8px;transition:background .15s,color .15s;
+}
+.segmentado button:hover{color:var(--texto);}
+.segmentado button.activo{background:var(--ambar);color:#1b1206;box-shadow:0 4px 12px rgba(255,154,61,.3);}
+
+/* Barra de uso / progreso */
+.barra-uso{height:8px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;}
+.barra-uso > span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--ambar-osc),var(--ambar));transition:width .4s ease;}
+.barra-uso.alerta > span{background:linear-gradient(90deg,#c44a4a,var(--rojo));}
+
+/* ---------- Mi cuenta ---------- */
+.estado-plan{
+  display:grid;grid-template-columns:minmax(200px,.8fr) 1.6fr;gap:22px;align-items:center;
+  padding:22px;border-radius:16px;margin-bottom:6px;
+  background:linear-gradient(135deg, rgba(76,195,138,.10), rgba(76,195,138,0) 55%), var(--panel);
+  border:1px solid rgba(76,195,138,.28);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04), 0 10px 28px rgba(0,0,0,.28);
+}
+.estado-plan.vencido{background:linear-gradient(135deg, rgba(229,96,96,.12), rgba(229,96,96,0) 55%), var(--panel);border-color:rgba(229,96,96,.35);}
+.ep-principal{display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+.ep-etq{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);font-weight:700;}
+.ep-nombre{font-family:var(--fuente-titulo);font-size:38px;font-weight:800;line-height:1;text-transform:uppercase;letter-spacing:.02em;}
+.ep-medidor{display:flex;flex-direction:column;gap:8px;}
+.ep-fila{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--texto-suave);}
+.ep-fila > span:first-child{display:inline-flex;align-items:center;gap:7px;}
+.ep-fila b{color:var(--texto);}
+.ep-valor{font-family:var(--fuente-titulo);font-size:17px;font-weight:700;color:var(--texto);}
+.ep-medidor .barra-uso + .ep-fila{margin-top:8px;}
+
+.grid-planes{gap:16px;align-items:stretch;}
+.plan{position:relative;padding:22px 20px 20px;gap:4px;transition:transform .15s ease,border-color .15s ease;}
+.plan:hover{transform:translateY(-3px);}
+.plan.destacado{border-color:rgba(255,154,61,.45);background:linear-gradient(180deg, rgba(255,154,61,.10), rgba(255,154,61,0) 45%), var(--panel);}
+.plan.actual{border-color:var(--verde);box-shadow:0 0 0 1px rgba(76,195,138,.25), 0 10px 28px rgba(0,0,0,.28);}
+.plan-sello{
+  position:absolute;top:-11px;left:20px;display:inline-flex;align-items:center;gap:5px;
+  font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:999px;background:var(--verde);color:#08200f;
+}
+.plan-sello.popular{background:linear-gradient(135deg,var(--ambar),var(--ambar-osc));color:#1b1206;}
+.plan-ico{
+  width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  background:var(--ambar-fondo);color:var(--ambar);border:1px solid rgba(255,154,61,.3);margin-bottom:8px;
+}
+.plan-nombre{font-family:var(--fuente-titulo);font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;}
+.plan .precio{font-size:38px;line-height:1.05;}
+.plan-cupo{font-size:13px;font-weight:700;color:var(--ambar);margin-bottom:6px;}
+.plan ul{gap:8px;margin:8px 0 16px;padding-top:12px;border-top:1px solid var(--borde-vidrio);}
+.plan li{display:flex;align-items:center;gap:9px;}
+.plan-check{
+  width:18px;height:18px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+  background:var(--verde-fondo);color:var(--verde);
+}
+.plan .btn{justify-content:center;margin-top:auto;}
+
+.perfil-pro{display:grid;grid-template-columns:180px 1fr;gap:24px;align-items:start;}
+.logo-zona{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;}
+.logo-zona small{font-size:11.5px;color:var(--tenue);}
+.logo-vista{
+  width:120px;height:120px;border-radius:20px;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#2a2e38,#1c2028);border:1px solid var(--borde);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.logo-vista img{width:100%;height:100%;object-fit:contain;background:#fff;padding:8px;}
+.logo-vista span{font-family:var(--fuente-titulo);font-size:40px;font-weight:800;color:var(--ambar);letter-spacing:.04em;}
+.logo-botones{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.logo-botones label{cursor:pointer;}
+.perfil-campos{display:flex;flex-direction:column;gap:14px;min-width:0;}
+.campo input:disabled{opacity:.6;cursor:not-allowed;}
+
+.grid-cuenta-extra{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+.grid-cuenta-extra > *{min-width:0;}
+.sello-mini{
+  display:flex;align-items:center;gap:10px;font-size:13px;color:var(--verde);
+  padding:10px 12px;border-radius:10px;background:var(--verde-fondo);border:1px solid rgba(76,195,138,.25);
+}
+.zona-archivo{
+  display:flex;align-items:center;gap:12px;padding:16px;border-radius:12px;cursor:pointer;
+  border:1.5px dashed rgba(255,154,61,.4);background:rgba(255,154,61,.05);color:var(--ambar);
+  transition:background .15s,border-color .15s;
+}
+.zona-archivo:hover{background:rgba(255,154,61,.1);border-color:var(--ambar);}
+.zona-archivo span{display:flex;flex-direction:column;color:var(--texto);font-size:14px;}
+.zona-archivo small{font-size:12px;color:var(--texto-suave);}
+.zona-archivo.deshabilitada{opacity:.5;cursor:not-allowed;}
+
+/* ---------- Administración ---------- */
+.lista-entrenadores{display:flex;flex-direction:column;gap:10px;}
+.fila-entrenador{
+  display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1fr) auto;gap:16px;align-items:center;
+  padding:14px 16px;border-radius:14px;
+  background:linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0) 60%), var(--panel);
+  border:1px solid var(--borde-vidrio);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04), 0 8px 22px rgba(0,0,0,.22);
+  transition:border-color .15s;
+}
+.fila-entrenador:hover{border-color:rgba(255,255,255,.13);}
+.fe-info, .fe-plan{min-width:0;}
+.fe-nombre{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.fe-sub{font-size:12.5px;color:var(--texto-suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px;}
+.fe-acciones{display:flex;align-items:center;gap:6px;}
+
+/* ---------- Lista de atletas ---------- */
+.card-atleta{flex-direction:column;align-items:stretch;gap:12px;padding:16px 16px 14px;}
+.card-atleta.inactivo{opacity:.72;}
+.card-atleta.con-alerta{border-left:3px solid var(--rojo);}
+.ca-cab{display:flex;align-items:center;gap:13px;}
+.ca-cab .detalle{display:flex;align-items:center;gap:5px;font-size:12.5px;}
+.ca-cab .detalle .icono-app{color:var(--ambar);}
+.ca-ir{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  color:var(--tenue);background:rgba(255,255,255,.04);transition:background .15s,color .15s,transform .15s;
+}
+.card-atleta:hover .ca-ir{background:var(--ambar);color:#1b1206;transform:translateX(2px);}
+.ca-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border-radius:10px;overflow:hidden;
+  background:var(--borde-vidrio);border:1px solid var(--borde-vidrio);
+}
+.ca-stats > div{background:rgba(0,0,0,.18);padding:8px 10px;display:flex;flex-direction:column;min-width:0;}
+.ca-stats span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tenue);font-weight:700;}
+.ca-stats b{font-family:var(--fuente-titulo);font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ca-stats b.rojo{color:var(--rojo);}
+.ca-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{display:inline-flex;align-items:center;gap:4px;}
+
+/* ---------- Móvil ---------- */
+@media(max-width:760px){
+  .cab-pagina{padding:16px;gap:12px;}
+  .cab-ico{width:44px;height:44px;border-radius:12px;}
+  .cab-texto h1{font-size:23px;}
+  .cab-acciones{width:100%;}
+  .estado-plan{grid-template-columns:1fr;gap:16px;padding:18px;}
+  .ep-nombre{font-size:32px;}
+  .perfil-pro{grid-template-columns:1fr;gap:18px;}
+  .grid-cuenta-extra{grid-template-columns:1fr;gap:0;}
+  .grid-planes{gap:20px;}
+  .fila-entrenador{grid-template-columns:auto minmax(0,1fr);gap:10px 12px;}
+  .fe-plan{grid-column:1 / -1;display:flex;align-items:center;gap:10px;}
+  .fe-plan .fe-sub{margin-top:0;}
+  .fe-acciones{grid-column:1 / -1;flex-wrap:wrap;}
+  .fe-acciones .btn-primario{flex:1;justify-content:center;}
+}
+
+/* Alertas del panel: nombre y detalle apilados, acción a la derecha */
+.alerta-cobro .ac-texto{flex:1;min-width:0;display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;}
+.alerta-cobro .ac-texto .nombre{flex:1 1 auto;}
+@media(max-width:760px){
+  .alerta-cobro{flex-wrap:nowrap;gap:12px;padding:12px;}
+  .alerta-cobro .ac-texto{flex-direction:column;align-items:flex-start;gap:2px;}
+  .alerta-cobro .ac-texto .nombre{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .barra-busqueda .campo-buscar{flex:1 1 100%;min-width:0;}
+  .barra-busqueda > .btn{flex:1;justify-content:center;}
+  .barra-busqueda > .filtros-grupo{flex:1 1 100%;}
+}

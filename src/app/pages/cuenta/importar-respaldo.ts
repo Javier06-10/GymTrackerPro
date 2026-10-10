@@ -6,19 +6,23 @@ import { RespaldoNormalizado, leerRespaldo } from '../../core/respaldo';
 import { UiService } from '../../core/ui.service';
 import { fmtFecha } from '../../core/util';
 import { Modal } from '../../shared/modal';
+import { Icono } from '../../shared/icono';
 
 /** Sube a la nube el respaldo JSON que descargaba la versión anterior (HTML con localStorage). */
 @Component({
   selector: 'app-importar-respaldo',
-  imports: [Modal],
+  imports: [Modal, Icono],
   template: `
     <div class="tarjeta" style="display:flex;flex-direction:column;gap:12px;">
       <div style="font-size:13.5px;color:var(--texto-suave);">
         ¿Usabas la versión anterior de GymTracker Pro (el archivo HTML)? Sube aquí el respaldo que descargabas con el botón de guardar
         (<b>GymTracker_Respaldo_….json</b>) y pasamos tus atletas, medidas, rutinas, asistencia, objetivos y pagos a tu cuenta.
       </div>
-      <input type="file" accept=".json,application/json" (change)="leer($event)" [disabled]="!auth.vigente()"
-        style="width:100%;padding:10px;background:var(--panel2);border:1px dashed var(--borde);border-radius:8px;color:var(--texto-suave);font-family:inherit;font-size:13px;" />
+      <label class="zona-archivo" [class.deshabilitada]="!auth.vigente()">
+        <app-icono nombre="subir" [tam]="22" />
+        <span><b>Elegir archivo de respaldo</b><small>Archivo .json de la versión anterior</small></span>
+        <input type="file" accept=".json,application/json" hidden (change)="leer($event)" [disabled]="!auth.vigente()" />
+      </label>
       <div class="nota-info">Los atletas se <b>agregan</b> a los que ya tienes (no se borra nada). Si importas el mismo archivo dos veces, quedarán duplicados.</div>
     </div>
 

@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { DatosService } from '../../core/datos.service';
-import { medicionPendiente, pagoVencido, ultimaMedida } from '../../core/dominio';
+import { OBJETIVOS, medicionPendiente, nombreObjetivo, pagoVencido, ultimaMedida } from '../../core/dominio';
 import { Atleta } from '../../core/modelos';
 import { mesesReporte } from '../../core/pdf';
 import { PdfService } from '../../core/pdf.service';
@@ -109,8 +109,10 @@ import { Icono } from '../../shared/icono';
       @for (a of vencidos(); track a.id) {
         <div class="alerta-cobro" (click)="ir(a.id, 'pagos')">
           <app-avatar-iniciales [nombre]="a.nombre" [genero]="a.genero" [tam]="38" />
-          <div class="nombre">{{ a.nombre }}</div>
-          <div class="dias">Vencido hace {{ dias(a.proximoPago) }} día{{ dias(a.proximoPago) === 1 ? '' : 's' }}</div>
+          <div class="ac-texto">
+            <div class="nombre">{{ a.nombre }}</div>
+            <div class="dias">Vencido hace {{ dias(a.proximoPago) }} día{{ dias(a.proximoPago) === 1 ? '' : 's' }}</div>
+          </div>
           <div class="monto">{{ dinero(a.tarifa) }}</div>
           @if (a.telefono) {
             <button class="btn-x" title="Recordar por WhatsApp" (click)="$event.stopPropagation(); recordarPago(a)"><app-icono nombre="chat" [tam]="17" /></button>
@@ -124,11 +126,13 @@ import { Icono } from '../../shared/icono';
       @for (x of cumples(); track x.a.id) {
         <div class="alerta-cobro" style="border-color:rgba(255,154,61,.4);border-left-color:var(--ambar);" (click)="ir(x.a.id)">
           <div style="color:var(--ambar);display:inline-flex"><app-icono nombre="cumple" [tam]="24" /></div>
-          <div class="nombre">{{ x.a.nombre }}</div>
-          <div class="dias" style="color:var(--ambar);">
-            @if (x.pc.dias === 0) { ¡Cumple HOY {{ x.pc.edadCumple }} años! }
-            @else if (x.pc.dias === 1) { Cumple mañana {{ x.pc.edadCumple }} años }
-            @else { Cumple {{ x.pc.edadCumple }} en {{ x.pc.dias }} días ({{ fecha(x.pc.fecha) }}) }
+          <div class="ac-texto">
+            <div class="nombre">{{ x.a.nombre }}</div>
+            <div class="dias" style="color:var(--ambar);">
+              @if (x.pc.dias === 0) { ¡Cumple HOY {{ x.pc.edadCumple }} años! }
+              @else if (x.pc.dias === 1) { Cumple mañana {{ x.pc.edadCumple }} años }
+              @else { Cumple {{ x.pc.edadCumple }} en {{ x.pc.dias }} días ({{ fecha(x.pc.fecha) }}) }
+            </div>
           </div>
           @if (x.a.telefono && x.pc.dias === 0) {
             <button class="btn btn-suave btn-mini" (click)="$event.stopPropagation(); felicitar(x.a, x.pc.edadCumple)"><app-icono nombre="chat" [tam]="15" /> Felicitar</button>
@@ -142,8 +146,10 @@ import { Icono } from '../../shared/icono';
       @for (a of pendMed(); track a.id) {
         <div class="alerta-cobro" style="border-color:rgba(91,141,184,.35);border-left-color:var(--acero);" (click)="ir(a.id, 'medidas')">
           <app-avatar-iniciales [nombre]="a.nombre" [genero]="a.genero" [tam]="38" />
-          <div class="nombre">{{ a.nombre }}</div>
-          <div class="dias" style="color:var(--acero);">Última medición hace {{ diasMed(a) }} días</div>
+          <div class="ac-texto">
+            <div class="nombre">{{ a.nombre }}</div>
+            <div class="dias" style="color:var(--acero);">Última medición hace {{ diasMed(a) }} días</div>
+          </div>
         </div>
       }
     }
@@ -181,19 +187,26 @@ import { Icono } from '../../shared/icono';
 
       <div class="lista-atletas">
         @for (a of lista(); track a.id) {
-          <div class="card-atleta" (click)="ir(a.id)">
-            <app-avatar-iniciales [nombre]="a.nombre" [genero]="a.genero" />
-            <div class="info">
-              <div class="nombre">{{ a.nombre }}</div>
-              <div class="detalle">
-                @if (ultima(a); as u) { {{ u.peso }} lb · última medición {{ fecha(u.fecha) }} } @else { Sin mediciones aún }
+          @let u = ultima(a);
+          <div class="card-atleta" [class.inactivo]="!a.activo" [class.con-alerta]="vencido(a)" (click)="ir(a.id)">
+            <div class="ca-cab">
+              <app-avatar-iniciales [nombre]="a.nombre" [genero]="a.genero" />
+              <div class="info">
+                <div class="nombre">{{ a.nombre }}</div>
+                <div class="detalle"><app-icono [nombre]="objetivoIc(a)" [tam]="13" /> {{ objetivoNombre(a.objetivo) }}</div>
               </div>
-              <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
-                @if (a.activo) { <span class="chip chip-verde">Activo</span> } @else { <span class="chip chip-gris">Inactivo</span> }
-                @if (a.grupoId) { <span class="chip chip-acero"><app-icono nombre="usuarios" [tam]="12" /> {{ datos.nombreGrupo(a.grupoId) }}</span> }
-                @if (cumpleHoy(a)) { <span class="chip chip-ambar"><app-icono nombre="cumple" [tam]="12" /> ¡Hoy!</span> }
-                @if (vencido(a)) { <span class="chip chip-rojo">Pago vencido</span> }
-              </div>
+              <span class="ca-ir"><app-icono nombre="chevron" [tam]="15" /></span>
+            </div>
+            <div class="ca-stats">
+              <div><span>Peso</span><b>{{ u ? u.peso + ' lb' : '—' }}</b></div>
+              <div><span>Medido</span><b>{{ u ? fecha(u.fecha) : 'Nunca' }}</b></div>
+              <div><span>Cobro</span><b [class.rojo]="vencido(a)">{{ a.proximoPago ? fecha(a.proximoPago) : '—' }}</b></div>
+            </div>
+            <div class="ca-chips">
+              @if (a.activo) { <span class="chip chip-verde">Activo</span> } @else { <span class="chip chip-gris">Inactivo</span> }
+              @if (a.grupoId) { <span class="chip chip-acero"><app-icono nombre="usuarios" [tam]="12" /> {{ datos.nombreGrupo(a.grupoId) }}</span> }
+              @if (cumpleHoy(a)) { <span class="chip chip-ambar"><app-icono nombre="cumple" [tam]="12" /> ¡Hoy!</span> }
+              @if (vencido(a)) { <span class="chip chip-rojo"><app-icono nombre="alerta" [tam]="12" /> Pago vencido</span> }
             </div>
           </div>
         } @empty {
@@ -239,6 +252,10 @@ export class Panel {
 
   protected readonly dinero = fmtDinero;
   protected readonly fecha = fmtFecha;
+  protected readonly objetivoNombre = nombreObjetivo;
+  protected objetivoIc(a: Atleta) {
+    return OBJETIVOS[a.objetivo]?.ic ?? 'diana';
+  }
   protected readonly ultima = ultimaMedida;
   protected readonly vencido = pagoVencido;
   protected dias(iso: string) { return diasDesde(iso) ?? 0; }

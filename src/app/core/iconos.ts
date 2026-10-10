@@ -9,6 +9,7 @@ export const ICONOS: Record<string, string> = {
   cerrar: '<path d="M6 6l12 12M18 6 6 18"/>',
   check: '<path d="m4.5 12.5 4.5 4.5 10-10"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  chevron: '<path d="m9 5 7 7-7 7"/>',
   casa: '<path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5.5h4V20"/>',
   lupa: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
   editar: '<path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="m14.5 7 3 3"/>',

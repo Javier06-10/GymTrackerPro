@@ -7,48 +7,85 @@ import { UiService } from '../../core/ui.service';
 import { diasDesde, esc, fmtDinero, fmtFecha, hoyISO, normalizar, sumarDias } from '../../core/util';
 import { Modal } from '../../shared/modal';
 import { Icono } from '../../shared/icono';
+import { AvatarIniciales } from '../../shared/avatar-iniciales';
 
 type Entrenador = Perfil & { created_at: string; suscripciones: Suscripcion | null };
+type Filtro = 'todos' | 'Activa' | 'Prueba' | 'Vencida';
 
 /** Administración del SaaS: entrenadores, estado de suscripción y registro de pagos manuales. */
 @Component({
   selector: 'app-admin',
-  imports: [FormsModule, Modal, Icono],
+  imports: [FormsModule, Modal, Icono, AvatarIniciales],
   template: `
+    <section class="cab-pagina">
+      <div class="cab-ico"><app-icono nombre="escudo" [tam]="24" /></div>
+      <div class="cab-texto">
+        <h1>Administración</h1>
+        <p>Entrenadores suscritos, estado de cada plan y registro de pagos manuales.</p>
+      </div>
+      <div class="cab-acciones">
+        <button class="btn btn-suave" (click)="cargar()"><app-icono nombre="recargar" [tam]="15" /> Recargar</button>
+      </div>
+    </section>
+
     <div class="grid-metricas">
-      <div class="metrica"><div class="etiqueta">Entrenadores</div><div class="valor">{{ lista().length }}</div></div>
-      <div class="metrica m-verde"><div class="etiqueta">Suscripciones activas</div><div class="valor">{{ conteo().activas }}</div>
-        <div class="sub">≈ {{ dinero(conteo().mrr) }} / mes</div></div>
-      <div class="metrica m-acero"><div class="etiqueta">En prueba</div><div class="valor">{{ conteo().prueba }}</div></div>
-      <div class="metrica m-rojo"><div class="etiqueta">Vencidas</div><div class="valor">{{ conteo().vencidas }}</div></div>
+      <div class="metrica">
+        <div class="etiqueta"><span class="ico"><app-icono nombre="usuarios" /></span> Entrenadores</div>
+        <div class="valor">{{ lista().length }}</div>
+        <div class="sub">Cuentas registradas</div>
+      </div>
+      <div class="metrica m-verde">
+        <div class="etiqueta"><span class="ico"><app-icono nombre="dinero" /></span> Ingreso mensual</div>
+        <div class="valor">{{ dinero(conteo().mrr) }}</div>
+        <div class="sub">{{ conteo().activas }} suscripci{{ conteo().activas === 1 ? 'ón activa' : 'ones activas' }}</div>
+      </div>
+      <div class="metrica m-acero">
+        <div class="etiqueta"><span class="ico"><app-icono nombre="regalo" /></span> En prueba</div>
+        <div class="valor">{{ conteo().prueba }}</div>
+        <div class="sub">Clientes por convertir</div>
+      </div>
+      <div class="metrica m-rojo">
+        <div class="etiqueta"><span class="ico"><app-icono nombre="alerta" /></span> Vencidas</div>
+        <div class="valor">{{ conteo().vencidas }}</div>
+        <div class="sub">Sin acceso para guardar</div>
+      </div>
     </div>
 
     <div class="barra-busqueda">
       <div class="campo-buscar"><span class="lupa"><app-icono nombre="lupa" [tam]="16" /></span>
         <input type="text" placeholder="Buscar por nombre, negocio o correo..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" /></div>
-      <button class="btn btn-suave" (click)="cargar()"><app-icono nombre="recargar" [tam]="15" /> Recargar</button>
+      <div class="filtros-grupo" style="margin:0;">
+        @for (f of filtros; track f.v) {
+          <div class="chip-filtro" [class.activo]="filtro() === f.v" (click)="filtro.set(f.v)">{{ f.t }}</div>
+        }
+      </div>
     </div>
 
-    <div class="tabla-scroll"><table>
-      <tr><th>Entrenador</th><th>Correo</th><th>Plan</th><th>Estado</th><th>Vence</th><th></th></tr>
+    <div class="lista-entrenadores">
       @for (e of filtrados(); track e.id) {
         @let s = e.suscripciones;
-        <tr>
-          <td><b>{{ e.nombre || '—' }}</b>@if (e.negocio) { <br /><small style="color:var(--tenue)">{{ e.negocio }}</small> }</td>
-          <td>{{ e.email }}</td>
-          <td>{{ nombrePlan(s?.plan_id) }}</td>
-          <td><span class="chip" [class]="'chip ' + chipEstado(s)">{{ estado(s) }}</span></td>
-          <td>{{ fecha(s?.vence_el) }}</td>
-          <td style="white-space:nowrap;">
+        <div class="fila-entrenador">
+          <app-avatar-iniciales [nombre]="e.nombre || e.email" genero="hombre" [tam]="42" />
+          <div class="fe-info">
+            <div class="fe-nombre">{{ e.nombre || '—' }} @if (e.rol === 'admin') { <span class="chip chip-acero">Admin</span> }</div>
+            <div class="fe-sub">{{ e.negocio ? e.negocio + ' · ' : '' }}{{ e.email }}</div>
+          </div>
+          <div class="fe-plan">
+            <span [class]="'chip ' + chipEstado(s)">{{ estado(s) }}</span>
+            <div class="fe-sub">{{ nombrePlan(s?.plan_id) }} · vence {{ fecha(s?.vence_el) }}</div>
+          </div>
+          <div class="fe-acciones">
             <button class="btn btn-primario btn-mini" (click)="abrirPago(e)"><app-icono nombre="dinero" [tam]="15" /> Registrar pago</button>
             <button class="btn btn-suave btn-mini" (click)="extenderPrueba(e)" title="Sumar 7 días">+7 días</button>
-            @if (s?.estado !== 'cancelada') { <button class="btn btn-peligro btn-mini" (click)="cancelar(e)">Cancelar</button> }
-          </td>
-        </tr>
+            @if (s?.estado !== 'cancelada') {
+              <button class="btn-x" title="Cancelar suscripción" (click)="cancelar(e)"><app-icono nombre="prohibido" [tam]="16" /></button>
+            }
+          </div>
+        </div>
       } @empty {
-        <tr><td colspan="6" style="text-align:center;color:var(--tenue);">Sin entrenadores.</td></tr>
+        <div class="vacio" style="padding:30px;"><p>{{ cargado() ? 'No hay entrenadores con ese filtro.' : 'Cargando entrenadores…' }}</p></div>
       }
-    </table></div>
+    </div>
 
     @if (pagoDe(); as e) {
       <app-modal [titulo]="'Registrar pago · ' + (e.nombre || e.email)" (cerrar)="pagoDe.set(null)">
@@ -83,12 +120,20 @@ export class Admin implements OnInit {
 
   protected readonly lista = signal<Entrenador[]>([]);
   protected readonly busqueda = signal('');
+  protected readonly cargado = signal(false);
+  protected readonly filtro = signal<Filtro>('todos');
+  protected readonly filtros: { v: Filtro; t: string }[] = [
+    { v: 'todos', t: 'Todos' }, { v: 'Activa', t: 'Activas' }, { v: 'Prueba', t: 'En prueba' }, { v: 'Vencida', t: 'Vencidas' },
+  ];
   protected readonly guardando = signal(false);
   protected readonly planesPago = computed(() => this.auth.planes().filter((p) => p.codigo !== 'prueba'));
 
   protected readonly filtrados = computed(() => {
     const q = normalizar(this.busqueda());
-    return this.lista().filter((e) => !q || normalizar(e.nombre + ' ' + e.negocio + ' ' + e.email).includes(q));
+    const f = this.filtro();
+    return this.lista().filter(
+      (e) => (!q || normalizar(e.nombre + ' ' + e.negocio + ' ' + e.email).includes(q)) && (f === 'todos' || this.estado(e.suscripciones) === f),
+    );
   });
 
   protected readonly conteo = computed(() => {
@@ -114,6 +159,7 @@ export class Admin implements OnInit {
     const { data, error } = await supabase.from('perfiles').select('*, suscripciones(*)').order('created_at', { ascending: false });
     if (error) return this.ui.error(error);
     this.lista.set((data as Entrenador[]) ?? []);
+    this.cargado.set(true);
   }
 
   private vigente(s: Suscripcion) {

@@ -2,60 +2,73 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth.service';
+import { DatosService } from '../../core/datos.service';
 import { Plan } from '../../core/modelos';
 import { supabase } from '../../core/supabase';
 import { UiService } from '../../core/ui.service';
-import { fmtDinero, fmtFecha } from '../../core/util';
+import { diasDesde, fmtDinero, fmtFecha, iniciales } from '../../core/util';
 import { ImportarRespaldo } from './importar-respaldo';
 import { Icono } from '../../shared/icono';
 
 interface PagoSuscripcion { id: string; monto: number; metodo: string; referencia: string; periodo_desde: string; periodo_hasta: string; plan_id: number }
 
-const ETIQUETA_ESTADO: Record<string, string> = { prueba: 'Prueba gratis', activa: 'Activa', vencida: 'Vencida', cancelada: 'Cancelada' };
 
 /** Perfil del entrenador, plan actual y solicitud de renovación (pago manual). */
 @Component({
   selector: 'app-cuenta',
   imports: [FormsModule, ImportarRespaldo, Icono],
   template: `
-    <div class="titulo-seccion" style="margin-top:0;"><app-icono nombre="tarjeta" [tam]="16" /> Mi plan</div>
-    @if (auth.suscripcion(); as s) {
-      <div class="grid-metricas">
-        <div class="metrica" [class.m-verde]="auth.vigente()" [class.m-rojo]="!auth.vigente()">
-          <div class="etiqueta">Estado</div>
-          <div class="valor">{{ auth.vigente() ? etiqueta(s.estado) : 'Vencida' }}</div>
-          <div class="sub">Plan {{ auth.plan()?.nombre }}</div>
-        </div>
-        <div class="metrica m-acero">
-          <div class="etiqueta">{{ auth.vigente() ? 'Vence el' : 'Venció el' }}</div>
-          <div class="valor" style="font-size:22px;">{{ fecha(s.vence_el) }}</div>
-          <div class="sub">
-            @if (auth.diasRestantes() >= 0) { Faltan {{ auth.diasRestantes() }} día{{ auth.diasRestantes() === 1 ? '' : 's' }} }
-            @else { Hace {{ -auth.diasRestantes() }} días }
-          </div>
-        </div>
-        <div class="metrica">
-          <div class="etiqueta">Límite de atletas</div>
-          <div class="valor">{{ auth.plan()?.max_atletas ?? '∞' }}</div>
-          <div class="sub">Según tu plan</div>
-        </div>
+    <section class="cab-pagina">
+      <div class="cab-ico"><app-icono nombre="persona" [tam]="24" /></div>
+      <div class="cab-texto">
+        <h1>Mi cuenta</h1>
+        <p>Tu plan, tu perfil profesional y la seguridad de tu acceso.</p>
       </div>
+    </section>
+
+    @if (auth.suscripcion(); as s) {
+      <section class="estado-plan" [class.vencido]="!auth.vigente()">
+        <div class="ep-principal">
+          <div class="ep-etq">Plan actual</div>
+          <div class="ep-nombre">{{ auth.plan()?.nombre }}</div>
+          <span [class]="'chip ' + (auth.vigente() ? (s.estado === 'prueba' ? 'chip-ambar' : 'chip-verde') : 'chip-rojo')">
+            <app-icono [nombre]="auth.vigente() ? 'check' : 'alerta'" [tam]="12" /> {{ !auth.vigente() ? 'Vencida' : s.estado === 'prueba' ? 'Vigente · 14 días gratis' : 'Vigente' }}
+          </span>
+        </div>
+        <div class="ep-medidor">
+          <div class="ep-fila">
+            <span><app-icono nombre="calendario" [tam]="15" /> {{ auth.vigente() ? 'Vence el' : 'Venció el' }} <b>{{ fecha(s.vence_el) }}</b></span>
+            <span class="ep-valor">
+              @if (auth.diasRestantes() >= 0) { {{ auth.diasRestantes() }} día{{ auth.diasRestantes() === 1 ? '' : 's' }} }
+              @else { hace {{ -auth.diasRestantes() }} días }
+            </span>
+          </div>
+          <div class="barra-uso" [class.alerta]="auth.diasRestantes() <= 5"><span [style.width.%]="pctTiempo()"></span></div>
+          <div class="ep-fila">
+            <span><app-icono nombre="usuarios" [tam]="15" /> Atletas registrados</span>
+            <span class="ep-valor">{{ usados() }} / {{ auth.plan()?.max_atletas ?? '∞' }}</span>
+          </div>
+          <div class="barra-uso" [class.alerta]="pctAtletas() >= 90"><span [style.width.%]="pctAtletas()"></span></div>
+        </div>
+      </section>
     }
 
+    <div class="titulo-seccion"><app-icono nombre="tarjeta" [tam]="16" /> Planes</div>
     <div class="grid-planes">
       @for (p of planesPago(); track p.id) {
-        <div class="plan" [class.actual]="p.id === auth.suscripcion()?.plan_id">
-          <div style="font-weight:800;font-size:15px;">{{ p.nombre }}</div>
+        @let actual = p.id === auth.suscripcion()?.plan_id;
+        <div class="plan" [class.actual]="actual" [class.destacado]="p.codigo === 'pro'">
+          @if (actual) { <span class="plan-sello">Tu plan</span> }
+          @else if (p.codigo === 'pro') { <span class="plan-sello popular"><app-icono nombre="estrella" [tam]="12" /> Más popular</span> }
+          <div class="plan-ico"><app-icono [nombre]="p.codigo === 'basico' ? 'pesa' : p.codigo === 'pro' ? 'fuego' : 'estrella'" [tam]="20" /></div>
+          <div class="plan-nombre">{{ p.nombre }}</div>
           <div class="precio">{{ dinero(p.precio_mensual) }} <small>/ mes</small></div>
+          <div class="plan-cupo">{{ p.max_atletas ? 'Hasta ' + p.max_atletas + ' atletas' : 'Atletas ilimitados' }}</div>
           <ul>
-            <li><app-icono nombre="usuarios" [tam]="14" /> {{ p.max_atletas ? 'Hasta ' + p.max_atletas + ' atletas' : 'Atletas ilimitados' }}</li>
-            <li><app-icono nombre="regla" [tam]="14" /> Medidas, mapa muscular y rutinas</li>
-            <li><app-icono nombre="manzana" [tam]="14" /> Nutrición, asistencia y objetivos</li>
-            <li><app-icono nombre="dinero" [tam]="14" /> Control de cobros y WhatsApp</li>
+            @for (b of beneficios; track b) { <li><span class="plan-check"><app-icono nombre="check" [tam]="12" /></span> {{ b }}</li> }
           </ul>
-          <button class="btn" [class.btn-primario]="p.id !== auth.suscripcion()?.plan_id" [class.btn-suave]="p.id === auth.suscripcion()?.plan_id"
-            style="justify-content:center;margin-top:auto;" (click)="solicitar(p)">
-            {{ p.id === auth.suscripcion()?.plan_id ? 'Renovar este plan' : 'Elegir ' + p.nombre }}
+          <button class="btn" [class.btn-primario]="!actual" [class.btn-suave]="actual" (click)="solicitar(p)">
+            <app-icono [nombre]="actual ? 'recargar' : 'chat'" [tam]="15" /> {{ actual ? 'Renovar este plan' : 'Elegir ' + p.nombre }}
           </button>
         </div>
       }
@@ -80,39 +93,57 @@ const ETIQUETA_ESTADO: Record<string, string> = { prueba: 'Prueba gratis', activ
       </table></div>
     }
 
-    <div class="titulo-seccion"><app-icono nombre="persona" [tam]="16" /> Mi perfil de entrenador</div>
-    <div class="tarjeta" style="display:flex;flex-direction:column;gap:14px;">
-      <div class="form-grid">
-        <div class="campo"><label>Tu nombre (firma de los mensajes)</label><input [(ngModel)]="perfil.nombre" /></div>
-        <div class="campo"><label>Nombre del negocio</label><input [(ngModel)]="perfil.negocio" /></div>
-        <div class="campo"><label>Teléfono</label><input type="tel" [(ngModel)]="perfil.telefono" /></div>
-      </div>
-      <div class="campo">
-        <label>Logo del negocio (JPG o PNG)</label>
-        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
-          @if (perfil.logo_url) {
-            <img [src]="perfil.logo_url" alt="logo" style="width:72px;height:72px;object-fit:contain;border-radius:12px;background:#fff;padding:4px;" />
-          }
-          <input type="file" accept="image/*" (change)="subirLogo($event)"
-            style="flex:1;min-width:200px;padding:10px;background:var(--panel2);border:1px dashed var(--borde);border-radius:8px;color:var(--texto-suave);font-family:inherit;font-size:13px;" />
-          @if (perfil.logo_url) { <button class="btn btn-fantasma btn-mini" style="color:var(--rojo);" (click)="perfil.logo_url = null">Quitar logo</button> }
+    <div class="titulo-seccion"><app-icono nombre="persona" [tam]="16" /> Perfil profesional</div>
+    <div class="tarjeta perfil-pro">
+      <div class="logo-zona">
+        <div class="logo-vista">
+          @if (perfil.logo_url) { <img [src]="perfil.logo_url" alt="Logo del negocio" /> }
+          @else { <span>{{ inicialesNegocio() }}</span> }
         </div>
+        <div class="logo-botones">
+          <label class="btn btn-suave btn-mini">
+            <app-icono nombre="subir" [tam]="14" /> {{ perfil.logo_url ? 'Cambiar logo' : 'Subir logo' }}
+            <input type="file" accept="image/*" hidden (change)="subirLogo($event)" />
+          </label>
+          @if (perfil.logo_url) {
+            <button class="btn btn-fantasma btn-mini" style="color:var(--rojo);" (click)="perfil.logo_url = null">Quitar</button>
+          }
+        </div>
+        <small>Sale en los PDF de progreso y en los recibos.</small>
       </div>
-      <div style="display:flex;justify-content:flex-end;">
-        <button class="btn btn-primario" (click)="guardarPerfil()">Guardar perfil</button>
+      <div class="perfil-campos">
+        <div class="form-grid">
+          <div class="campo"><label>Tu nombre (firma de los mensajes)</label><input [(ngModel)]="perfil.nombre" /></div>
+          <div class="campo"><label>Nombre del negocio</label><input [(ngModel)]="perfil.negocio" /></div>
+        </div>
+        <div class="form-grid">
+          <div class="campo"><label>Teléfono</label><input type="tel" [(ngModel)]="perfil.telefono" /></div>
+          <div class="campo"><label>Correo de acceso</label><input [value]="auth.perfil()?.email ?? ''" disabled /></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="btn btn-primario" (click)="guardarPerfil()"><app-icono nombre="guardar" [tam]="15" /> Guardar perfil</button>
+        </div>
       </div>
     </div>
 
-    <div class="titulo-seccion"><app-icono nombre="subir" [tam]="16" /> Importar desde la versión anterior</div>
-    <app-importar-respaldo />
-
-    <div class="titulo-seccion"><app-icono nombre="candado" [tam]="16" /> Seguridad</div>
-    <div class="tarjeta" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
-      <div class="campo" style="flex:1;min-width:220px;">
-        <label>Nueva contraseña · {{ auth.perfil()?.email }}</label>
-        <input type="password" [(ngModel)]="clave" autocomplete="new-password" minlength="6" />
+    <div class="grid-cuenta-extra">
+      <div>
+        <div class="titulo-seccion"><app-icono nombre="subir" [tam]="16" /> Importar versión anterior</div>
+        <app-importar-respaldo />
       </div>
-      <button class="btn btn-suave" (click)="cambiarClave()">Cambiar contraseña</button>
+      <div>
+        <div class="titulo-seccion"><app-icono nombre="candado" [tam]="16" /> Seguridad</div>
+        <div class="tarjeta" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="sello-mini"><app-icono nombre="escudo" [tam]="18" /> Tu sesión viaja cifrada y solo tú ves a tus atletas.</div>
+          <div class="campo">
+            <label>Nueva contraseña</label>
+            <input type="password" [(ngModel)]="clave" autocomplete="new-password" minlength="6" placeholder="Mínimo 6 caracteres" />
+          </div>
+          <div style="display:flex;justify-content:flex-end;">
+            <button class="btn btn-suave" (click)="cambiarClave()"><app-icono nombre="candado" [tam]="15" /> Cambiar contraseña</button>
+          </div>
+        </div>
+      </div>
     </div>
   `,
 })
@@ -121,10 +152,31 @@ export class Cuenta implements OnInit {
   private readonly ui = inject(UiService);
   protected readonly dinero = fmtDinero;
   protected readonly fecha = fmtFecha;
-  protected etiqueta(e: string) { return ETIQUETA_ESTADO[e] ?? e; }
 
   protected readonly planesPago = computed(() => this.auth.planes().filter((p) => p.codigo !== 'prueba'));
   protected readonly historial = signal<PagoSuscripcion[]>([]);
+  private readonly datos = inject(DatosService);
+  protected readonly beneficios = ['Medidas con mapa muscular', 'Rutinas e historial de cargas', 'Nutrición, asistencia y objetivos', 'Cobros, recibos y WhatsApp', 'Reportes en PDF'];
+
+  protected readonly usados = computed(() => this.datos.atletas().length);
+  protected readonly pctAtletas = computed(() => {
+    const max = this.auth.plan()?.max_atletas;
+    return max ? Math.min(100, Math.round((this.usados() / max) * 100)) : 8;
+  });
+  /** Parte del período que queda: la prueba dura 14 días; un plan pagado, desde el inicio del último período. */
+  protected readonly pctTiempo = computed(() => {
+    const s = this.auth.suscripcion();
+    const quedan = this.auth.diasRestantes();
+    if (!s || quedan < 0) return 0;
+    const ultimo = this.historial()[0];
+    const total = s.estado === 'prueba' || !ultimo ? 14 : Math.max(1, (diasDesde(ultimo.periodo_desde) ?? 0) + quedan);
+    return Math.max(4, Math.min(100, Math.round((quedan / total) * 100)));
+  });
+  protected inicialesNegocio() {
+    // Sin artículos ni preposiciones: "Gym de Prueba" → "GP"
+    const texto = (this.perfil.negocio || this.perfil.nombre || 'GymTracker').replace(/\b(de|del|la|las|el|los|y)\b/gi, ' ');
+    return iniciales(texto);
+  }
   protected perfil = { nombre: '', negocio: '', telefono: '', logo_url: null as string | null };
   protected clave = '';
 

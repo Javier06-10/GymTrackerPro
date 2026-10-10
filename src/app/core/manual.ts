@@ -521,7 +521,7 @@ return [
 <p>Este manual está pensado para el entrenador personal de gimnasio que trabaja con clientas y quiere un método claro: <b>evaluar → definir objetivo → diseñar la rutina → aplicarla con buena técnica → progresar y medir</b>. Está escrito en lenguaje directo, con tablas y fichas listas para usar en el piso del gimnasio.</p>
 <p>Un principio transversal: <b>las mujeres no necesitan un entrenamiento "especial" por ser mujeres</b>. Los principios de fuerza e hipertrofia son los mismos para ambos sexos. Lo que sí cambia en la práctica son los objetivos más frecuentes (glúteos y tren inferior, tono general, pérdida de grasa), el punto de partida promedio de fuerza absoluta y algunas consideraciones de adaptación que verás en los capítulos finales.</p>
 ${calloutEv("Los estudios comparativos muestran que hombres y mujeres responden al entrenamiento de fuerza con ganancias relativas similares de fuerza y masa muscular; las diferencias absolutas se explican principalmente por la masa muscular y los niveles hormonales de partida.")}
-${calloutPr("Cuando algo proviene de investigación se marca con ${iconoSvg('microscopio', 14)} y cuando es criterio profesional de campo se marca con ${iconoSvg('herramienta', 14)}. Sé igual de honesto con tu clienta: diferencia siempre qué es ciencia y qué es experiencia.")}
+${calloutPr(`Cuando algo proviene de investigación se marca con ${iconoSvg('microscopio', 14)} y cuando es criterio profesional de campo se marca con ${iconoSvg('herramienta', 14)}. Sé igual de honesto con tu clienta: diferencia siempre qué es ciencia y qué es experiencia.`)}
 <p><b>Cómo usar el manual:</b> léelo completo una vez y luego úsalo como referencia: el capítulo de Glúteos para corregir técnica, las rutinas como plantillas de partida (nunca recetas rígidas) y las fichas de registro junto con GymTracker Pro para el seguimiento diario.</p>
 `},
 {id:"principios", t:"Principios del entrenamiento", h:`
@@ -644,7 +644,7 @@ progresion:"Sube repeticiones hasta 20 y luego la carga. Variar el ángulo del t
 <p>La primera sesión no se entrena fuerte: <b>se evalúa</b>. Una buena evaluación te da el punto de partida, detecta banderas rojas y construye confianza profesional.</p>
 <h3>4.1 Entrevista inicial (10–15 min)</h3>
 ${tablaM(["Área","Preguntas clave"],[
-["Objetivo","¿Qué quieres lograr y para cuándo? Convierte lo vago en medible (usa la pestaña Objetivos ${iconoSvg('diana', 14)})"],
+["Objetivo",`¿Qué quieres lograr y para cuándo? Convierte lo vago en medible (usa la pestaña Objetivos ${iconoSvg('diana', 14)})`],
 ["Historial","¿Has entrenado antes? ¿Qué te funcionó y qué odiaste?"],
 ["Salud","Lesiones, cirugías, dolores actuales, enfermedades, medicación, embarazo actual o reciente"],
 ["Estilo de vida","Sueño, trabajo (sentada/de pie), estrés, días reales disponibles"],
@@ -692,7 +692,7 @@ ${tablaM(["Objetivo","Ajustes sobre la plantilla"],[
 ["Pérdida de grasa","Misma rutina de fuerza; añade 2–3 cardios de 20–40 min aparte y ajusta la dieta (Cap. 7)"],
 ["Recomposición","Rutina de hipertrofia + calorías de mantenimiento + proteína alta; progreso por medidas"],
 ["Desarrollo general / salud","3 días full body todo el año; técnica y constancia por delante"]])}
-${calloutPr("Estas rutinas son plantillas de partida: la rutina 'perfecta' es la que la clienta puede cumplir 4 semanas seguidas. Usa el botón ${iconoSvg('compartir', 14)} Compartir rutina para clonar plantillas entre clientas del mismo nivel y personalizarlas después.")}
+${calloutPr(`Estas rutinas son plantillas de partida: la rutina 'perfecta' es la que la clienta puede cumplir 4 semanas seguidas. Usa el botón ${iconoSvg('compartir', 14)} Compartir rutina para clonar plantillas entre clientas del mismo nivel y personalizarlas después.`)}
 `},
 {id:"progresion", t:"Progresión de cargas", h:`
 <h2>Capítulo 6 · Cómo progresar cargas, repeticiones y volumen</h2>
@@ -703,7 +703,7 @@ ${tablaM(["Semana","Hip thrust (ejemplo)","Acción"],[
 ["2","60 kg → 11, 10, 9","Mantener carga"],
 ["3","60 kg → 12, 12, 12 (RIR 2)","¡Tope logrado! Subir"],
 ["4","65 kg → 9, 8, 8","Nuevo ciclo"]])}
-${calloutPr("Registra cada peso en GymTracker (campo de peso del ejercicio): el historial de carga ${iconoSvg('tendencia', 14)} dibuja la curva y motiva muchísimo cuando la clienta ve sus ▲.")}
+${calloutPr(`Registra cada peso en GymTracker (campo de peso del ejercicio): el historial de carga ${iconoSvg('tendencia', 14)} dibuja la curva y motiva muchísimo cuando la clienta ve sus ▲.`)}
 <h3>6.2 Otras palancas de progresión</h3>
 ${tablaM(["Palanca","Cuándo usarla"],[
 ["Añadir repeticiones","Siempre primero: es la progresión más fina"],
@@ -771,8 +771,8 @@ ${calloutSg("Derivar no es perder una clienta: es la conducta que te define como
 ${tablaM(["Hábito profesional","Cómo se ve en la práctica"],[
 ["Plan preparado ANTES de la sesión","La rutina del día ya está cargada en GymTracker; nada de improvisar"],
 ["Registro en el momento","Pesos y repeticiones se anotan al terminar cada ejercicio, no 'luego'"],
-["Revisión semanal (15 min por clienta)","Historial de cargas ${iconoSvg('tendencia', 14)}, asistencia ${iconoSvg('calendario', 14)} y objetivos ${iconoSvg('diana', 14)}: ¿progresa, se estanca, falta?"],
-["Medición periódica","El recordatorio ${iconoSvg('regla', 14)} te avisa; no dependas de la memoria"],
+["Revisión semanal (15 min por clienta)",`Historial de cargas ${iconoSvg('tendencia', 14)}, asistencia ${iconoSvg('calendario', 14)} y objetivos ${iconoSvg('diana', 14)}: ¿progresa, se estanca, falta?`],
+["Medición periódica",`El recordatorio ${iconoSvg('regla', 14)} te avisa; no dependas de la memoria`],
 ["Comunicación","Un mensaje corto tras una falta ('te esperamos el jueves') rescata más clientas que cualquier descuento"]])}
 <h3>10.2 Retención</h3>
 <p>Las clientas se quedan cuando <b>ven su progreso</b>. Enséñales su curva de cargas, sus medidas, su % de asistencia y su avatar cambiando: los datos que ya registras son tu mejor herramienta de retención.</p>
@@ -803,7 +803,7 @@ ${tablaM(["Indicador","Mes pasado","Hoy","Cambio"],[
 ["Carga en hip thrust (al tope de reps)","____","____","____"],
 ["Carga en sentadilla","____","____","____"],
 ["% de asistencia del mes","____","____","____"],
-["Avance de objetivos ${iconoSvg('diana', 14)}","____","____","____"],
+[`Avance de objetivos ${iconoSvg('diana', 14)}`,"____","____","____"],
 ["Ajustes para el próximo mes","","",""]])}
 `},
 {id:"errores", t:"Errores del entrenador", h:`

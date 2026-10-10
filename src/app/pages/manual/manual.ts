@@ -21,18 +21,24 @@ function generoGuardado(): Genero {
   imports: [RouterLink, SvgSeguroPipe, Icono],
   template: `
     <a class="volver" routerLink="/panel">← Volver al panel</a>
-    <div class="manual-portada" style="flex-wrap:wrap;">
-      <div class="manual-icono"><app-icono nombre="libro" [tam]="26" /></div>
-      <div style="flex:1;min-width:200px;">
-        <div class="manual-titulo">Manual del Entrenador</div>
-        <div class="manual-sub">Entrenamiento Femenino · Formación para entrenador personal</div>
+    <section class="cab-pagina">
+      <div class="cab-ico"><app-icono nombre="libro" [tam]="24" /></div>
+      <div class="cab-texto">
+        <h1>Manual del Entrenador</h1>
+        <p>Entrenamiento femenino · {{ capitulos().length - 1 }} capítulos con evidencia, técnica y fichas de ejercicio.</p>
+        <div class="cab-progreso">
+          <span>Capítulo {{ indice() }} de {{ capitulos().length - 1 }}</span>
+          <div class="barra-uso"><span [style.width.%]="(indice() / (capitulos().length - 1)) * 100"></span></div>
+        </div>
       </div>
-      <div class="filtros-grupo" style="margin:0;" role="group" aria-label="Figuras de los ejercicios">
-        <span style="font-size:12px;color:var(--texto-suave);align-self:center;">Figuras:</span>
-        <div class="chip-filtro" [class.activo]="genero() === 'mujer'" (click)="cambiarGenero('mujer')"><app-icono nombre="mujer" [tam]="14" /> Mujer</div>
-        <div class="chip-filtro" [class.activo]="genero() === 'hombre'" (click)="cambiarGenero('hombre')"><app-icono nombre="hombre" [tam]="14" /> Hombre</div>
+      <div class="cab-acciones">
+        <span class="cab-etq">Figuras</span>
+        <div class="segmentado" role="group" aria-label="Figuras de los ejercicios">
+          <button [class.activo]="genero() === 'mujer'" (click)="cambiarGenero('mujer')"><app-icono nombre="mujer" [tam]="14" /> Mujer</button>
+          <button [class.activo]="genero() === 'hombre'" (click)="cambiarGenero('hombre')"><app-icono nombre="hombre" [tam]="14" /> Hombre</button>
+        </div>
       </div>
-    </div>
+    </section>
     <div class="manual-layout">
       <div class="manual-nav">
         @for (c of capitulos(); track c.id; let i = $index) {
