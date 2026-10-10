@@ -69,9 +69,21 @@ Generados sin librerías en `core/pdf.ts` (portado de la plantilla), firmados co
 
 *Mi cuenta → 📥 Importar*: sube el `GymTracker_Respaldo_….json` de la plantilla HTML. `core/respaldo.ts` valida y limpia el archivo (lo trata como dato no confiable) y la RPC `importar_respaldo` lo inserta en una sola transacción respetando RLS y el límite del plan (si no caben todos, primero los activos). Los atletas se agregan; no se borra nada.
 
+## App instalable (PWA)
+
+En producción la app registra el service worker de Angular (`ngsw-config.json`) y se puede instalar en el teléfono o el escritorio:
+
+- **Android / Chrome / Edge**: botón *Instalar app* en el encabezado o en el menú (usa el diálogo nativo, `core/pwa.service.ts`).
+- **iPhone / iPad**: el mismo botón muestra los pasos de Safari → Compartir → *Agregar a inicio*.
+- La app (HTML, JS, CSS, iconos y fuentes) queda en caché y abre al instante; los datos de Supabase **no** se cachean, siempre vienen de la red.
+- Al publicar una versión nueva aparece el aviso *Hay una versión nueva → Actualizar* (se revisa al abrir y cada 30 min).
+- Los iconos de `public/icons/` se generan desde el logo de la pesa (normal, *maskable* para Android y `apple-touch-icon`).
+- `render.yaml` sirve `ngsw-worker.js`, `ngsw.json`, `index.html` y el manifest con `Cache-Control: no-cache` para que las actualizaciones lleguen.
+
+En `ng serve` el service worker está apagado; para probarlo: `npm run build` y servir `dist/GymTrackerPro/browser` con un servidor estático.
+
 ## Pendiente (siguientes fases)
 
-
 - Pasarela de pago automática (Stripe / PayPal) con webhooks.
-- Portal del atleta, PWA instalable, unidades kg/cm.
-- Despliegue (Vercel/Netlify/Firebase Hosting) y configurar URL del sitio y SMTP propio en Supabase Auth.
+- Portal del atleta, unidades kg/cm.
+- Configurar URL del sitio y SMTP propio en Supabase Auth.

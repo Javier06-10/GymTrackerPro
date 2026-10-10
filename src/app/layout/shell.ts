@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { DatosService } from '../core/datos.service';
+import { PwaService } from '../core/pwa.service';
 import { UiService } from '../core/ui.service';
 import { AtletaForm } from '../pages/atleta/atleta-form';
 import { Icono } from '../shared/icono';
@@ -28,18 +29,26 @@ import { Icono } from '../shared/icono';
           @if (auth.esAdmin()) { <a routerLink="/admin" routerLinkActive="activo">Admin</a> }
         </nav>
         <div class="separador"></div>
+        @if (pwa.puedeOfrecer()) {
+          <button class="btn btn-suave btn-txt" (click)="pwa.instalar()" title="Instalar GymTracker como app">
+            <app-icono nombre="instalar" [tam]="16" /> Instalar app
+          </button>
+        }
         <button class="btn btn-primario" (click)="ui.formAtleta.set({ id: null })" [disabled]="!auth.vigente()">
           <app-icono nombre="mas" [tam]="16" /><span class="btn-txt"> Nuevo atleta</span>
         </button>
         <button class="btn btn-fantasma menu-movil" (click)="menu.set(!menu())" aria-label="Menú"><app-icono nombre="menu" [tam]="18" /></button>
-        <button class="btn btn-fantasma btn-txt" (click)="salir()" title="Cerrar sesión">⎋</button>
+        <button class="btn btn-fantasma btn-txt" (click)="salir()" title="Cerrar sesión" aria-label="Cerrar sesión"><app-icono nombre="salir" [tam]="17" /></button>
         @if (menu()) {
           <div class="menu-desplegable" (click)="menu.set(false)">
             <a routerLink="/panel"><app-icono nombre="casa" [tam]="16" /> Panel</a>
             <a routerLink="/manual"><app-icono nombre="libro" [tam]="16" /> Manual del entrenador</a>
             <a routerLink="/cuenta"><app-icono nombre="persona" [tam]="16" /> Mi cuenta y plan</a>
             @if (auth.esAdmin()) { <a routerLink="/admin"><app-icono nombre="herramienta" [tam]="16" /> Administración</a> }
-            <button (click)="salir()">⎋ Cerrar sesión</button>
+            @if (pwa.puedeOfrecer()) {
+              <button class="menu-instalar" (click)="pwa.instalar()"><app-icono nombre="instalar" [tam]="16" /> Instalar la app en este teléfono</button>
+            }
+            <button (click)="salir()"><app-icono nombre="salir" [tam]="16" /> Cerrar sesión</button>
           </div>
         }
       </header>
@@ -69,6 +78,7 @@ export class Shell {
   protected readonly auth = inject(AuthService);
   protected readonly datos = inject(DatosService);
   protected readonly ui = inject(UiService);
+  protected readonly pwa = inject(PwaService);
   private readonly router = inject(Router);
   protected readonly menu = signal(false);
   protected readonly cargando = signal(true);
