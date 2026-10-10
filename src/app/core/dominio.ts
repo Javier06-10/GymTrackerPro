@@ -1,6 +1,7 @@
 // Reglas de negocio del entrenador (portadas de la plantilla).
 import { Atleta, Composicion, Medida, Objetivo, ObjetivoMeta } from './modelos';
 import { diasDesde, hoyISO, isoDe } from './util';
+import { Sistema, largoGuardar, largoVer, pesoGuardar, pesoVer, uLargo, uPeso } from './unidades';
 
 export const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
@@ -126,8 +127,20 @@ export function avanceObjetivo(a: Atleta, ob: ObjetivoMeta): { actual: number | 
   return { actual, pct: Math.max(0, Math.min(100, pct)) };
 }
 
-export function unidadObjetivo(ob: ObjetivoMeta): string {
-  return ob.tipo === 'peso' ? 'lb' : ob.tipo === 'zona' ? 'in' : ob.unidad || '';
+export function unidadObjetivo(ob: ObjetivoMeta, s: Sistema = 'imperial'): string {
+  return ob.tipo === 'peso' ? uPeso(s) : ob.tipo === 'zona' ? uLargo(s) : ob.unidad || '';
+}
+
+/** Valor de un objetivo (guardado en lb / in si es de peso o de zona) en las unidades del entrenador. */
+export function verValorObjetivo(ob: ObjetivoMeta, v: number | null | undefined, s: Sistema = 'imperial'): number | null {
+  if (v === null || v === undefined) return null;
+  return ob.tipo === 'peso' ? pesoVer(v, s) : ob.tipo === 'zona' ? largoVer(v, s) : v;
+}
+
+/** Lo que se escribió en el formulario del objetivo → valor guardado (lb / in si aplica). */
+export function guardarValorObjetivo(tipo: ObjetivoMeta['tipo'], v: unknown, s: Sistema = 'imperial'): number {
+  const n = tipo === 'peso' ? pesoGuardar(v, s) : tipo === 'zona' ? largoGuardar(v, s) : Number(v);
+  return Number(n) || 0;
 }
 
 export function serieMedida(a: Atleta, clave: string): { fecha: string; valor: number }[] {

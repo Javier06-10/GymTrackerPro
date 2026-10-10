@@ -3,7 +3,8 @@
    Genera PDF 1.4 a mano: Helvetica WinAnsi, carta (612x792),
    coordenadas con y hacia abajo y logo JPEG opcional.
    ============================================================ */
-import { ZONAS, ZONAS_INVERTIDAS, avanceObjetivo, medicionPendiente, pagoVencido, serieMedida, unidadObjetivo } from './dominio';
+import { ZONAS, ZONAS_INVERTIDAS, avanceObjetivo, medicionPendiente, pagoVencido, serieMedida, unidadObjetivo, verValorObjetivo } from './dominio';
+import { Sistema, largoTxt, largoVer, pesoTxt, pesoVer, uLargo, uPeso } from './unidades';
 import { Atleta, Medida, PagoAtleta } from './modelos';
 import { MESES_ES, diasDesde, fmtDinero, fmtFecha, hoyISO, normalizar } from './util';
 
@@ -17,7 +18,7 @@ type Op =
 
 export interface LogoPDF { datos: string; w: number; h: number }
 /** Datos del entrenador que firma los documentos. */
-export interface Membrete { nombre: string; negocio: string; logo: LogoPDF | null }
+export interface Membrete { nombre: string; negocio: string; logo: LogoPDF | null; sistema?: Sistema }
 
 const OSCURO: Color = [0.13, 0.16, 0.2];
 const GRIS: Color = [0.42, 0.46, 0.52];
@@ -165,7 +166,7 @@ function lienzo(m: Membrete) {
 export interface FilaComparacion { zona: string; antes: string; ahora: string; delta: number; ev: { texto: 'AVANCE' | 'RETROCESO' | 'IGUAL' | 'CAMBIO'; color: Color } }
 export interface Comparacion { ant: Medida; act: Medida; dias: number; filas: FilaComparacion[]; avances: number; retros: number; iguales: number; frase: string }
 
-export function compararProgreso(a: Atleta): Comparacion | null {
+export function compararProgreso(a: Atleta, s: Sistema = 'imperial'): Comparacion | null {
   if (a.medidas.length < 2) return null;
   const ant = a.medidas[a.medidas.length - 2];
   const act = a.medidas[a.medidas.length - 1];
@@ -177,14 +178,14 @@ export function compararProgreso(a: Atleta): Comparacion | null {
   };
   const filas: FilaComparacion[] = [];
   if (ant.peso != null && act.peso != null) {
-    const d = Number((act.peso - ant.peso).toFixed(1));
+    const d = Number((pesoVer(act.peso, s)! - pesoVer(ant.peso, s)!).toFixed(1));
     const neutral = !(a.objetivo === 'perder' || a.objetivo === 'ganar');
-    filas.push({ zona: 'Peso corporal', antes: ant.peso + ' lb', ahora: act.peso + ' lb', delta: d, ev: evaluar(d, a.objetivo === 'perder', neutral) });
+    filas.push({ zona: 'Peso corporal', antes: pesoTxt(ant.peso, s), ahora: pesoTxt(act.peso, s), delta: d, ev: evaluar(d, a.objetivo === 'perder', neutral) });
   }
   ZONAS.forEach(([z, nombre]) => {
     if (ant[z] != null && act[z] != null) {
-      const d = Number((Number(act[z]) - Number(ant[z])).toFixed(1));
-      filas.push({ zona: nombre, antes: ant[z] + ' in', ahora: act[z] + ' in', delta: d, ev: evaluar(d, ZONAS_INVERTIDAS.has(z), false) });
+      const d = Number((largoVer(act[z], s)! - largoVer(ant[z], s)!).toFixed(1));
+      filas.push({ zona: nombre, antes: largoTxt(ant[z], s), ahora: largoTxt(act[z], s), delta: d, ev: evaluar(d, ZONAS_INVERTIDAS.has(z), false) });
     }
   });
   if (!filas.length) return null;
@@ -227,7 +228,8 @@ function graficaPDF(ops: Op[], cfg: { x: number; y: number; w: number; h: number
    📄 REPORTE DE PROGRESO FÍSICO (2 páginas)
    ============================================================ */
 export function exportarProgresoPDF(a: Atleta, m: Membrete): string | null {
-  const cmp = compararProgreso(a);
+  const s = m.sistema ?? 'imperial';
+  const cmp = compararProgreso(a, s);
   if (!cmp) return null;
   const { ant, act, dias, filas, avances, retros, iguales, frase } = cmp;
   const { ops, T, TD, L, encabezado, pie } = lienzo(m);
@@ -273,7 +275,7 @@ export function exportarProgresoPDF(a: Atleta, m: Membrete): string | null {
     conDatos.forEach(({ ob, av }) => {
       const pct = av.pct!;
       y += 20;
-      T(64, y, `${ob.titulo}  (${ob.valorInicial} -> ${ob.valorObjetivo} ${unidadObjetivo(ob)})`, 11, true);
+      T(64, y, `${ob.titulo}  (${verValorObjetivo(ob, ob.valorInicial, s)} -> ${verValorObjetivo(ob, ob.valorObjetivo, s)} ${unidadObjetivo(ob, s)})`, 11, true);
       TD(548, y, pct + '%', 12, true, pct === 100 ? VERDE : AMBAR);
       y += 10;
       ops.push({ tipo: 'rectBorde', x: 64, y, w: 400, h: 9, color: LINEA });
@@ -284,8 +286,11 @@ export function exportarProgresoPDF(a: Atleta, m: Membrete): string | null {
   pie(`Generado el ${fmtFecha(hoyISO())}  ·  Reporte de seguimiento — GymTracker Pro`);
 
   // Página 2: gráficas de evolución
-  const metricas: [string, string, string][] = [['peso', 'Peso corporal', 'lb'], ...ZONAS.map(([z, n]) => [z, n, 'in'] as [string, string, string])];
-  const series = metricas.map((mm) => ({ mm, s: serieMedida(a, mm[0]) })).filter((x) => x.s.length >= 2);
+  const metricas: [string, string, string][] = [['peso', 'Peso corporal', uPeso(s)], ...ZONAS.map(([z, n]) => [z, n, uLargo(s)] as [string, string, string])];
+  const conv = (clave: string, v: number) => (clave === 'peso' ? pesoVer(v, s) : largoVer(v, s))!;
+  const series = metricas
+    .map((mm) => ({ mm, s: serieMedida(a, mm[0]).map((p) => ({ fecha: p.fecha, valor: conv(mm[0], p.valor) })) }))
+    .filter((x) => x.s.length >= 2);
   const paginas = [ops];
   if (series.length) {
     const p2 = lienzo(m);

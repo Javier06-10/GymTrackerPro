@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth.service';
 import { DatosService } from '../../core/datos.service';
+import { Sistema, UnidadesService } from '../../core/unidades';
 import { Plan } from '../../core/modelos';
 import { supabase } from '../../core/supabase';
 import { UiService } from '../../core/ui.service';
@@ -126,6 +127,24 @@ interface PagoSuscripcion { id: string; monto: number; metodo: string; referenci
       </div>
     </div>
 
+    <div class="titulo-seccion"><app-icono nombre="balanza" [tam]="16" /> Unidades de medida</div>
+    <div class="tarjeta unidades-pref">
+      <div class="up-texto">
+        <b>¿Cómo trabajas el peso y las medidas?</b>
+        <span>Se aplica a medidas, gráficas, objetivos, nutrición y PDFs. Puedes cambiarlo cuando quieras: los datos ya guardados se convierten solos.</span>
+      </div>
+      <div class="opciones-unidad" role="radiogroup" aria-label="Unidades de medida">
+        @for (o of opcionesUnidad; track o.v) {
+          <button class="op-unidad" role="radio" [attr.aria-checked]="unidades.sistema() === o.v" [class.activa]="unidades.sistema() === o.v"
+            [disabled]="guardandoUnidades()" (click)="cambiarUnidades(o.v)">
+            <span class="ou-check"><app-icono nombre="check" [tam]="13" /></span>
+            <span class="ou-t">{{ o.t }}</span>
+            <span class="ou-s">{{ o.s }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
     <div class="grid-cuenta-extra">
       <div>
         <div class="titulo-seccion"><app-icono nombre="subir" [tam]="16" /> Importar versión anterior</div>
@@ -228,6 +247,26 @@ export class Cuenta implements OnInit {
       img.src = lector.result as string;
     };
     lector.readAsDataURL(archivo);
+  }
+
+  protected readonly unidades = inject(UnidadesService);
+  protected readonly guardandoUnidades = signal(false);
+  protected readonly opcionesUnidad: { v: Sistema; t: string; s: string }[] = [
+    { v: 'imperial', t: 'Libras y pulgadas', s: 'lb · in · pies' },
+    { v: 'metrico', t: 'Kilos y centímetros', s: 'kg · cm' },
+  ];
+
+  async cambiarUnidades(v: Sistema) {
+    if (v === this.unidades.sistema()) return;
+    this.guardandoUnidades.set(true);
+    try {
+      await this.auth.actualizarPerfil({ unidades: v });
+      this.ui.toast(v === 'metrico' ? 'Ahora trabajas en kilos y centímetros ✓' : 'Ahora trabajas en libras y pulgadas ✓');
+    } catch (e) {
+      this.ui.error(e);
+    } finally {
+      this.guardandoUnidades.set(false);
+    }
   }
 
   async guardarPerfil() {

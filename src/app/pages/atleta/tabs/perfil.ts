@@ -6,6 +6,7 @@ import { Atleta } from '../../../core/modelos';
 import { UiService } from '../../../core/ui.service';
 import { esc, fmtDinero, fmtFecha } from '../../../core/util';
 import { Icono } from '../../../shared/icono';
+import { UnidadesService } from '../../../core/unidades';
 
 @Component({
   selector: 'app-tab-perfil',
@@ -50,6 +51,7 @@ export class TabPerfil {
   protected readonly ui = inject(UiService);
   private readonly datos = inject(DatosService);
   private readonly router = inject(Router);
+  private readonly u = inject(UnidadesService);
 
   protected readonly dinero = fmtDinero;
   protected readonly fecha = fmtFecha;
@@ -66,7 +68,7 @@ export class TabPerfil {
     return [
       { ico: a.genero === 'mujer' ? 'mujer' : 'hombre', lbl: 'Género', val: a.genero === 'mujer' ? 'Mujer' : 'Hombre' },
       { ico: 'cumple', lbl: 'Edad', val: (a.edad ? a.edad + ' años' : '—') + (a.fechaNacimiento ? ' · ' + this.fecha(a.fechaNacimiento) : '') },
-      { ico: 'regla', lbl: 'Estatura', val: `${a.estaturaPies} pies ${a.estaturaPulg} pulg` },
+      { ico: 'regla', lbl: 'Estatura', val: this.u.metrico() ? this.u.estatura(a.estaturaPies, a.estaturaPulg) : `${a.estaturaPies} pies ${Math.round(Number(a.estaturaPulg))} pulg` },
       { ico: 'cuerpo-atletico', lbl: 'Composición', val: this.comp(a.composicion), destacar: true },
       { ico: 'diana', lbl: 'Objetivo', val: this.obj(a.objetivo), destacar: true },
       { ico: 'cama', lbl: 'Sueño', val: this.sueno(a.horasSueno) },

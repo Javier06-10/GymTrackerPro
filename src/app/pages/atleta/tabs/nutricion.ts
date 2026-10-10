@@ -3,6 +3,7 @@ import { CONSEJOS_OBJETIVO, OBJETIVOS, calcularNutricion, lecturaProgreso, nombr
 import { Atleta } from '../../../core/modelos';
 import { UiService } from '../../../core/ui.service';
 import { Icono } from '../../../shared/icono';
+import { UnidadesService } from '../../../core/unidades';
 
 /** Recomendación nutricional según el objetivo (portado de tabNutricion). */
 @Component({
@@ -28,7 +29,7 @@ import { Icono } from '../../../shared/icono';
           <div style="font-weight:800;font-size:16px;">Objetivo: {{ obj().t }}</div>
           @if (a.objetivoTexto) { <div style="font-size:13px;color:var(--ambar);margin-top:2px;"><app-icono nombre="diana" [tam]="14" /> {{ a.objetivoTexto }}</div> }
           <div style="font-size:13px;color:var(--texto-suave);margin-top:2px;">
-            {{ a.edad }} años · {{ ult.peso }} lb ({{ p.kg.toFixed(1) }} kg) · {{ a.estaturaPies }}'{{ a.estaturaPulg }}" ·
+            {{ a.edad }} años · {{ u.pesoTxt(ult.peso) }}@if (!u.metrico()) { ({{ p.kg.toFixed(1) }} kg) } · {{ u.estatura(a.estaturaPies, a.estaturaPulg) }} ·
             Actividad: {{ p.nivelTxt }} · {{ comp(a.composicion) }}
           </div>
         </div>
@@ -68,8 +69,9 @@ import { Icono } from '../../../shared/icono';
         <div class="tarjeta" style="margin-bottom:16px;">
           <div style="font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:6px;"><app-icono nombre="grafico" [tam]="16" /> Lectura del progreso (primera vs última medición)</div>
           <div style="font-size:13.5px;color:var(--texto-suave);">
-            Peso: <b style="color:var(--texto)">{{ l.dPeso > 0 ? '+' : '' }}{{ l.dPeso }} lb</b>
-            @if (l.dAbd !== null) { · Abdomen (ombligo): <b style="color:var(--texto)">{{ l.dAbd > 0 ? '+' : '' }}{{ l.dAbd }} in</b> }
+            @let prim = a.medidas[0];
+            Peso: <b style="color:var(--texto)">{{ u.difTxt('peso', ult.peso, prim.peso) }}</b>
+            @if (l.dAbd !== null) { · Abdomen (ombligo): <b style="color:var(--texto)">{{ u.difTxt('abdomenOmbligo', ult.abdomenOmbligo, prim.abdomenOmbligo) }}</b> }
             — {{ l.lectura }}
           </div>
         </div>
@@ -106,6 +108,7 @@ export class TabNutricion {
   readonly atleta = input.required<Atleta>();
   readonly irA = output<string>();
   protected readonly ui = inject(UiService);
+  protected readonly u = inject(UnidadesService);
 
   protected readonly comp = nombreComposicion;
   protected readonly sueno = nombreSueno;

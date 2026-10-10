@@ -1165,3 +1165,27 @@ app-marca-auth{display:block;}
   header.top{padding-top:max(14px, env(safe-area-inset-top));}
   @media(max-width:640px){ header.top{padding-top:max(10px, env(safe-area-inset-top)) !important;} }
 }
+
+/* ---------- Preferencia de unidades (Mi cuenta) ---------- */
+.unidades-pref{display:grid;grid-template-columns:1fr minmax(0,1.1fr);gap:20px;align-items:center;}
+.up-texto{display:flex;flex-direction:column;gap:4px;}
+.up-texto span{font-size:13px;color:var(--texto-suave);}
+.opciones-unidad{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.op-unidad{
+  position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;cursor:pointer;
+  padding:14px 14px 14px 44px;border-radius:12px;font-family:var(--fuente);color:var(--texto);
+  background:var(--panel2);border:1.5px solid var(--borde);transition:border-color .15s,background .15s;
+}
+.op-unidad:hover{border-color:rgba(255,154,61,.5);}
+.op-unidad.activa{border-color:var(--ambar);background:linear-gradient(135deg,rgba(255,154,61,.14),rgba(255,154,61,.04));}
+.op-unidad:disabled{opacity:.6;cursor:wait;}
+.ou-check{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;border:1.5px solid var(--borde);color:transparent;
+}
+.op-unidad.activa .ou-check{background:var(--ambar);border-color:var(--ambar);color:#1b1206;}
+.ou-t{font-weight:700;font-size:14px;}
+.ou-s{font-family:var(--fuente-titulo);font-size:13px;letter-spacing:.06em;color:var(--texto-suave);}
+@media(max-width:760px){
+  .unidades-pref{grid-template-columns:1fr;gap:14px;}
+}

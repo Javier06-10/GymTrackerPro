@@ -18,7 +18,7 @@ import { Icono } from '../../../shared/icono';
     <div class="tarjeta">
       <div class="campo">
         <label style="display:flex;align-items:center;gap:6px;"><app-icono nombre="bandera" [tam]="14" /> Metas a corto plazo</label>
-        <textarea placeholder='Objetivos para la próxima revisión física. Ej. "Llegar a las 200 lb en peso muerto para el próximo mes"...'
+        <textarea placeholder='Objetivos para la próxima revisión física. Ej. "Subir 10 % la carga del peso muerto para el próximo mes"...'
           [value]="atleta().bitacoraMetas" (change)="guardar('bitacoraMetas', $any($event.target).value)"></textarea>
       </div>
     </div>

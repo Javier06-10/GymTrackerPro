@@ -123,6 +123,8 @@ export interface Perfil {
   email: string;
   logo_url: string | null;
   rol: 'entrenador' | 'admin';
+  /** Cómo ve y captura pesos y medidas (en la base siempre son lb e in). */
+  unidades: 'imperial' | 'metrico';
 }
 
 export interface Suscripcion {

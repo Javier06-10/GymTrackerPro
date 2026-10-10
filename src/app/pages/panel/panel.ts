@@ -15,6 +15,7 @@ import { GraficaBarras } from '../../shared/graficas/grafica-barras';
 import { AvatarIniciales } from '../../shared/avatar-iniciales';
 import { GruposModal } from './grupos-modal';
 import { Icono } from '../../shared/icono';
+import { UnidadesService } from '../../core/unidades';
 
 /** Dashboard — balance global del entrenador (portado de renderDashboard). */
 @Component({
@@ -198,7 +199,7 @@ import { Icono } from '../../shared/icono';
               <span class="ca-ir"><app-icono nombre="chevron" [tam]="15" /></span>
             </div>
             <div class="ca-stats">
-              <div><span>Peso</span><b>{{ u ? u.peso + ' lb' : '—' }}</b></div>
+              <div><span>Peso</span><b>{{ u ? unidades.pesoTxt(u.peso) : '—' }}</b></div>
               <div><span>Medido</span><b>{{ u ? fecha(u.fecha) : 'Nunca' }}</b></div>
               <div><span>Cobro</span><b [class.rojo]="vencido(a)">{{ a.proximoPago ? fecha(a.proximoPago) : '—' }}</b></div>
             </div>
@@ -252,6 +253,7 @@ export class Panel {
 
   protected readonly dinero = fmtDinero;
   protected readonly fecha = fmtFecha;
+  protected readonly unidades = inject(UnidadesService);
   protected readonly objetivoNombre = nombreObjetivo;
   protected objetivoIc(a: Atleta) {
     return OBJETIVOS[a.objetivo]?.ic ?? 'diana';

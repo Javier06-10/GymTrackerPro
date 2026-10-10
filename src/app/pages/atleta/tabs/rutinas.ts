@@ -11,6 +11,7 @@ import { fmtFecha, hoyISO, normalizar } from '../../../core/util';
 import { Modal } from '../../../shared/modal';
 import { Sparkline } from '../../../shared/graficas/sparkline';
 import { Icono } from '../../../shared/icono';
+import { UnidadesService } from '../../../core/unidades';
 
 interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls: string } }
 
@@ -98,7 +99,7 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
                 </div>
                 <div class="fila-doble" style="margin-bottom:8px;">
                   <div class="campo"><label>Series x Reps</label><input type="text" placeholder="Ej. 4 x 10-12" [(ngModel)]="form.series" /></div>
-                  <div class="campo"><label>Peso de trabajo</label><input type="text" placeholder="Ej. 60 lb" [(ngModel)]="form.peso" /></div>
+                  <div class="campo"><label>Peso de trabajo</label><input type="text" [placeholder]="'Ej. ' + (unidades.metrico() ? '27 kg' : '60 lb')" [(ngModel)]="form.peso" /></div>
                   <div class="campo"><label>Descanso</label><input type="text" placeholder="Ej. 90 seg" [(ngModel)]="form.descanso" /></div>
                 </div>
                 <div class="campo" style="margin-bottom:10px;">
@@ -176,6 +177,7 @@ export class TabRutinas {
   private readonly datos = inject(DatosService);
   private readonly ui = inject(UiService);
   private readonly auth = inject(AuthService);
+  protected readonly unidades = inject(UnidadesService);
 
   protected readonly dias = DIAS;
   protected readonly fecha = fmtFecha;

@@ -8,6 +8,7 @@ import { UiService } from '../../core/ui.service';
 import { edadDesde, hoyISO } from '../../core/util';
 import { Modal } from '../../shared/modal';
 import { Icono } from '../../shared/icono';
+import { UnidadesService, estaturaCm, estaturaDesdeCm } from '../../core/unidades';
 
 /** Modal Nuevo / Editar atleta (portado de abrirModalAtleta). */
 @Component({
@@ -25,11 +26,16 @@ import { Icono } from '../../shared/icono';
             <option value="hombre">Hombre</option>
             <option value="mujer">Mujer</option>
           </select></div>
-        <div class="campo"><label>Estatura</label>
-          <div class="fila-doble">
-            <input type="number" min="3" max="7" placeholder="Pies" [(ngModel)]="f.estaturaPies" />
-            <input type="number" min="0" max="11" placeholder="Pulg" [(ngModel)]="f.estaturaPulg" />
-          </div></div>
+        @if (u.metrico()) {
+          <div class="campo"><label>Estatura (cm)</label>
+            <input type="number" min="100" max="230" placeholder="Ej. 172" [(ngModel)]="f.estaturaCm" /></div>
+        } @else {
+          <div class="campo"><label>Estatura (pies y pulgadas)</label>
+            <div class="fila-doble">
+              <input type="number" min="3" max="7" placeholder="Pies" [(ngModel)]="f.estaturaPies" />
+              <input type="number" min="0" max="11" placeholder="Pulg" [(ngModel)]="f.estaturaPulg" />
+            </div></div>
+        }
       </div>
       <div class="form-grid">
         <div class="campo"><label>Fecha de nacimiento</label>
@@ -76,7 +82,7 @@ import { Icono } from '../../shared/icono';
       </div>
       <div class="campo"><label>Meta específica a alcanzar</label>
         <input type="text" [(ngModel)]="f.objetivoTexto"
-          placeholder='Ej. "Bajar a 180 lb", "Sumar 2 pulgadas de brazo", "Correr 5K sin parar"' /></div>
+          [placeholder]="u.metrico() ? 'Ej. Bajar a 80 kg, Sumar 5 cm de brazo, Correr 5K sin parar' : 'Ej. Bajar a 180 lb, Sumar 2 pulgadas de brazo, Correr 5K sin parar'" /></div>
       <div class="campo"><label>Discapacidad / enfermedad / lesiones</label>
         <textarea style="min-height:64px;" [(ngModel)]="f.condiciones"
           placeholder="Ej. Hipertensión controlada, lesión de rodilla derecha, diabetes tipo 2... (dejar vacío si no aplica)"></textarea></div>
@@ -103,6 +109,7 @@ export class AtletaForm implements OnInit {
   readonly cerrar = output<void>();
   protected readonly datos = inject(DatosService);
   private readonly ui = inject(UiService);
+  protected readonly u = inject(UnidadesService);
   private readonly router = inject(Router);
   protected readonly guardando = signal(false);
   protected grupoNuevo = '';
@@ -114,7 +121,7 @@ export class AtletaForm implements OnInit {
   ];
 
   protected f = {
-    nombre: '', telefono: '', genero: 'hombre' as Genero, estaturaPies: 5, estaturaPulg: 8,
+    nombre: '', telefono: '', genero: 'hombre' as Genero, estaturaPies: 5, estaturaPulg: 8, estaturaCm: 173 as number | null,
     fechaNacimiento: '', edad: null as number | null, objetivo: '' as Objetivo | '', grupoId: '',
     horasSueno: '', estiloVida: '', objetivoTexto: '', condiciones: '', composicion: 'musculo' as Composicion,
   };
@@ -125,7 +132,7 @@ export class AtletaForm implements OnInit {
     if (a) {
       this.f = {
         nombre: a.nombre, telefono: a.telefono, genero: a.genero, estaturaPies: a.estaturaPies,
-        estaturaPulg: a.estaturaPulg, fechaNacimiento: a.fechaNacimiento, edad: a.edad, objetivo: a.objetivo,
+        estaturaPulg: Math.round(Number(a.estaturaPulg) * 10) / 10, estaturaCm: estaturaCm(a.estaturaPies, a.estaturaPulg), fechaNacimiento: a.fechaNacimiento, edad: a.edad, objetivo: a.objetivo,
         grupoId: a.grupoId, horasSueno: a.horasSueno, estiloVida: a.estiloVida, objetivoTexto: a.objetivoTexto,
         condiciones: a.condiciones, composicion: a.composicion,
       };
@@ -153,12 +160,16 @@ export class AtletaForm implements OnInit {
       }
       const edadAuto = this.f.fechaNacimiento ? edadDesde(this.f.fechaNacimiento) : null;
       const edad = edadAuto ?? (Number(this.f.edad) > 0 ? Number(this.f.edad) : null);
+      // En métrico se captura en cm; en la base se guarda en pies + pulgadas
+      const est = this.u.metrico() && Number(this.f.estaturaCm) > 0
+        ? estaturaDesdeCm(Number(this.f.estaturaCm))
+        : { pies: Number(this.f.estaturaPies) || 5, pulg: Number(this.f.estaturaPulg) || 0 };
       const datos: Partial<Atleta> = {
         grupoId,
         nombre,
         genero: this.f.genero,
-        estaturaPies: Number(this.f.estaturaPies) || 5,
-        estaturaPulg: Number(this.f.estaturaPulg) || 0,
+        estaturaPies: est.pies,
+        estaturaPulg: est.pulg,
         composicion: this.f.composicion,
         edad,
         condiciones: this.f.condiciones.trim(),

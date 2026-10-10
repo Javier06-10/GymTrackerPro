@@ -1,7 +1,8 @@
 import { Component, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatosService } from '../../../core/datos.service';
-import { ZONAS, avanceObjetivo, ultimaMedida, unidadObjetivo } from '../../../core/dominio';
+import { ZONAS, avanceObjetivo, guardarValorObjetivo, ultimaMedida, unidadObjetivo, verValorObjetivo } from '../../../core/dominio';
+import { UnidadesService } from '../../../core/unidades';
 import { Atleta, ObjetivoMeta } from '../../../core/modelos';
 import { UiService } from '../../../core/ui.service';
 import { fmtFecha, hoyISO, uid } from '../../../core/util';
@@ -32,12 +33,12 @@ import { Icono } from '../../../shared/icono';
           <button class="btn-x" title="Eliminar objetivo" (click)="eliminar(i)"><app-icono nombre="cerrar" [tam]="15" /></button>
         </div>
         <div style="font-size:13px;color:var(--texto-suave);margin:8px 0 9px;">
-          {{ ob.valorObjetivo < ob.valorInicial ? '↓' : '↑' }} De <b style="color:var(--texto)">{{ ob.valorInicial }} {{ u }}</b>
-          a <b style="color:var(--ambar)">{{ ob.valorObjetivo }} {{ u }}</b> · Actual:
+          {{ ob.valorObjetivo < ob.valorInicial ? '↓' : '↑' }} De <b style="color:var(--texto)">{{ ver(ob, ob.valorInicial) }} {{ u }}</b>
+          a <b style="color:var(--ambar)">{{ ver(ob, ob.valorObjetivo) }} {{ u }}</b> · Actual:
           @if (ob.tipo === 'manual') {
             <input class="peso-inline" style="width:64px;" type="number" step="0.1" [value]="ob.valorActual ?? ''"
               (change)="actualizarManual(i, $any($event.target).value)" /> {{ u }}
-          } @else if (av.actual !== null) { <b style="color:var(--texto)">{{ av.actual }} {{ u }}</b> }
+          } @else if (av.actual !== null) { <b style="color:var(--texto)">{{ ver(ob, av.actual) }} {{ u }}</b> }
           @else { <i>registra una medición</i> }
           @if (ob.fecha) { · desde {{ fecha(ob.fecha) }} }
         </div>
@@ -47,7 +48,7 @@ import { Icono } from '../../../shared/icono';
       <div class="vacio">
         <span class="ic"><app-icono nombre="diana" [tam]="40" /></span>
         <h3>Sin objetivos definidos</h3>
-        <p>Crea metas medibles: "Bajar 20 lb", "Reducir 3 in de cintura", "Lograr 10 dominadas"... y el avance se calculará automáticamente.</p>
+        <p>Crea metas medibles: {{ unidades.metrico() ? '"Bajar 8 kg", "Reducir 6 cm de cintura"' : '"Bajar 20 lb", "Reducir 3 in de cintura"' }}, "Lograr 10 dominadas"... y el avance se calculará automáticamente.</p>
         <button class="btn btn-primario" (click)="abrir()"><app-icono nombre="mas" [tam]="16" /> Crear primer objetivo</button>
       </div>
     }
@@ -55,7 +56,7 @@ import { Icono } from '../../../shared/icono';
     @if (modal()) {
       <app-modal titulo="Nuevo Objetivo" (cerrar)="modal.set(false)">
         <div class="campo"><label>Nombre del objetivo</label>
-          <input type="text" [(ngModel)]="f.titulo" placeholder='Ej. "Bajar 20 lb", "Reducir cintura", "10 dominadas"' /></div>
+          <input type="text" [(ngModel)]="f.titulo" [placeholder]="unidades.metrico() ? 'Ej. Bajar 8 kg, Reducir cintura, 10 dominadas' : 'Ej. Bajar 20 lb, Reducir cintura, 10 dominadas'" /></div>
         <div class="campo"><label>Tipo de seguimiento</label>
           <select [(ngModel)]="f.tipo" (ngModelChange)="alCambiarTipo()">
             <option value="peso">Peso corporal (automático con las mediciones)</option>
@@ -87,17 +88,19 @@ export class TabObjetivos {
   readonly atleta = input.required<Atleta>();
   private readonly datos = inject(DatosService);
   private readonly ui = inject(UiService);
+  protected readonly unidades = inject(UnidadesService);
 
   protected readonly zonas = ZONAS;
   protected readonly fecha = fmtFecha;
-  protected readonly unidad = unidadObjetivo;
+  protected unidad(ob: ObjetivoMeta) { return unidadObjetivo(ob, this.unidades.sistema()); }
+  protected ver(ob: ObjetivoMeta, v: number | null | undefined) { return verValorObjetivo(ob, v, this.unidades.sistema()); }
   protected avance(ob: ObjetivoMeta) { return avanceObjetivo(this.atleta(), ob); }
 
   protected readonly modal = signal(false);
   protected f = { titulo: '', tipo: 'peso' as ObjetivoMeta['tipo'], zona: 'pecho', unidad: '', inicial: null as number | null, objetivo: null as number | null };
 
   protected sufijo() {
-    return this.f.tipo === 'peso' ? '(lb)' : this.f.tipo === 'zona' ? '(in)' : '';
+    return this.f.tipo === 'peso' ? `(${this.unidades.uPeso()})` : this.f.tipo === 'zona' ? `(${this.unidades.uLargo()})` : '';
   }
 
   abrir() {
@@ -109,8 +112,8 @@ export class TabObjetivos {
   /** Precarga el valor inicial con la última medición. */
   alCambiarTipo() {
     const ult = ultimaMedida(this.atleta());
-    if (this.f.tipo === 'peso') this.f.inicial = ult?.peso ?? null;
-    else if (this.f.tipo === 'zona') this.f.inicial = ult && ult[this.f.zona] != null ? Number(ult[this.f.zona]) : null;
+    if (this.f.tipo === 'peso') this.f.inicial = ult ? this.unidades.peso(ult.peso) : null;
+    else if (this.f.tipo === 'zona') this.f.inicial = ult ? this.unidades.largo(ult[this.f.zona]) : null;
     else this.f.inicial = 0;
   }
 
@@ -129,8 +132,9 @@ export class TabObjetivos {
     const titulo = this.f.titulo.trim();
     if (!titulo) return this.ui.toast('Ponle nombre al objetivo', 'err');
     if (this.f.objetivo === null || (this.f.objetivo as unknown) === '') return this.ui.toast('Define el valor objetivo', 'err');
-    const inicial = Number(this.f.inicial) || 0;
-    const ob: ObjetivoMeta = { id: uid(), titulo, tipo: this.f.tipo, valorInicial: inicial, valorObjetivo: Number(this.f.objetivo), fecha: hoyISO() };
+    const s = this.unidades.sistema();
+    const inicial = guardarValorObjetivo(this.f.tipo, this.f.inicial, s);
+    const ob: ObjetivoMeta = { id: uid(), titulo, tipo: this.f.tipo, valorInicial: inicial, valorObjetivo: guardarValorObjetivo(this.f.tipo, this.f.objetivo, s), fecha: hoyISO() };
     if (ob.tipo === 'zona') ob.zona = this.f.zona;
     if (ob.tipo === 'manual') {
       ob.unidad = this.f.unidad.trim();

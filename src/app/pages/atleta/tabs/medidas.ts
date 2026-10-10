@@ -14,6 +14,7 @@ import { fmtFecha, hoyISO } from '../../../core/util';
 import { Modal } from '../../../shared/modal';
 import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
 import { Icono } from '../../../shared/icono';
+import { UnidadesService } from '../../../core/unidades';
 
 /** Medidas + avatar anatómico evolutivo (portado de tabMedidas). */
 @Component({
@@ -76,14 +77,14 @@ import { Icono } from '../../../shared/icono';
             </div>
           } @else {
             <div class="tabla-scroll"><table>
-              <tr><th>Fecha</th><th>Peso (lb)</th>@for (z of zonas; track z[0]) { <th>{{ z[1] }} (in)</th> }<th></th></tr>
+              <tr><th>Fecha</th><th>Peso ({{ u.uPeso() }})</th>@for (z of zonas; track z[0]) { <th>{{ z[1] }} ({{ u.uLargo() }})</th> }<th></th></tr>
               @for (m of medidasDesc(); track m.id; let i = $index) {
                 @let ant = anterior(i);
                 <tr>
                   <td>{{ fecha(m.fecha) }}</td>
-                  <td><b>{{ m.peso }}</b> @if (dp(m.peso, ant?.peso); as x) { <span [class]="x.cls">{{ x.txt }}</span> }</td>
+                  <td><b>{{ u.peso(m.peso) }}</b> @if (dp(u.peso(m.peso), u.peso(ant?.peso)); as x) { <span [class]="x.cls">{{ x.txt }}</span> }</td>
                   @for (z of zonas; track z[0]) {
-                    <td>{{ m[z[0]] ?? '—' }} @if (d(m[z[0]], ant?.[z[0]], invertida(z[0])); as x) { <span [class]="x.cls">{{ x.txt }}</span> }</td>
+                    <td>{{ u.largo(m[z[0]]) ?? '—' }} @if (d(u.largo(m[z[0]]), u.largo(ant?.[z[0]]), invertida(z[0])); as x) { <span [class]="x.cls">{{ x.txt }}</span> }</td>
                   }
                   <td><button class="btn-x" title="Eliminar medición" (click)="eliminar(m)"><app-icono nombre="cerrar" [tam]="15" /></button></td>
                 </tr>
@@ -96,11 +97,11 @@ import { Icono } from '../../../shared/icono';
               <div class="titulo-seccion" style="margin-top:18px;">Progreso total (primera vs última)</div>
               <div class="tabla-scroll"><table>
                 <tr><th>Zona</th><th>Inicio</th><th>Actual</th><th>Cambio</th></tr>
-                <tr><td>Peso</td><td>{{ prim.peso }} lb</td><td>{{ ult.peso }} lb</td>
-                  <td>@if (dp(ult.peso, prim.peso); as x) { <span [class]="x.cls" style="font-size:14px;">{{ x.txt }}</span> }</td></tr>
+                <tr><td>Peso</td><td>{{ u.pesoTxt(prim.peso) }}</td><td>{{ u.pesoTxt(ult.peso) }}</td>
+                  <td>@if (dp(u.peso(ult.peso), u.peso(prim.peso)); as x) { <span [class]="x.cls" style="font-size:14px;">{{ x.txt }}</span> }</td></tr>
                 @for (z of zonas; track z[0]) {
-                  <tr><td>{{ z[1] }}</td><td>{{ prim[z[0]] ?? '—' }} in</td><td>{{ ult[z[0]] ?? '—' }} in</td>
-                    <td>@if (d(ult[z[0]], prim[z[0]], invertida(z[0])); as x) { <span [class]="x.cls" style="font-size:14px;">{{ x.txt }}</span> }</td></tr>
+                  <tr><td>{{ z[1] }}</td><td>{{ u.largoTxt(prim[z[0]]) }}</td><td>{{ u.largoTxt(ult[z[0]]) }}</td>
+                    <td>@if (d(u.largo(ult[z[0]]), u.largo(prim[z[0]]), invertida(z[0])); as x) { <span [class]="x.cls" style="font-size:14px;">{{ x.txt }}</span> }</td></tr>
                 }
               </table></div>
             }
@@ -136,14 +137,14 @@ import { Icono } from '../../../shared/icono';
       <app-modal titulo="Nueva Medición" (cerrar)="modal.set(false)">
         <div class="form-grid">
           <div class="campo"><label>Fecha de medición</label><input type="date" [(ngModel)]="form.fecha" /></div>
-          <div class="campo"><label>Peso de báscula (lb)</label><input type="number" step="0.1" placeholder="Ej. 175" [(ngModel)]="form.peso" /></div>
+          <div class="campo"><label>Peso de báscula ({{ u.uPeso() }})</label><input type="number" step="0.1" [placeholder]="u.metrico() ? 'Ej. 79.5' : 'Ej. 175'" [(ngModel)]="form.peso" /></div>
         </div>
         @for (g of gruposMedida; track g[0]) {
-          <div class="titulo-seccion" style="margin:6px 0 2px;">{{ g[0] }} — pulgadas</div>
+          <div class="titulo-seccion" style="margin:6px 0 2px;">{{ g[0] }} — {{ u.metrico() ? 'centímetros' : 'pulgadas' }}</div>
           <div class="form-grid">
             @for (z of g[1]; track z) {
-              <div class="campo"><label>{{ etiqueta(z) }} (in)</label>
-                <input type="number" step="0.1" placeholder="in" [(ngModel)]="form.zonas[z]" /></div>
+              <div class="campo"><label>{{ etiqueta(z) }} ({{ u.uLargo() }})</label>
+                <input type="number" step="0.1" [placeholder]="u.uLargo()" [(ngModel)]="form.zonas[z]" /></div>
             }
           </div>
         }
@@ -161,6 +162,7 @@ export class TabMedidas {
   private readonly ui = inject(UiService);
   private readonly pdf = inject(PdfService);
   private readonly auth = inject(AuthService);
+  protected readonly u = inject(UnidadesService);
 
   protected readonly zonas = ZONAS;
   protected readonly gruposMedida = GRUPOS_MEDIDA;
@@ -187,20 +189,23 @@ export class TabMedidas {
   /* ---------- Gráfica de evolución ---------- */
   protected readonly metrica = signal('peso');
   protected readonly metricasDisponibles = computed(() =>
-    ([['peso', 'Peso', 'lb']] as [string, string, string][])
-      .concat(ZONAS.map((z) => [z[0], z[1], 'in'] as [string, string, string]))
+    ([['peso', 'Peso', this.u.uPeso()]] as [string, string, string][])
+      .concat(ZONAS.map((z) => [z[0], z[1], this.u.uLargo()] as [string, string, string]))
       .filter((m) => serieMedida(this.atleta(), m[0]).length >= 2),
   );
   protected readonly metricaActiva = computed(() => {
     const disp = this.metricasDisponibles();
     return disp.find((m) => m[0] === this.metrica()) ?? disp[0];
   });
-  protected readonly serieActiva = computed(() => serieMedida(this.atleta(), this.metricaActiva()[0]));
+  protected readonly serieActiva = computed(() => {
+    const clave = this.metricaActiva()[0];
+    return serieMedida(this.atleta(), clave).map((p) => ({ fecha: p.fecha, valor: this.u.valor(clave, p.valor)! }));
+  });
   /** Meta del primer objetivo que sigue esta métrica (peso o zona). */
   protected readonly metaActiva = computed(() => {
     const clave = this.metricaActiva()[0];
     const ob = this.atleta().objetivos.find((o) => (clave === 'peso' ? o.tipo === 'peso' : o.tipo === 'zona' && o.zona === clave));
-    return ob ? ob.valorObjetivo : null;
+    return ob ? this.u.valor(clave, ob.valorObjetivo) : null;
   });
   protected readonly cambioTotal = computed(() => {
     const s = this.serieActiva();
@@ -217,19 +222,19 @@ export class TabMedidas {
   abrirModal() {
     const ult = this.ultima();
     const zonas: Record<string, number | null> = {};
-    ZONAS.forEach(([z]) => (zonas[z] = ult ? (ult[z] as number | null) : null));
-    this.form = { fecha: hoyISO(), peso: ult?.peso ?? null, zonas };
+    ZONAS.forEach(([z]) => (zonas[z] = ult ? this.u.largo(ult[z]) : null));
+    this.form = { fecha: hoyISO(), peso: ult ? this.u.peso(ult.peso) : null, zonas };
     this.modal.set(true);
   }
 
   async guardar() {
     if (!this.form.fecha) return this.ui.toast('Selecciona la fecha', 'err');
-    const peso = Number(this.form.peso);
+    const peso = this.u.aLb(this.form.peso);
     if (!peso) return this.ui.toast('Registra el peso de báscula', 'err');
     const m: Record<string, unknown> = { fecha: this.form.fecha, peso };
     ZONAS.forEach(([z]) => {
       const v = this.form.zonas[z];
-      m[z] = v === null || v === undefined || (v as unknown) === '' ? null : Number(v);
+      m[z] = this.u.aPulg(v);
     });
     this.guardando.set(true);
     try {
@@ -261,7 +266,7 @@ export class TabMedidas {
 
   resumenWhatsApp() {
     const a = this.atleta();
-    const cmp = compararProgreso(a);
+    const cmp = compararProgreso(a, this.u.sistema());
     if (!cmp) return this.ui.toast('Se necesitan al menos 2 mediciones para comparar', 'err');
     const emoji = { AVANCE: '✅', RETROCESO: '🔻', IGUAL: '➖', CAMBIO: 'ℹ️' };
     let t = `📊 *TU PROGRESO — ${a.nombre.toUpperCase()}*\n`;

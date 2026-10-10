@@ -10,7 +10,7 @@ export class PdfService {
 
   private async membrete(): Promise<Membrete> {
     const p = this.auth.perfil();
-    return { nombre: p?.nombre ?? '', negocio: p?.negocio ?? '', logo: await cargarLogoPDF(p?.logo_url) };
+    return { nombre: p?.nombre ?? '', negocio: p?.negocio ?? '', logo: await cargarLogoPDF(p?.logo_url), sistema: p?.unidades ?? 'imperial' };
   }
 
   /** Devuelve false si no hay dos mediciones con zonas en común. */

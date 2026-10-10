@@ -6,6 +6,7 @@ import { UiService } from '../../core/ui.service';
 import { diasDesde, fmtFecha, hoyISO, iniciales } from '../../core/util';
 import { abrirWhatsApp, primerNombre } from '../../core/whatsapp';
 import { Icono } from '../../shared/icono';
+import { UnidadesService } from '../../core/unidades';
 import { TabAsistencia } from './tabs/asistencia';
 import { TabBitacora } from './tabs/bitacora';
 import { TabMedidas } from './tabs/medidas';
@@ -47,7 +48,7 @@ const ICONO_OBJETIVO: Record<string, string> = { perder: 'fuego', ganar: 'tenden
             <div class="ficha-etiquetas">
               <span class="etq"><app-icono [nombre]="a.genero === 'mujer' ? 'mujer' : 'hombre'" [tam]="14" /> {{ a.genero === 'mujer' ? 'Mujer' : 'Hombre' }}</span>
               @if (a.edad) { <span class="etq"><app-icono nombre="cumple" [tam]="14" /> {{ a.edad }} años</span> }
-              <span class="etq"><app-icono nombre="regla" [tam]="14" /> {{ a.estaturaPies }}'{{ a.estaturaPulg }}"</span>
+              <span class="etq"><app-icono nombre="regla" [tam]="14" /> {{ u.estatura(a.estaturaPies, a.estaturaPulg) }}</span>
               <span class="etq etq-ambar"><app-icono [nombre]="icoObjetivo(a.objetivo)" [tam]="14" /> {{ obj(a.objetivo) }}</span>
               @if (a.grupoId) { <span class="etq etq-azul"><app-icono nombre="usuarios" [tam]="14" /> {{ datos.nombreGrupo(a.grupoId) }}</span> }
               @if (a.activo) { <span class="etq etq-verde">Activo</span> } @else { <span class="etq">Inactivo</span> }
@@ -67,7 +68,7 @@ const ICONO_OBJETIVO: Record<string, string> = { perder: 'fuego', ganar: 'tenden
             <div>
               <div class="k-lbl">Peso actual</div>
               <div class="k-val">{{ resumen().peso }}</div>
-              @if (resumen().cambioPeso; as c) { <div class="k-sub"><span [class]="c.cls">{{ c.txt }} lb</span> desde el inicio</div> }
+              @if (resumen().cambioPeso; as c) { <div class="k-sub"><span [class]="c.cls">{{ c.txt }} {{ u.uPeso() }}</span> desde el inicio</div> }
               @else { <div class="k-sub">{{ resumen().ultimaMedicion }}</div> }
             </div>
           </div>
@@ -132,6 +133,7 @@ export class AtletaPage {
 
   protected readonly datos = inject(DatosService);
   protected readonly ui = inject(UiService);
+  protected readonly u = inject(UnidadesService);
   private readonly router = inject(Router);
   protected readonly tabs = TABS;
   protected readonly comp = nombreComposicion;
@@ -155,8 +157,8 @@ export class AtletaPage {
     Object.entries(a.asistencia).forEach(([iso, v]) => { if (iso.startsWith(mes)) { if (v === 'E') e++; else if (v === 'F') f++; } });
     const d = a.proximoPago ? diasDesde(a.proximoPago) ?? 0 : null;
     return {
-      peso: ult ? `${ult.peso} lb` : '—',
-      cambioPeso: ult && prim && a.medidas.length > 1 ? deltaPeso(a.objetivo, ult.peso, prim.peso) : null,
+      peso: ult ? this.u.pesoTxt(ult.peso) : '—',
+      cambioPeso: ult && prim && a.medidas.length > 1 ? deltaPeso(a.objetivo, this.u.peso(ult.peso), this.u.peso(prim.peso)) : null,
       ultimaMedicion: ult ? 'medido el ' + fmtFecha(ult.fecha) : 'sin mediciones',
       racha: rachaActual(a),
       asistenciaMes: e + f ? Math.round((e / (e + f)) * 100) + '%' : '—',

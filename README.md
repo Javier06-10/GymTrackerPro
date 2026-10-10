@@ -69,6 +69,15 @@ Generados sin librerías en `core/pdf.ts` (portado de la plantilla), firmados co
 
 *Mi cuenta → 📥 Importar*: sube el `GymTracker_Respaldo_….json` de la plantilla HTML. `core/respaldo.ts` valida y limpia el archivo (lo trata como dato no confiable) y la RPC `importar_respaldo` lo inserta en una sola transacción respetando RLS y el límite del plan (si no caben todos, primero los activos). Los atletas se agregan; no se borra nada.
 
+## Unidades de medida (lb/in o kg/cm)
+
+Cada entrenador elige en *Mi cuenta → Unidades de medida* si trabaja en **libras y pulgadas** o en **kilos y centímetros** (`perfiles.unidades`, migración `0005_unidades.sql`).
+
+- En la base todo se sigue guardando en **libras y pulgadas** (estatura en pies + pulgadas); `core/unidades.ts` convierte al mostrar y al capturar. Cambiar la preferencia no modifica ningún dato.
+- Las columnas de medidas tienen 3 decimales para que kg → lb → kg y cm → in → cm vuelvan al mismo número.
+- Las diferencias (“-7.2 kg desde el inicio”) se calculan restando los valores ya convertidos, así cuadran con las tablas.
+- Aplica a medidas, gráficas, objetivos, nutrición, ficha del atleta, panel y PDFs. El peso de trabajo de las rutinas es texto libre (“60 lb”, “27 kg”) y no se convierte.
+
 ## App instalable (PWA)
 
 En producción la app registra el service worker de Angular (`ngsw-config.json`) y se puede instalar en el teléfono o el escritorio:
@@ -85,5 +94,5 @@ En `ng serve` el service worker está apagado; para probarlo: `npm run build` y 
 ## Pendiente (siguientes fases)
 
 - Pasarela de pago automática (Stripe / PayPal) con webhooks.
-- Portal del atleta, unidades kg/cm.
+- Portal del atleta.
 - Configurar URL del sitio y SMTP propio en Supabase Auth.
