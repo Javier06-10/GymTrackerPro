@@ -1372,3 +1372,63 @@ html:is([data-tema="fuerza"],[data-tema="bienestar"]) :is(.tarjeta, .metrica, .c
 .ot-t{display:flex;align-items:center;gap:5px;font-weight:700;font-size:14px;}
 .ot-t .icono-app{color:var(--ambar-texto);}
 .ot-s{font-size:12px;color:var(--texto-suave);}
+
+/* ============================================================
+   ESTILO SÓLIDO: colores planos, sin degradados ni brillos.
+   Un color de fondo, uno de superficie, uno de estructura y un
+   solo acento; el rojo queda solo para alertas.
+   ============================================================ */
+body{background:var(--fondo);}
+header.top{background:var(--marino);border-bottom:1px solid color-mix(in srgb, #000 25%, var(--marino));box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;}
+.nav-top a.activo{background:color-mix(in srgb, #fff 14%, transparent);color:#fff;box-shadow:inset 0 -2px 0 var(--ambar);}
+.banner-sus{background:var(--ambar-fondo);border-bottom:1px solid color-mix(in srgb, var(--ambar) 30%, transparent);}
+
+/* Superficies planas */
+.tarjeta, .metrica, .card-atleta, .card-dia, .plan, .alerta-cobro, .marco-avatar, .manual-cuerpo, .manual-nav,
+.fila-entrenador, .op-tema, .op-unidad{
+  background:var(--panel);border:1px solid var(--borde);box-shadow:none;
+}
+.metrica:hover, .card-atleta:hover, .plan:hover, .op-tema:hover{transform:none;}
+.card-atleta:hover, .fila-entrenador:hover{border-color:var(--ambar);box-shadow:none;}
+
+/* Bloques protagonistas en el color de estructura, sin brillo */
+.hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan, .estado-plan.vencido{
+  background:var(--marino);border:1px solid color-mix(in srgb, #000 20%, var(--marino));box-shadow:none;
+}
+.estado-plan.vencido{box-shadow:inset 4px 0 0 var(--rojo);}
+
+/* Un solo acento, plano */
+.btn-primario, .tab-ficha.activa, .plan-sello.popular, .cab-ico, .paso-n, .logo .icono, .segmentado button.activo{
+  background:var(--ambar);box-shadow:none;
+}
+.btn-primario:hover{background:var(--ambar-osc);box-shadow:none;}
+.logo .icono{box-shadow:none;}
+.titulo-seccion::before{background:var(--ambar);}
+.barra-uso > span, .barra-prog > div{background:var(--ambar);}
+.barra-uso.alerta > span{background:var(--rojo);}
+.op-unidad.activa{background:var(--ambar-fondo);}
+.plan.destacado{background:var(--panel);border-color:var(--ambar);}
+.plan.actual{box-shadow:none;}
+.logo-vista{background:var(--panel2);}
+
+/* Métricas: sin franjas de colores; icono en el acento (rojo solo en "por cobrar") */
+.metrica, .metrica.m-acero, .metrica.m-verde, .metrica.m-rojo{border-top:1px solid var(--borde);}
+.metrica .ico, .metrica.m-verde .ico, .metrica.m-acero .ico{background:var(--ambar-fondo);color:var(--ambar-texto);}
+.metrica.m-rojo .ico{background:var(--rojo-fondo);color:var(--rojo);}
+.k-ico, .k-ico.k-fuego{background:var(--ambar-fondo);color:var(--ambar-texto);}
+
+/* Avatar del atleta plano */
+.ficha-avatar, .ficha-avatar.mujer{
+  background:color-mix(in srgb, #000 22%, var(--marino));color:#fff;
+  box-shadow:0 0 0 3px color-mix(in srgb, #fff 20%, transparent);
+}
+.avatar-mini, .avatar-mini.mujer{background:var(--ambar-fondo);color:var(--ambar-texto);border-color:color-mix(in srgb, var(--ambar) 35%, transparent);}
+
+/* Gráficas: cada gráfica es una sola medida → mismo acento */
+html[data-tema], :root{--serie-azul:var(--serie-ambar);}
+html:is([data-tema="fuerza"],[data-tema="bienestar"]) .estado-plan{background:var(--marino);}
+
+/* Sombras mínimas */
+.modal{box-shadow:0 12px 40px rgba(0,0,0,.35);}
+.btn-suave{background:var(--panel2);border-color:var(--borde);}
+.btn-suave:hover{background:var(--panel2);border-color:var(--ambar);color:var(--ambar-texto);}
