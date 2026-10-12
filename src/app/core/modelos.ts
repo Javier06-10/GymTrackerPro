@@ -126,7 +126,7 @@ export interface Perfil {
   /** Cómo ve y captura pesos y medidas (en la base siempre son lb e in). */
   unidades: 'imperial' | 'metrico';
   /** Tema visual elegido (ver core/tema.service.ts). */
-  tema: 'marca' | 'energia' | 'fuerza' | 'bienestar' | 'tech';
+  tema: 'marca' | 'marca-oscuro' | 'energia' | 'fuerza' | 'bienestar' | 'tech';
 }
 
 export interface Suscripcion {

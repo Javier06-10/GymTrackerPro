@@ -135,7 +135,7 @@ interface PagoSuscripcion { id: string; monto: number; metodo: string; referenci
           [disabled]="guardandoTema()" (click)="cambiarTema(t.v)">
           <span class="ot-vista" [style.background]="t.muestras[0]">
             <span class="ot-barra" [style.background]="t.muestras[1]"></span>
-            <span class="ot-tarjeta" [style.background]="t.muestras[1]" [style.opacity]="t.v === 'fuerza' || t.v === 'bienestar' ? .18 : 1"></span>
+            <span class="ot-tarjeta" [style.background]="t.muestras[1]" [style.opacity]="t.v === 'marca' || t.v === 'fuerza' || t.v === 'bienestar' ? .18 : 1"></span>
             <span class="ot-boton" [style.background]="t.muestras[2]"></span>
             <span class="ot-punto" [style.background]="t.muestras[3]"></span>
           </span>

@@ -1,7 +1,7 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 import { AuthService } from './auth.service';
 
-export type Tema = 'marca' | 'energia' | 'fuerza' | 'bienestar' | 'tech';
+export type Tema = 'marca' | 'marca-oscuro' | 'energia' | 'fuerza' | 'bienestar' | 'tech';
 
 export interface OpcionTema {
   v: Tema;
@@ -14,7 +14,8 @@ export interface OpcionTema {
 }
 
 export const TEMAS: OpcionTema[] = [
-  { v: 'marca', t: 'Marca GymTracker', s: 'Azul marino y naranja', muestras: ['#0b0f2e', '#2a3582', '#eb670e', '#ffffff'], barra: '#2a3582' },
+  { v: 'marca', t: 'Marca GymTracker', s: 'Claro con azul marino y naranja', muestras: ['#f3f5fb', '#2a3582', '#eb670e', '#ffffff'], barra: '#2a3582' },
+  { v: 'marca-oscuro', t: 'Marca oscuro', s: 'Todo en azul marino y naranja', muestras: ['#0b0f2e', '#2a3582', '#eb670e', '#ffffff'], barra: '#2a3582' },
   { v: 'energia', t: 'High Energy', s: 'Lima neón sobre negro · estilo Nike', muestras: ['#121212', '#1e1e1e', '#ccff00', '#ff5500'], barra: '#262626' },
   { v: 'fuerza', t: 'Fuerza y rendimiento', s: 'Claro, naranja atlético · estilo Strava', muestras: ['#f8fafc', '#1e3a8a', '#fc5200', '#e2e8f0'], barra: '#1e3a8a' },
   { v: 'bienestar', t: 'Bienestar', s: 'Salvia y terracota · estilo Calm', muestras: ['#fdfbf7', '#4e7c67', '#d97757', '#f3efea'], barra: '#4e7c67' },

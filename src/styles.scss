@@ -1255,7 +1255,22 @@ header.top{
    TemaService; los valores pasan contraste 4.5:1 (WCAG AA).
    Regla 60-30-10: fondo neutro · superficies · acento solo en acciones.
    ============================================================ */
+/* Marca (claro, 60-30-10): fondo neutro claro · azul marino estructural · naranja en acciones */
 :root, html[data-tema="marca"]{
+  color-scheme:light;
+  --fondo:#f3f5fb; --panel:#ffffff; --panel2:#eef1f8;
+  --borde:#dde2ef; --borde-suave:#e6e9f3; --borde-fuerte:#c5cce0; --borde-vidrio:#dde2ef;
+  --texto:#12173f; --texto-suave:#4a5175; --tenue:#626a92;
+  --ambar:#eb670e; --ambar-osc:#d95e0c; --ambar-claro:#ffc39b; --ambar-texto:#b94f05; --sobre-acento:#10154a;
+  --acero:#2a3582; --acero-texto:#2a3582;
+  --verde:#15803d; --rojo:#dc2626;
+  --brillo:#12173f; --sombra-color:#12173f;
+  --marino:#2a3582; --marino-claro:#3a47a6; --marino-oscuro:#1f2766;
+  --serie-ambar:#eb670e; --serie-azul:#2a3582; --serie-verde:#15803d; --rejilla:#e6e9f3;
+  --fig-1:#2f3a8f; --fig-2:#141a4a;
+}
+/* Marca oscuro: la versión anterior, todo en azul marino */
+html[data-tema="marca-oscuro"]{
   color-scheme:dark;
   --fondo:#0b0f2e; --panel:#161c4a; --panel2:#1f2661;
   --borde:#323b86; --borde-suave:#283071; --borde-fuerte:#3e4794; --borde-vidrio:rgba(255,255,255,.07);
@@ -1333,7 +1348,7 @@ html[data-tema="tech"]{
 }
 /* Temas claros: encabezado y tarjetas protagonistas siguen oscuros (color estructural)
    y por dentro usan texto claro */
-html:is([data-tema="fuerza"],[data-tema="bienestar"]) :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){
+html:is([data-tema="marca"],[data-tema="fuerza"],[data-tema="bienestar"]) :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){
   --texto:#ffffff; --texto-suave:#e3e8f2; --tenue:#c9d1e0;
   --panel:color-mix(in srgb, var(--marino-oscuro) 82%, #ffffff); --panel2:color-mix(in srgb, var(--marino-oscuro) 70%, #ffffff);
   --borde:color-mix(in srgb, #ffffff 26%, var(--marino)); --borde-suave:color-mix(in srgb, #ffffff 18%, var(--marino));
@@ -1342,12 +1357,13 @@ html:is([data-tema="fuerza"],[data-tema="bienestar"]) :is(header.top, .hero-pane
   color:var(--texto);
 }
 html[data-tema="fuerza"] :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){ --ambar-texto:#ff8a4c; }
+html[data-tema="marca"] :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){ --ambar-texto:#ff9a52; }
 html[data-tema="bienestar"] :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){ --ambar-texto:#ffd9b8; --ambar:#f3a17f; --ambar-osc:#e48a64; --sobre-acento:#2d3748; }
 html:is([data-tema="fuerza"],[data-tema="bienestar"]) .estado-plan{
   background:linear-gradient(135deg, var(--marino-claro), var(--marino-oscuro));
 }
 /* Sombras más suaves en temas claros */
-html:is([data-tema="fuerza"],[data-tema="bienestar"]) :is(.tarjeta, .metrica, .card-atleta, .plan, .alerta-cobro, .fila-entrenador, .manual-cuerpo, .manual-nav){
+html:is([data-tema="marca"],[data-tema="fuerza"],[data-tema="bienestar"]) :is(.tarjeta, .metrica, .card-atleta, .plan, .alerta-cobro, .fila-entrenador, .manual-cuerpo, .manual-nav){
   box-shadow:0 1px 2px rgba(15,23,42,.06), 0 6px 18px rgba(15,23,42,.06);
 }
 /* Fondo de las figuras (avatar y manual) según el tema */
@@ -1426,9 +1442,14 @@ header.top{background:var(--marino);border-bottom:1px solid color-mix(in srgb, #
 
 /* Gráficas: cada gráfica es una sola medida → mismo acento */
 html[data-tema], :root{--serie-azul:var(--serie-ambar);}
-html:is([data-tema="fuerza"],[data-tema="bienestar"]) .estado-plan{background:var(--marino);}
+html:is([data-tema="marca"],[data-tema="fuerza"],[data-tema="bienestar"]) .estado-plan{background:var(--marino);}
 
 /* Sombras mínimas */
 .modal{box-shadow:0 12px 40px rgba(0,0,0,.35);}
 .btn-suave{background:var(--panel2);border-color:var(--borde);}
 .btn-suave:hover{background:var(--panel2);border-color:var(--ambar);color:var(--ambar-texto);}
+
+/* Marca clara: títulos y números en azul de marca (color estructural), acento solo en acciones */
+html[data-tema="marca"] .titulo-seccion{color:var(--marino);}
+html[data-tema="marca"] :is(.metrica .valor, .ficha-datos h2, .grafica-cab .t, .manual-cuerpo h2, .plan-nombre){color:var(--marino);}
+html[data-tema="marca"] .titulo-seccion::after{background:var(--borde);}
