@@ -52,10 +52,10 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
   const r2 = n => Math.round(n*10)/10;
 
   // Estilo lámina anatómica
-  const FONDO="url(#avFondo)", CUERPO="#15171c", L="#eef0f4";
+  const FONDO="url(#avFondo)", CUERPO="#0f1336", L="#eef0f4";
   const GRIS_MUSCULO="#6f6d6b";
   const TRAZO=`fill="${CUERPO}" stroke="${L}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"`;
-  const PELO=`fill="#3a3e48" stroke="${L}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"`;
+  const PELO=`fill="#3a4286" stroke="${L}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"`;
   const MUSC=`fill="none" stroke="${L}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".6"`;
   // Vista lateral: cuerpo gris como los músculos del mapa
   const TRAZO_GRIS=`fill="${GRIS_MUSCULO}" stroke="${L}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"`;
@@ -85,7 +85,7 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
       <stop offset=".62" stop-color="#f4f6fa"/><stop offset="1" stop-color="#cfd5e3"/>
     </linearGradient>
     <radialGradient id="avFondo" cx=".5" cy=".42" r=".75">
-      <stop offset="0" stop-color="#20242d"/><stop offset="1" stop-color="#0f1115"/>
+      <stop offset="0" stop-color="#262f78"/><stop offset="1" stop-color="#0a0d2a"/>
     </radialGradient>
   </defs>`;
 
@@ -527,7 +527,7 @@ export function graficaLineaSVG(puntos: { fecha: string; valor: number }[], unid
   const pts = puntos.map((p,i)=>X(i).toFixed(1)+","+Y(p.valor).toFixed(1)).join(" ");
   s += `<polyline points="${pts}" fill="none" stroke="var(--ambar)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`;
   puntos.forEach((p,i)=>{
-    s += `<circle cx="${X(i).toFixed(1)}" cy="${Y(p.valor).toFixed(1)}" r="4" fill="#1a1e26" stroke="var(--ambar)" stroke-width="2.4"/>`;
+    s += `<circle cx="${X(i).toFixed(1)}" cy="${Y(p.valor).toFixed(1)}" r="4" fill="#161c4a" stroke="var(--ambar)" stroke-width="2.4"/>`;
   });
   const ult = puntos[puntos.length-1], pri = puntos[0];
   s += `<text x="${(X(puntos.length-1)-6).toFixed(1)}" y="${(Y(ult.valor)-10).toFixed(1)}" text-anchor="end" font-size="13" font-weight="800" fill="var(--ambar)">${ult.valor} ${unidad}</text>`;

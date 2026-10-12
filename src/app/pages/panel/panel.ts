@@ -38,12 +38,12 @@ import { UnidadesService } from '../../core/unidades';
       <div class="hero-arte" aria-hidden="true">
         <!-- Barra con discos y pulso: ilustración decorativa -->
         <svg viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
-          <path d="M6 92 H70 L82 70 L96 108 L110 52 L124 92 H234" fill="none" stroke="rgba(255,154,61,.55)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M6 92 H70 L82 70 L96 108 L110 52 L124 92 H234" fill="none" stroke="rgba(235,103,14,.55)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
           <rect x="30" y="36" width="180" height="6" rx="3" fill="#8a90a0"/>
-          <rect x="44" y="14" width="14" height="50" rx="3" fill="#2a2e38" stroke="#eef0f4" stroke-width="1.6"/>
-          <rect x="60" y="20" width="10" height="38" rx="3" fill="#d0731f" stroke="#eef0f4" stroke-width="1.6"/>
-          <rect x="182" y="14" width="14" height="50" rx="3" fill="#2a2e38" stroke="#eef0f4" stroke-width="1.6"/>
-          <rect x="170" y="20" width="10" height="38" rx="3" fill="#d0731f" stroke="#eef0f4" stroke-width="1.6"/>
+          <rect x="44" y="14" width="14" height="50" rx="3" fill="#232a66" stroke="#eef0f4" stroke-width="1.6"/>
+          <rect x="60" y="20" width="10" height="38" rx="3" fill="#eb670e" stroke="#eef0f4" stroke-width="1.6"/>
+          <rect x="182" y="14" width="14" height="50" rx="3" fill="#232a66" stroke="#eef0f4" stroke-width="1.6"/>
+          <rect x="170" y="20" width="10" height="38" rx="3" fill="#eb670e" stroke="#eef0f4" stroke-width="1.6"/>
           <rect x="22" y="33" width="10" height="12" rx="2" fill="#6f6d6b"/><rect x="208" y="33" width="10" height="12" rx="2" fill="#6f6d6b"/>
         </svg>
       </div>
@@ -125,7 +125,7 @@ import { UnidadesService } from '../../core/unidades';
     @if (cumples().length) {
       <div class="titulo-seccion"><app-icono nombre="cumple" [tam]="16" /> Cumpleaños</div>
       @for (x of cumples(); track x.a.id) {
-        <div class="alerta-cobro" style="border-color:rgba(255,154,61,.4);border-left-color:var(--ambar);" (click)="ir(x.a.id)">
+        <div class="alerta-cobro" style="border-color:rgba(235,103,14,.4);border-left-color:var(--ambar);" (click)="ir(x.a.id)">
           <div style="color:var(--ambar);display:inline-flex"><app-icono nombre="cumple" [tam]="24" /></div>
           <div class="ac-texto">
             <div class="nombre">{{ x.a.nombre }}</div>
@@ -145,7 +145,7 @@ import { UnidadesService } from '../../core/unidades';
     @if (pendMed().length) {
       <div class="titulo-seccion"><app-icono nombre="regla" [tam]="16" /> Mediciones pendientes</div>
       @for (a of pendMed(); track a.id) {
-        <div class="alerta-cobro" style="border-color:rgba(91,141,184,.35);border-left-color:var(--acero);" (click)="ir(a.id, 'medidas')">
+        <div class="alerta-cobro" style="border-color:rgba(125,147,255,.35);border-left-color:var(--acero);" (click)="ir(a.id, 'medidas')">
           <app-avatar-iniciales [nombre]="a.nombre" [genero]="a.genero" [tam]="38" />
           <div class="ac-texto">
             <div class="nombre">{{ a.nombre }}</div>

@@ -12,10 +12,10 @@ export interface CapituloManual { id: string; t: string; h: string }
 // Mismo lenguaje que el mapa muscular del avatar: fondo oscuro, músculos grises, contornos blancos.
 const DEFS_FIG = `<defs>
   <radialGradient id="figFondo" cx=".5" cy=".4" r=".8">
-    <stop offset="0" stop-color="#20242d"/><stop offset="1" stop-color="#0f1115"/>
+    <stop offset="0" stop-color="#262f78"/><stop offset="1" stop-color="#0a0d2a"/>
   </radialGradient>
 </defs>`;
-const LEYENDA_FIG = '<span class="leyenda-fig"><i style="background:#d0731f"></i>Músculo principal <i style="background:#8f5a2e"></i>Secundario <i class="flecha"></i>Movimiento</span>';
+const LEYENDA_FIG = '<span class="leyenda-fig"><i style="background:#eb670e"></i>Músculo principal <i style="background:#a4470f"></i>Secundario <i class="flecha"></i>Movimiento</span>';
 function figManual(svg, pie){
   const conDefs = svg.replace(/<svg([^>]*)>/, '<svg$1>' + DEFS_FIG).replace('fill="#e7ebf3"', 'fill="url(#figFondo)"')
     // Las leyendas largas al pie del dibujo se salían del recuadro: se parten en dos líneas
@@ -30,23 +30,23 @@ function figManual(svg, pie){
 }
 const _FM = 'fill="#6f6d6b" stroke="#eef0f4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
 const _FL = 'fill="none" stroke="#eef0f4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
-const _FT = 'fill="#e8eaee" font-family="system-ui" font-size="11" font-weight="700"';
+const _FT = 'fill="#ffffff" font-family="system-ui" font-size="11" font-weight="700"';
 const _FT10 = _FT.replace('font-size="11"', 'font-size="9.5"');
 
 /* Anatomía de los glúteos (vista posterior): mitad izquierda capa superficial,
    mitad derecha capa profunda (sin el glúteo mayor) para ver medio y menor.
    Colores categóricos validados: mayor ámbar, medio azul, menor verde. */
 function svgGluteosAnatomia(){
-  const L = '#eef0f4', CU = '#15171c', GR = '#6f6d6b';
-  const MAYOR = '#d0731f', MEDIO = '#4a8bd8', MENOR = '#36a877';
+  const L = '#eef0f4', CU = '#0f1336', GR = '#6f6d6b';
+  const MAYOR = '#eb670e', MEDIO = '#6c84ff', MENOR = '#36a877';
   const m = (d, c, extra = '') => `<path d="${d}" fill="${c}" stroke="${L}" stroke-width="1.5" stroke-linejoin="round" ${extra}/>`;
   const guia = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${L}" stroke-width="1" opacity=".55"/><circle cx="${x2}" cy="${y2}" r="1.8" fill="${L}"/>`;
-  const T = 'fill="#e8eaee" font-family="system-ui" font-size="10" font-weight="700"';
-  const Ts = 'fill="#9aa3b2" font-family="system-ui" font-size="9" font-weight="700" letter-spacing=".08em"';
+  const T = 'fill="#ffffff" font-family="system-ui" font-size="10" font-weight="700"';
+  const Ts = 'fill="#bac0e6" font-family="system-ui" font-size="9" font-weight="700" letter-spacing=".08em"';
   // Fibras del glúteo mayor (diagonales hacia el fémur)
   let fibras = '';
   [[140,70,96,104],[146,86,94,124],[147,104,98,140],[146,122,108,154]].forEach(([a,b,c,d]) => {
-    fibras += `<path d="M ${a} ${b} Q ${(a+c)/2+6} ${(b+d)/2-4} ${c} ${d}" fill="none" stroke="#f3b27a" stroke-width="1" opacity=".55"/>`;
+    fibras += `<path d="M ${a} ${b} Q ${(a+c)/2+6} ${(b+d)/2-4} ${c} ${d}" fill="none" stroke="#ffb07a" stroke-width="1" opacity=".55"/>`;
   });
   return `<svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="296" height="216" rx="14" fill="#e7ebf3"/>
@@ -101,10 +101,10 @@ function svgGluteosAnatomia(){
    trabaja el ejercicio se pintan en ámbar (principal) y ámbar oscuro (secundario).
    El lado lejano va atenuado. Coordenadas en el viewBox 300×190. */
 const LINEA = '#eef0f4';
-const CUERPO = '#15171c';
+const CUERPO = '#0f1336';
 const GRIS = '#6f6d6b';
-const FOCO = { principal: '#d0731f', secundario: '#8f5a2e' };
-const MOV = '#4a8bd8'; // flechas de movimiento en azul: el ámbar ya marca los músculos
+const FOCO = { principal: '#eb670e', secundario: '#a4470f' };
+const MOV = '#6c84ff'; // flechas de movimiento en azul: el ámbar ya marca los músculos
 let _idFig = 0;
 /** Género de las figuras ('mujer' | 'hombre'); lo fija construirManual(). */
 let _GEN = 'mujer';
@@ -163,9 +163,9 @@ function _cabeza(c, mira){
     ? `M ${X(-10.5)} ${y - 1} C ${X(-12)} ${y - 14}, ${X(3)} ${y - 17}, ${X(9.5)} ${y - 8} C ${X(4)} ${y - 10.5}, ${X(-2)} ${y - 10}, ${X(-6)} ${y - 4} Z`
     : `M ${X(-10.5)} ${y + 1} C ${X(-12)} ${y - 14}, ${X(3)} ${y - 18}, ${X(9.5)} ${y - 8} C ${X(3)} ${y - 11}, ${X(-3)} ${y - 9}, ${X(-5)} ${y - 1} Z`;
   const cola = `M ${X(-9)} ${y - 8} C ${X(-20)} ${y - 9}, ${X(-24)} ${y + 2}, ${X(-21)} ${y + 13} C ${X(-18)} ${y + 6}, ${X(-14)} ${y - 1}, ${X(-8)} ${y - 3} Z`;
-  return (hombre ? '' : `<path d="${cola}" fill="#3a3e48" ${trazo}/>`)
+  return (hombre ? '' : `<path d="${cola}" fill="#3a4286" ${trazo}/>`)
     + `<path d="${cara}" fill="${CUERPO}" ${trazo}/>`
-    + `<path d="${pelo}" fill="#3a3e48" ${trazo}/>`
+    + `<path d="${pelo}" fill="#3a4286" ${trazo}/>`
     + `<ellipse cx="${X(-3)}" cy="${y + 1}" rx="2.3" ry="3.1" fill="none" stroke="${LINEA}" stroke-width="1.1"/>`;
 }
 
@@ -244,19 +244,19 @@ function _flecha(d, doble = false){
 
 /* Equipo (tonos oscuros con contorno blanco) */
 function _disco(x, y, r){
-  return `<circle cx="${x}" cy="${y}" r="${r}" fill="#2a2e38" stroke="${LINEA}" stroke-width="1.8"/>
+  return `<circle cx="${x}" cy="${y}" r="${r}" fill="#232a66" stroke="${LINEA}" stroke-width="1.8"/>
     <circle cx="${x}" cy="${y}" r="${r * 0.62}" fill="none" stroke="#8a90a0" stroke-width="1.2"/>
     <circle cx="${x}" cy="${y}" r="${r * 0.18}" fill="#8a90a0" stroke="${LINEA}" stroke-width="1"/>`;
 }
 function _banco(x, y, w, alto){
-  return `<rect x="${x}" y="${y}" width="${w}" height="12" rx="5" fill="#3a3f4c" stroke="${LINEA}" stroke-width="1.6"/>
-    <rect x="${x + 8}" y="${y + 12}" width="7" height="${alto}" fill="#2a2e38" stroke="${LINEA}" stroke-width="1.4"/>
-    <rect x="${x + w - 15}" y="${y + 12}" width="7" height="${alto}" fill="#2a2e38" stroke="${LINEA}" stroke-width="1.4"/>`;
+  return `<rect x="${x}" y="${y}" width="${w}" height="12" rx="5" fill="#3a4286" stroke="${LINEA}" stroke-width="1.6"/>
+    <rect x="${x + 8}" y="${y + 12}" width="7" height="${alto}" fill="#232a66" stroke="${LINEA}" stroke-width="1.4"/>
+    <rect x="${x + w - 15}" y="${y + 12}" width="7" height="${alto}" fill="#232a66" stroke="${LINEA}" stroke-width="1.4"/>`;
 }
 function _mancuerna(x, y){
   return `<rect x="${x - 9}" y="${y - 2}" width="18" height="4" rx="2" fill="#8a90a0" stroke="${LINEA}" stroke-width="1"/>
-    <rect x="${x - 12}" y="${y - 6}" width="6" height="12" rx="2" fill="#2a2e38" stroke="${LINEA}" stroke-width="1.3"/>
-    <rect x="${x + 6}" y="${y - 6}" width="6" height="12" rx="2" fill="#2a2e38" stroke="${LINEA}" stroke-width="1.3"/>`;
+    <rect x="${x - 12}" y="${y - 6}" width="6" height="12" rx="2" fill="#232a66" stroke="${LINEA}" stroke-width="1.3"/>
+    <rect x="${x + 6}" y="${y - 6}" width="6" height="12" rx="2" fill="#232a66" stroke="${LINEA}" stroke-width="1.3"/>`;
 }
 const _suelo = (y) => {
   let juntas = '';
@@ -333,13 +333,13 @@ function svgBulgarian(){
 }
 /* Cajón para step-up */
 function _cajon(x, y, w, h){
-  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#2a2e38" stroke="${LINEA}" stroke-width="1.6"/>
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#232a66" stroke="${LINEA}" stroke-width="1.6"/>
     <line x1="${x + 6}" y1="${y + 6}" x2="${x + w - 6}" y2="${y + 6}" stroke="#8a90a0" stroke-width="1.2"/>`;
 }
 /* Máquina de polea: columna, polea baja y cable hasta el tobillo */
 function _polea(x, tobillo){
-  return `<rect x="${x}" y="16" width="14" height="136" rx="3" fill="#2a2e38" stroke="${LINEA}" stroke-width="1.6"/>
-    <rect x="${x - 4}" y="24" width="22" height="10" rx="2" fill="#3a3f4c" stroke="${LINEA}" stroke-width="1.2"/>
+  return `<rect x="${x}" y="16" width="14" height="136" rx="3" fill="#232a66" stroke="${LINEA}" stroke-width="1.6"/>
+    <rect x="${x - 4}" y="24" width="22" height="10" rx="2" fill="#3a4286" stroke="${LINEA}" stroke-width="1.2"/>
     <circle cx="${x + 7}" cy="142" r="5" fill="#8a90a0" stroke="${LINEA}" stroke-width="1.2"/>
     <line x1="${x + 2}" y1="142" x2="${tobillo[0]}" y2="${tobillo[1]}" stroke="#c9cfdd" stroke-width="1.4" stroke-dasharray="1 0"/>`;
 }
@@ -385,9 +385,9 @@ function maniquiFrente(p){
   ]);
   // Cabeza de frente
   const yc = yH - 22;
-  out += (H ? '' : `<ellipse cx="${cx}" cy="${yc - 12}" rx="7" ry="5" fill="#3a3e48" stroke="${LINEA}" stroke-width="1.4"/>`)
+  out += (H ? '' : `<ellipse cx="${cx}" cy="${yc - 12}" rx="7" ry="5" fill="#3a4286" stroke="${LINEA}" stroke-width="1.4"/>`)
     + `<ellipse cx="${cx}" cy="${yc}" rx="10.5" ry="12.5" fill="${CUERPO}" stroke="${LINEA}" stroke-width="1.6"/>
-    <path d="M ${cx - 10.5} ${yc - 2} C ${cx - 11} ${yc - 15}, ${cx + 11} ${yc - 15}, ${cx + 10.5} ${yc - 2} C ${cx + 6} ${yc - 8}, ${cx - 6} ${yc - 8}, ${cx - 10.5} ${yc - 2} Z" fill="#3a3e48" stroke="${LINEA}" stroke-width="1.4"/>`;
+    <path d="M ${cx - 10.5} ${yc - 2} C ${cx - 11} ${yc - 15}, ${cx + 11} ${yc - 15}, ${cx + 10.5} ${yc - 2} C ${cx + 6} ${yc - 8}, ${cx - 6} ${yc - 8}, ${cx - 10.5} ${yc - 2} Z" fill="#3a4286" stroke="${LINEA}" stroke-width="1.4"/>`;
   return out;
 }
 
