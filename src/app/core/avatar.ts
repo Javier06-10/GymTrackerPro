@@ -85,7 +85,7 @@ export function dibujarAvatar(c, vistaForzada: VistaAvatar, ancho?: number): str
       <stop offset=".62" stop-color="#f4f6fa"/><stop offset="1" stop-color="#cfd5e3"/>
     </linearGradient>
     <radialGradient id="avFondo" cx=".5" cy=".42" r=".75">
-      <stop offset="0" stop-color="#262f78"/><stop offset="1" stop-color="#0a0d2a"/>
+      <stop offset="0" class="fig-fondo-1" stop-color="#262f78"/><stop offset="1" class="fig-fondo-2" stop-color="#0a0d2a"/>
     </radialGradient>
   </defs>`;
 

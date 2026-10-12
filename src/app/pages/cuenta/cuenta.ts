@@ -4,6 +4,7 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth.service';
 import { DatosService } from '../../core/datos.service';
 import { Sistema, UnidadesService } from '../../core/unidades';
+import { TEMAS, Tema, TemaService } from '../../core/tema.service';
 import { Plan } from '../../core/modelos';
 import { supabase } from '../../core/supabase';
 import { UiService } from '../../core/ui.service';
@@ -125,6 +126,23 @@ interface PagoSuscripcion { id: string; monto: number; metodo: string; referenci
           <button class="btn btn-primario" (click)="guardarPerfil()"><app-icono nombre="guardar" [tam]="15" /> Guardar perfil</button>
         </div>
       </div>
+    </div>
+
+    <div class="titulo-seccion"><app-icono nombre="estrella" [tam]="16" /> Tema de la app</div>
+    <div class="grid-temas" role="radiogroup" aria-label="Tema de la app">
+      @for (t of temas; track t.v) {
+        <button class="op-tema" role="radio" [attr.aria-checked]="tema.tema() === t.v" [class.activa]="tema.tema() === t.v"
+          [disabled]="guardandoTema()" (click)="cambiarTema(t.v)">
+          <span class="ot-vista" [style.background]="t.muestras[0]">
+            <span class="ot-barra" [style.background]="t.muestras[1]"></span>
+            <span class="ot-tarjeta" [style.background]="t.muestras[1]" [style.opacity]="t.v === 'fuerza' || t.v === 'bienestar' ? .18 : 1"></span>
+            <span class="ot-boton" [style.background]="t.muestras[2]"></span>
+            <span class="ot-punto" [style.background]="t.muestras[3]"></span>
+          </span>
+          <span class="ot-t">@if (tema.tema() === t.v) { <app-icono nombre="check" [tam]="14" /> }{{ t.t }}</span>
+          <span class="ot-s">{{ t.s }}</span>
+        </button>
+      }
     </div>
 
     <div class="titulo-seccion"><app-icono nombre="balanza" [tam]="16" /> Unidades de medida</div>
@@ -251,6 +269,23 @@ export class Cuenta implements OnInit {
 
   protected readonly unidades = inject(UnidadesService);
   protected readonly guardandoUnidades = signal(false);
+  protected readonly tema = inject(TemaService);
+  protected readonly temas = TEMAS;
+  protected readonly guardandoTema = signal(false);
+
+  async cambiarTema(t: Tema) {
+    if (t === this.tema.tema()) return;
+    this.guardandoTema.set(true);
+    try {
+      await this.tema.elegir(t);
+      this.ui.toast('Tema aplicado ✓');
+    } catch (e) {
+      this.ui.error(e);
+    } finally {
+      this.guardandoTema.set(false);
+    }
+  }
+
   protected readonly opcionesUnidad: { v: Sistema; t: string; s: string }[] = [
     { v: 'imperial', t: 'Libras y pulgadas', s: 'lb · in · pies' },
     { v: 'metrico', t: 'Kilos y centímetros', s: 'kg · cm' },

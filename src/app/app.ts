@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { PwaService } from './core/pwa.service';
+import { TemaService } from './core/tema.service';
 import { UiService } from './core/ui.service';
 import { Icono } from './shared/icono';
 import { Modal } from './shared/modal';
@@ -49,4 +50,6 @@ import { Modal } from './shared/modal';
 export class App {
   protected readonly ui = inject(UiService);
   protected readonly pwa = inject(PwaService);
+  // Se crea con la app para aplicar el tema desde la pantalla de entrada
+  private readonly tema = inject(TemaService);
 }

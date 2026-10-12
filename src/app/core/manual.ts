@@ -12,7 +12,7 @@ export interface CapituloManual { id: string; t: string; h: string }
 // Mismo lenguaje que el mapa muscular del avatar: fondo oscuro, músculos grises, contornos blancos.
 const DEFS_FIG = `<defs>
   <radialGradient id="figFondo" cx=".5" cy=".4" r=".8">
-    <stop offset="0" stop-color="#262f78"/><stop offset="1" stop-color="#0a0d2a"/>
+    <stop offset="0" class="fig-fondo-1" stop-color="#262f78"/><stop offset="1" class="fig-fondo-2" stop-color="#0a0d2a"/>
   </radialGradient>
 </defs>`;
 const LEYENDA_FIG = '<span class="leyenda-fig"><i style="background:#eb670e"></i>Músculo principal <i style="background:#a4470f"></i>Secundario <i class="flecha"></i>Movimiento</span>';

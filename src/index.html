@@ -19,6 +19,8 @@
   <script>
     // El aviso de "instalar app" puede llegar antes de que arranque Angular: se guarda para PwaService.
     window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__pwaPrompt = e; });
+    // Tema guardado en este dispositivo: se aplica antes de pintar para que no parpadee el color
+    try { document.documentElement.dataset.tema = localStorage.getItem('gt-tema') || 'marca'; } catch (e) { document.documentElement.dataset.tema = 'marca'; }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

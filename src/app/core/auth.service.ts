@@ -93,7 +93,7 @@ export class AuthService {
     await supabase.auth.signOut();
   }
 
-  async actualizarPerfil(cambios: Partial<Pick<Perfil, 'nombre' | 'negocio' | 'telefono' | 'logo_url' | 'unidades'>>) {
+  async actualizarPerfil(cambios: Partial<Pick<Perfil, 'nombre' | 'negocio' | 'telefono' | 'logo_url' | 'unidades' | 'tema'>>) {
     const uid = this.sesion()?.user.id;
     const { data, error } = await supabase.from('perfiles').update(cambios).eq('id', uid!).select().single();
     if (error) throw error;
