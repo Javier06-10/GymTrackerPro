@@ -1189,3 +1189,18 @@ app-marca-auth{display:block;}
 @media(max-width:760px){
   .unidades-pref{grid-template-columns:1fr;gap:14px;}
 }
+
+/* ---------- Fechas ---------- */
+/* Calendario nativo en tema oscuro: icono y selector legibles */
+:root{color-scheme:dark;}
+.campo input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.75);cursor:pointer;opacity:.9;}
+/* Fecha de nacimiento en tres listas (día / mes / año) */
+.fecha-tres{display:grid;grid-template-columns:.8fr 1.4fr 1fr;gap:6px;}
+.fecha-tres select{min-width:0;padding-left:8px;padding-right:4px;}
+.enlace-mini{
+  align-self:flex-start;margin-top:4px;background:none;border:0;padding:0;cursor:pointer;
+  font-family:var(--fuente);font-size:12px;color:var(--tenue);text-decoration:underline;
+}
+.enlace-mini:hover{color:var(--rojo);}
+.fe-confirmar{margin-top:8px;}
+.nota-info a{color:var(--ambar);font-weight:700;}

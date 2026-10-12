@@ -31,6 +31,11 @@ import { Icono } from '../../shared/icono';
               </div>
             }
             @if (error()) { <div class="error-form">{{ error() }}</div> }
+            @if (sinConfirmar()) {
+              <button type="button" class="btn btn-suave btn-mini" style="justify-content:center;" [disabled]="cargando()" (click)="reenviar()">
+                <app-icono nombre="enviar" [tam]="15" /> Reenviar correo de confirmación
+              </button>
+            }
             @if (aviso()) { <div class="ok-form">{{ aviso() }}</div> }
             <button class="btn btn-primario" style="justify-content:center;" [disabled]="cargando()">
               {{ cargando() ? 'Un momento…' : recuperando() ? 'Enviar enlace de recuperación' : 'Entrar' }}
@@ -57,12 +62,32 @@ export class Login {
   readonly aviso = signal('');
   readonly recuperando = signal(false);
 
+  /** La cuenta existe pero no ha confirmado el correo: se ofrece reenviarlo. */
+  readonly sinConfirmar = signal(false);
+
   async entrar() {
     this.error.set('');
+    this.aviso.set('');
+    this.sinConfirmar.set(false);
     this.cargando.set(true);
     try {
       await this.auth.entrar(this.email.trim(), this.clave);
       this.router.navigateByUrl('/panel');
+    } catch (e) {
+      this.sinConfirmar.set(/Email not confirmed/i.test((e as { message?: string })?.message ?? ''));
+      this.error.set(mensajeError(e));
+    } finally {
+      this.cargando.set(false);
+    }
+  }
+
+  async reenviar() {
+    this.error.set('');
+    this.cargando.set(true);
+    try {
+      await this.auth.reenviarConfirmacion(this.email.trim());
+      this.sinConfirmar.set(false);
+      this.aviso.set(`Te reenviamos el correo de confirmación a ${this.email.trim()}. Revisa también la carpeta de Spam.`);
     } catch (e) {
       this.error.set(mensajeError(e));
     } finally {

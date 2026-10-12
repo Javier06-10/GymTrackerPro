@@ -78,6 +78,12 @@ export class AuthService {
     return { requiereConfirmacion: !data.session };
   }
 
+  /** Vuelve a enviar el correo de confirmación de una cuenta nueva. */
+  async reenviarConfirmacion(email: string) {
+    const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: location.origin + '/login' } });
+    if (error) throw error;
+  }
+
   async recuperarClave(email: string) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/cuenta' });
     if (error) throw error;

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { mensajeError } from '../../core/supabase';
+import { environment } from '../../../environments/environment';
 import { MarcaAuth } from '../../shared/marca-auth';
 import { Icono } from '../../shared/icono';
 
@@ -21,7 +22,11 @@ import { Icono } from '../../shared/icono';
         <div class="tarjeta">
           @if (enviado()) {
             <div class="ok-form">
-              Te enviamos un correo a <b>{{ email }}</b>. Confirma tu cuenta desde ese enlace y luego entra.
+              ¡Cuenta creada! Te enviamos un correo a <b>{{ email }}</b>. Confirma tu cuenta desde ese enlace y luego entra.
+            </div>
+            <div class="nota-info" style="margin-top:10px;">
+              ¿No te llega en unos minutos? Revisa la carpeta de <b>Spam</b> o
+              <a [href]="enlaceWhatsApp()" target="_blank" rel="noopener">escríbenos por WhatsApp</a> y activamos tu cuenta.
             </div>
             <a routerLink="/login" class="btn btn-primario" style="justify-content:center;margin-top:14px;">Ir a entrar</a>
           } @else {
@@ -58,6 +63,11 @@ export class Registro {
   readonly cargando = signal(false);
   readonly error = signal('');
   readonly enviado = signal(false);
+
+  enlaceWhatsApp() {
+    const msj = `Hola 👋 Me registré en GymTracker Pro con el correo ${this.email.trim()} y no me llegó el correo de confirmación.`;
+    return 'https://wa.me/' + environment.whatsappVentas + '?text=' + encodeURIComponent(msj);
+  }
 
   async registrar() {
     this.error.set('');

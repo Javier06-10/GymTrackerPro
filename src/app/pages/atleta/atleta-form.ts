@@ -5,7 +5,7 @@ import { DatosService } from '../../core/datos.service';
 import { derivarObjetivo } from '../../core/dominio';
 import { Atleta, Composicion, Genero, Objetivo } from '../../core/modelos';
 import { UiService } from '../../core/ui.service';
-import { edadDesde, hoyISO } from '../../core/util';
+import { MESES_ES, edadDesde, hoyISO } from '../../core/util';
 import { Modal } from '../../shared/modal';
 import { Icono } from '../../shared/icono';
 import { UnidadesService, estaturaCm, estaturaDesdeCm } from '../../core/unidades';
@@ -39,7 +39,25 @@ import { UnidadesService, estaturaCm, estaturaDesdeCm } from '../../core/unidade
       </div>
       <div class="form-grid">
         <div class="campo"><label>Fecha de nacimiento</label>
-          <input type="date" [(ngModel)]="f.fechaNacimiento" (ngModelChange)="alCambiarNacimiento($event)" /></div>
+          <!-- Día / mes / año por separado: el calendario nativo cambia de orden según el idioma del equipo (mm/dd) -->
+          <div class="fecha-tres">
+            <select [(ngModel)]="nac.dia" (ngModelChange)="alCambiarNacimiento()" aria-label="Día de nacimiento">
+              <option [ngValue]="null">Día</option>
+              @for (d of diasNac(); track d) { <option [ngValue]="d">{{ d }}</option> }
+            </select>
+            <select [(ngModel)]="nac.mes" (ngModelChange)="alCambiarNacimiento()" aria-label="Mes de nacimiento">
+              <option [ngValue]="null">Mes</option>
+              @for (m of meses; track $index) { <option [ngValue]="$index + 1">{{ m }}</option> }
+            </select>
+            <select [(ngModel)]="nac.anio" (ngModelChange)="alCambiarNacimiento()" aria-label="Año de nacimiento">
+              <option [ngValue]="null">Año</option>
+              @for (y of anios; track y) { <option [ngValue]="y">{{ y }}</option> }
+            </select>
+          </div>
+          @if (nac.dia || nac.mes || nac.anio) {
+            <button type="button" class="enlace-mini" (click)="borrarNacimiento()">Quitar fecha</button>
+          }
+        </div>
         <div class="campo"><label>Edad (años)</label>
           <input type="number" min="10" max="99" placeholder="Auto con la fecha" [(ngModel)]="f.edad" /></div>
         <div class="campo"><label>Objetivo a lograr</label>
@@ -136,12 +154,37 @@ export class AtletaForm implements OnInit {
         grupoId: a.grupoId, horasSueno: a.horasSueno, estiloVida: a.estiloVida, objetivoTexto: a.objetivoTexto,
         condiciones: a.condiciones, composicion: a.composicion,
       };
+      const [y, m, d] = (a.fechaNacimiento || '').split('-').map(Number);
+      if (y && m && d) this.nac = { dia: d, mes: m, anio: y };
     }
   }
 
-  alCambiarNacimiento(v: string) {
-    const e = v ? edadDesde(v) : null;
+  /* ---------- Fecha de nacimiento (día / mes / año) ---------- */
+  protected readonly meses = MESES_ES;
+  protected readonly anios = Array.from({ length: 91 }, (_, i) => new Date().getFullYear() - 5 - i);
+  protected nac: { dia: number | null; mes: number | null; anio: number | null } = { dia: null, mes: null, anio: null };
+
+  /** Días del mes elegido (28–31); sin mes o año, 31. */
+  protected diasNac() {
+    const total = this.nac.mes ? new Date(this.nac.anio ?? 2000, this.nac.mes, 0).getDate() : 31;
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  alCambiarNacimiento() {
+    const { dia, mes, anio } = this.nac;
+    // Si se cambia a un mes más corto (31 → febrero), el día se ajusta al último válido
+    if (dia && mes && anio) {
+      const max = new Date(anio, mes, 0).getDate();
+      if (dia > max) this.nac.dia = max;
+    }
+    this.f.fechaNacimiento = this.nac.dia && mes && anio ? `${anio}-${String(mes).padStart(2, '0')}-${String(this.nac.dia).padStart(2, '0')}` : '';
+    const e = this.f.fechaNacimiento ? edadDesde(this.f.fechaNacimiento) : null;
     if (e !== null) this.f.edad = e;
+  }
+
+  borrarNacimiento() {
+    this.nac = { dia: null, mes: null, anio: null };
+    this.f.fechaNacimiento = '';
   }
 
   async guardar() {

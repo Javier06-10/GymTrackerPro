@@ -67,8 +67,15 @@ type Filtro = 'todos' | 'Activa' | 'Prueba' | 'Vencida';
         <div class="fila-entrenador">
           <app-avatar-iniciales [nombre]="e.nombre || e.email" genero="hombre" [tam]="42" />
           <div class="fe-info">
-            <div class="fe-nombre">{{ e.nombre || '—' }} @if (e.rol === 'admin') { <span class="chip chip-acero">Admin</span> }</div>
+            <div class="fe-nombre">
+              {{ e.nombre || '—' }}
+              @if (e.rol === 'admin') { <span class="chip chip-acero">Admin</span> }
+              @if (sinConfirmar(e.id)) { <span class="chip chip-rojo" title="No ha confirmado su correo: no puede entrar"><app-icono nombre="alerta" [tam]="12" /> Correo sin confirmar</span> }
+            </div>
             <div class="fe-sub">{{ e.negocio ? e.negocio + ' · ' : '' }}{{ e.email }}</div>
+            @if (sinConfirmar(e.id)) {
+              <button class="btn btn-suave btn-mini fe-confirmar" (click)="confirmarCorreo(e)"><app-icono nombre="check" [tam]="14" /> Confirmar correo y dar acceso</button>
+            }
           </div>
           <div class="fe-plan">
             <span [class]="'chip ' + chipEstado(s)">{{ estado(s) }}</span>
@@ -156,10 +163,33 @@ export class Admin implements OnInit {
   }
 
   async cargar() {
-    const { data, error } = await supabase.from('perfiles').select('*, suscripciones(*)').order('created_at', { ascending: false });
-    if (error) return this.ui.error(error);
-    this.lista.set((data as Entrenador[]) ?? []);
+    const [perfiles, correos] = await Promise.all([
+      supabase.from('perfiles').select('*, suscripciones(*)').order('created_at', { ascending: false }),
+      supabase.rpc('admin_estado_correos'),
+    ]);
+    if (perfiles.error) return this.ui.error(perfiles.error);
+    this.lista.set((perfiles.data as Entrenador[]) ?? []);
+    const pendientes = ((correos.data as { trainer_id: string; confirmado: boolean }[]) ?? []).filter((c) => !c.confirmado);
+    this.pendientes.set(new Set(pendientes.map((c) => c.trainer_id)));
     this.cargado.set(true);
+  }
+
+  /* ---------- Correos sin confirmar ---------- */
+  protected readonly pendientes = signal<Set<string>>(new Set());
+  protected sinConfirmar(id: string) {
+    return this.pendientes().has(id);
+  }
+  async confirmarCorreo(e: Entrenador) {
+    const ok = await this.ui.confirmar(
+      'Confirmar correo',
+      `<b>${esc(e.nombre || e.email)}</b> podrá entrar con su correo y contraseña sin usar el enlace de confirmación.`,
+      'Confirmar y dar acceso',
+    );
+    if (!ok) return;
+    const { error } = await supabase.rpc('admin_confirmar_correo', { p_trainer_id: e.id });
+    if (error) return this.ui.error(error);
+    this.ui.toast('Correo confirmado ✓ Ya puede entrar');
+    await this.cargar();
   }
 
   private vigente(s: Suscripcion) {
