@@ -158,7 +158,7 @@ export class AtletaPage {
     const d = a.proximoPago ? diasDesde(a.proximoPago) ?? 0 : null;
     return {
       peso: ult ? this.u.pesoTxt(ult.peso) : '—',
-      cambioPeso: ult && prim && a.medidas.length > 1 ? deltaPeso(a.objetivo, this.u.peso(ult.peso), this.u.peso(prim.peso)) : null,
+      cambioPeso: ult && prim && a.medidas.length > 1 ? deltaPeso(a, this.u.peso(ult.peso), this.u.peso(prim.peso)) : null,
       ultimaMedicion: ult ? 'medido el ' + fmtFecha(ult.fecha) : 'sin mediciones',
       racha: rachaActual(a),
       asistenciaMes: e + f ? Math.round((e / (e + f)) * 100) + '%' : '—',

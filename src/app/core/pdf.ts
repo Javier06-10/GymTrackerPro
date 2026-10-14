@@ -3,7 +3,7 @@
    Genera PDF 1.4 a mano: Helvetica WinAnsi, carta (612x792),
    coordenadas con y hacia abajo y logo JPEG opcional.
    ============================================================ */
-import { ZONAS, ZONAS_INVERTIDAS, avanceObjetivo, medicionPendiente, pagoVencido, serieMedida, unidadObjetivo, verValorObjetivo } from './dominio';
+import { ZONAS, avanceObjetivo, bajarEsBueno, quiereBajar, medicionPendiente, pagoVencido, serieMedida, unidadObjetivo, verValorObjetivo } from './dominio';
 import { Sistema, largoTxt, largoVer, pesoTxt, pesoVer, uLargo, uPeso } from './unidades';
 import { Atleta, Medida, PagoAtleta } from './modelos';
 import { MESES_ES, diasDesde, fmtDinero, fmtFecha, hoyISO, normalizar } from './util';
@@ -179,13 +179,14 @@ export function compararProgreso(a: Atleta, s: Sistema = 'imperial'): Comparacio
   const filas: FilaComparacion[] = [];
   if (ant.peso != null && act.peso != null) {
     const d = Number((pesoVer(act.peso, s)! - pesoVer(ant.peso, s)!).toFixed(1));
-    const neutral = !(a.objetivo === 'perder' || a.objetivo === 'ganar');
-    filas.push({ zona: 'Peso corporal', antes: pesoTxt(ant.peso, s), ahora: pesoTxt(act.peso, s), delta: d, ev: evaluar(d, a.objetivo === 'perder', neutral) });
+    const bajar = quiereBajar(a);
+    const neutral = !(bajar || a.objetivo === 'ganar');
+    filas.push({ zona: 'Peso corporal', antes: pesoTxt(ant.peso, s), ahora: pesoTxt(act.peso, s), delta: d, ev: evaluar(d, bajar, neutral) });
   }
   ZONAS.forEach(([z, nombre]) => {
     if (ant[z] != null && act[z] != null) {
       const d = Number((largoVer(act[z], s)! - largoVer(ant[z], s)!).toFixed(1));
-      filas.push({ zona: nombre, antes: largoTxt(ant[z], s), ahora: largoTxt(act[z], s), delta: d, ev: evaluar(d, ZONAS_INVERTIDAS.has(z), false) });
+      filas.push({ zona: nombre, antes: largoTxt(ant[z], s), ahora: largoTxt(act[z], s), delta: d, ev: evaluar(d, bajarEsBueno(a, z), false) });
     }
   });
   if (!filas.length) return null;

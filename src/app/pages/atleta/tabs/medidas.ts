@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { VistaAvatar, dibujarAvatar } from '../../../core/avatar';
 import { GraficaLinea } from '../../../shared/graficas/grafica-linea';
 import { DatosService } from '../../../core/datos.service';
-import { GRUPOS_MEDIDA, ZONAS, ZONAS_INVERTIDAS, delta, deltaPeso, etiquetaZona, medicionPendiente, serieMedida, ultimaMedida } from '../../../core/dominio';
+import { GRUPOS_MEDIDA, ZONAS, bajarEsBueno, delta, deltaPeso, etiquetaZona, medicionPendiente, serieMedida, ultimaMedida } from '../../../core/dominio';
 import { Atleta, Medida } from '../../../core/modelos';
 import { AuthService } from '../../../core/auth.service';
 import { compararProgreso } from '../../../core/pdf';
@@ -169,8 +169,9 @@ export class TabMedidas {
   protected readonly etiqueta = etiquetaZona;
   protected readonly fecha = fmtFecha;
   protected readonly d = delta;
-  protected dp(actual: unknown, anterior: unknown) { return deltaPeso(this.atleta().objetivo, actual, anterior); }
-  protected invertida(z: string) { return ZONAS_INVERTIDAS.has(z); }
+  protected dp(actual: unknown, anterior: unknown) { return deltaPeso(this.atleta(), actual, anterior); }
+  /** Si el atleta quiere bajar de peso, que baje cualquier medida es avance (verde). */
+  protected invertida(z: string) { return bajarEsBueno(this.atleta(), z); }
 
   protected readonly vistas: [VistaAvatar, string][] = [['frente', 'Frente'], ['lado', 'Lado'], ['espalda', 'Espalda']];
   protected readonly vista = signal<VistaAvatar>('frente');
@@ -211,7 +212,7 @@ export class TabMedidas {
     const s = this.serieActiva();
     if (s.length < 2) return null;
     const clave = this.metricaActiva()[0];
-    return clave === 'peso' ? this.dp(s[s.length - 1].valor, s[0].valor) : delta(s[s.length - 1].valor, s[0].valor, ZONAS_INVERTIDAS.has(clave));
+    return clave === 'peso' ? this.dp(s[s.length - 1].valor, s[0].valor) : delta(s[s.length - 1].valor, s[0].valor, this.invertida(clave));
   });
 
   /* ---------- Alta de medición ---------- */

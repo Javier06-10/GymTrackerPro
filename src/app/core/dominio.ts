@@ -158,10 +158,27 @@ export function delta(actual: unknown, anterior: unknown, invertido: boolean) {
   return { txt: (d > 0 ? '+' : '') + d, cls: bueno ? 'delta-pos' : 'delta-neg' };
 }
 
-/** Delta de peso coloreado según el objetivo: perder → bajar es bueno; ganar → subir; recomp/mantener → neutro. */
-export function deltaPeso(objetivo: Objetivo, actual: unknown, anterior: unknown) {
-  const d = delta(actual, anterior, objetivo === 'perder');
-  if (d && (objetivo === 'recomp' || objetivo === 'mantener')) return { ...d, cls: 'delta-cero' };
+/** Meta escrita que pide bajar: "Bajar de peso", "Bajar 12 lbs", "Perder grasa", "Adelgazar"... */
+const META_BAJAR = /\b(bajar|rebajar|adelgaz\w*|perder (?:de )?(?:peso|grasa|libras|kilos|medidas)|quemar grasa|reducir (?:peso|grasa|medidas))\b/i;
+
+/**
+ * El atleta busca bajar de peso: objetivo "Perder grasa" o una meta escrita que lo pide.
+ * En ese caso que bajen las medidas (brazos, piernas, cadera…) también es avance.
+ */
+export function quiereBajar(a: Pick<Atleta, 'objetivo' | 'objetivoTexto'>): boolean {
+  return a.objetivo === 'perder' || META_BAJAR.test(a.objetivoTexto || '');
+}
+
+/** ¿Para este atleta, que baje esta zona es bueno? (abdomen siempre; todas si quiere bajar de peso). */
+export function bajarEsBueno(a: Pick<Atleta, 'objetivo' | 'objetivoTexto'>, zona: string): boolean {
+  return quiereBajar(a) || ZONAS_INVERTIDAS.has(zona);
+}
+
+/** Delta de peso coloreado según el objetivo: bajar de peso → bajar es bueno; ganar → subir; recomp/mantener → neutro. */
+export function deltaPeso(a: Pick<Atleta, 'objetivo' | 'objetivoTexto'>, actual: unknown, anterior: unknown) {
+  if (quiereBajar(a)) return delta(actual, anterior, true);
+  const d = delta(actual, anterior, false);
+  if (d && a.objetivo !== 'ganar') return { ...d, cls: 'delta-cero' };
   return d;
 }
 
@@ -222,10 +239,10 @@ export function lecturaProgreso(a: Atleta): { dPeso: number; dAbd: number | null
   const dPeso = Number((ult.peso - prim.peso).toFixed(1));
   const dAbd = ult.abdomenOmbligo != null && prim.abdomenOmbligo != null ? Number((ult.abdomenOmbligo - prim.abdomenOmbligo).toFixed(1)) : null;
   let lectura = '';
-  if (a.objetivo === 'perder') lectura = dPeso < 0 || (dAbd != null && dAbd < 0) ? 'La tendencia va en la dirección del objetivo.' : 'La tendencia aún no muestra reducción — revisa la adherencia al plan.';
-  if (a.objetivo === 'ganar') lectura = dPeso > 0 ? 'La tendencia va en la dirección del objetivo.' : 'El peso no está subiendo — probablemente falta comer más.';
-  if (a.objetivo === 'recomp') lectura = dAbd != null && dAbd < 0 ? 'El abdomen está bajando con el peso estable: recomposición en marcha.' : 'Sigue midiendo: en recomposición las cintas dicen más que la báscula.';
-  if (a.objetivo === 'mantener') lectura = Math.abs(dPeso) <= 3 ? 'Peso estable: mantenimiento logrado.' : 'El peso se está moviendo — ajusta calorías si no es intencional.';
+  if (quiereBajar(a)) lectura = dPeso < 0 || (dAbd != null && dAbd < 0) ? 'La tendencia va en la dirección del objetivo.' : 'La tendencia aún no muestra reducción — revisa la adherencia al plan.';
+  else if (a.objetivo === 'ganar') lectura = dPeso > 0 ? 'La tendencia va en la dirección del objetivo.' : 'El peso no está subiendo — probablemente falta comer más.';
+  else if (a.objetivo === 'recomp') lectura = dAbd != null && dAbd < 0 ? 'El abdomen está bajando con el peso estable: recomposición en marcha.' : 'Sigue midiendo: en recomposición las cintas dicen más que la báscula.';
+  else if (a.objetivo === 'mantener') lectura = Math.abs(dPeso) <= 3 ? 'Peso estable: mantenimiento logrado.' : 'El peso se está moviendo — ajusta calorías si no es intencional.';
   return { dPeso, dAbd, lectura };
 }
 
