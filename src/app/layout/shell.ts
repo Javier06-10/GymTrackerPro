@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { AuthService } from '../core/auth.service';
 import { DatosService } from '../core/datos.service';
 import { PwaService } from '../core/pwa.service';
+import { RutinasCompartidasService } from '../core/rutinas-compartidas.service';
 import { UiService } from '../core/ui.service';
 import { AtletaForm } from '../pages/atleta/atleta-form';
 import { Icono } from '../shared/icono';
@@ -23,7 +24,7 @@ import { Icono } from '../shared/icono';
           </div>
         </a>
         <nav class="nav-top">
-          <a routerLink="/panel" routerLinkActive="activo">Panel</a>
+          <a routerLink="/panel" routerLinkActive="activo">Panel@if (compartidas.recibidas().length) { <span class="contador" title="Rutinas recibidas">{{ compartidas.recibidas().length }}</span> }</a>
           <a routerLink="/manual" routerLinkActive="activo">Manual</a>
           <a routerLink="/cuenta" routerLinkActive="activo">Mi cuenta</a>
           @if (auth.esAdmin()) { <a routerLink="/admin" routerLinkActive="activo">Admin</a> }
@@ -41,7 +42,7 @@ import { Icono } from '../shared/icono';
         <button class="btn btn-fantasma btn-txt" (click)="salir()" title="Cerrar sesión" aria-label="Cerrar sesión"><app-icono nombre="salir" [tam]="17" /></button>
         @if (menu()) {
           <div class="menu-desplegable" (click)="menu.set(false)">
-            <a routerLink="/panel"><app-icono nombre="casa" [tam]="16" /> Panel</a>
+            <a routerLink="/panel"><app-icono nombre="casa" [tam]="16" /> Panel@if (compartidas.recibidas().length) { <span class="contador">{{ compartidas.recibidas().length }}</span> }</a>
             <a routerLink="/manual"><app-icono nombre="libro" [tam]="16" /> Manual del entrenador</a>
             <a routerLink="/cuenta"><app-icono nombre="persona" [tam]="16" /> Mi cuenta y plan</a>
             @if (auth.esAdmin()) { <a routerLink="/admin"><app-icono nombre="herramienta" [tam]="16" /> Administración</a> }
@@ -79,6 +80,7 @@ export class Shell {
   protected readonly datos = inject(DatosService);
   protected readonly ui = inject(UiService);
   protected readonly pwa = inject(PwaService);
+  protected readonly compartidas = inject(RutinasCompartidasService);
   private readonly router = inject(Router);
   protected readonly menu = signal(false);
   protected readonly cargando = signal(true);
@@ -112,6 +114,7 @@ export class Shell {
     try {
       if (!this.auth.perfil()) await this.auth.cargarCuenta();
       if (!this.datos.cargado()) await this.datos.cargar();
+      this.compartidas.cargar().catch(() => undefined);
     } catch (e) {
       this.ui.error(e);
     } finally {

@@ -12,6 +12,7 @@ import { Modal } from '../../../shared/modal';
 import { Sparkline } from '../../../shared/graficas/sparkline';
 import { Icono } from '../../../shared/icono';
 import { UnidadesService } from '../../../core/unidades';
+import { RutinasCompartidasService, diasConContenido, prepararDias } from '../../../core/rutinas-compartidas.service';
 
 interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls: string } }
 
@@ -136,7 +137,31 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
 
     @if (compartir()) {
       <app-modal titulo="Compartir Rutina" (cerrar)="compartir.set(false)">
-        @if (!otros().length) {
+        <div class="segmentado segmentado-ancho" role="group" aria-label="Con quién compartir">
+          <button [class.activo]="modo() === 'atletas'" (click)="modo.set('atletas')"><app-icono nombre="usuarios" [tam]="15" /> A mis atletas</button>
+          <button [class.activo]="modo() === 'entrenador'" (click)="modo.set('entrenador')"><app-icono nombre="enviar" [tam]="15" /> A otro entrenador</button>
+        </div>
+        @if (modo() === 'entrenador') {
+          <div class="campo"><label>¿Qué enviar de {{ a.nombre }}?</label>
+            <select [(ngModel)]="cr.dia">
+              <option value="__todos__">Toda la semana ({{ diasConEjercicios() }} día{{ diasConEjercicios() === 1 ? '' : 's' }} con ejercicios)</option>
+              @for (d of dias; track d) {
+                <option [value]="d">{{ d }}{{ a.rutina[d].titulo ? ' — ' + a.rutina[d].titulo : '' }} ({{ a.rutina[d].ejercicios.length }} ej.)</option>
+              }
+            </select>
+          </div>
+          <div class="campo"><label>Correo del entrenador</label>
+            <input type="email" [(ngModel)]="env.email" placeholder="Ej. coach@gmail.com" autocomplete="off" /></div>
+          <div class="campo"><label>Nombre de la rutina</label>
+            <input type="text" [(ngModel)]="env.nombre" maxlength="120" placeholder="Ej. Glúteo y pierna · 4 días" /></div>
+          <div class="campo"><label>Nota (opcional)</label>
+            <textarea [(ngModel)]="env.nota" maxlength="500" rows="2" placeholder="Ej. Ideal para principiantes, subir carga cada 2 semanas"></textarea></div>
+          <label style="display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--texto-suave);cursor:pointer;">
+            <input type="checkbox" [(ngModel)]="cr.pesos" style="width:16px;height:16px;accent-color:var(--ambar);" />
+            Incluir los pesos de trabajo
+          </label>
+          <div class="nota-info">El entrenador debe tener cuenta en GymTracker Pro con ese correo. La recibirá en su panel, en <b>Rutinas recibidas</b>, y decide a qué atletas aplicarla. No se envían datos de {{ a.nombre }}: solo los ejercicios.</div>
+        } @else if (!otros().length) {
           <p style="color:var(--texto-suave);font-size:14px;">No hay otros atletas registrados a quienes copiarles la rutina. Crea otro atleta primero.</p>
         } @else {
           <div class="campo"><label>¿Qué copiar de {{ a.nombre }}?</label>
@@ -165,8 +190,13 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
           <div class="nota-info">La rutina copiada <b>sobrescribe</b> los días seleccionados en el atleta de destino. El historial de carga no se copia: cada atleta arranca el suyo.</div>
         }
         <ng-container pie>
-          <button class="btn btn-fantasma" (click)="compartir.set(false)">{{ otros().length ? 'Cancelar' : 'Entendido' }}</button>
-          @if (otros().length) { <button class="btn btn-primario" (click)="ejecutarCompartir()"><app-icono nombre="compartir" [tam]="15" /> Copiar rutina</button> }
+          @if (modo() === 'entrenador') {
+            <button class="btn btn-fantasma" (click)="compartir.set(false)">Cancelar</button>
+            <button class="btn btn-primario" (click)="enviarAEntrenador()" [disabled]="enviando()"><app-icono nombre="enviar" [tam]="15" /> {{ enviando() ? 'Enviando…' : 'Enviar rutina' }}</button>
+          } @else {
+            <button class="btn btn-fantasma" (click)="compartir.set(false)">{{ otros().length ? 'Cancelar' : 'Entendido' }}</button>
+            @if (otros().length) { <button class="btn btn-primario" (click)="ejecutarCompartir()"><app-icono nombre="compartir" [tam]="15" /> Copiar rutina</button> }
+          }
         </ng-container>
       </app-modal>
     }
@@ -360,7 +390,42 @@ export class TabRutinas {
 
   abrirCompartir() {
     this.cr = { dia: '__todos__', destinos: new Set(), pesos: false };
+    this.env = { email: '', nombre: this.nombreSugerido(), nota: '' };
+    this.modo.set('atletas');
     this.compartir.set(true);
+  }
+
+  /* ---------- Enviar a otro entrenador ---------- */
+  private readonly compartidas = inject(RutinasCompartidasService);
+  protected readonly modo = signal<'atletas' | 'entrenador'>('atletas');
+  protected readonly enviando = signal(false);
+  protected env = { email: '', nombre: '', nota: '' };
+
+  /** "Glúteo · Pierna · Espalda" con los títulos de los días, o "Rutina de 5 días". */
+  private nombreSugerido() {
+    const r = this.atleta().rutina;
+    const con = DIAS.filter((d) => r[d].ejercicios.length);
+    const titulos = [...new Set(con.map((d) => r[d].titulo.trim()).filter(Boolean))];
+    return titulos.length ? titulos.slice(0, 3).join(' · ') : `Rutina de ${con.length} día${con.length === 1 ? '' : 's'}`;
+  }
+
+  async enviarAEntrenador() {
+    const email = this.env.email.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return this.ui.toast('Escribe un correo válido', 'err');
+    if (!this.env.nombre.trim()) return this.ui.toast('Ponle nombre a la rutina', 'err');
+    const dias = this.cr.dia === '__todos__' ? DIAS.filter((d) => this.atleta().rutina[d].ejercicios.length) : [this.cr.dia];
+    const rutina = prepararDias(this.atleta().rutina, dias, this.cr.pesos);
+    if (!diasConContenido(rutina).length) return this.ui.toast('Ese día no tiene ejercicios para enviar', 'err');
+    this.enviando.set(true);
+    try {
+      const quien = await this.compartidas.enviar(email, this.env.nombre, this.env.nota, rutina);
+      this.compartir.set(false);
+      this.ui.toast(`Rutina enviada a ${quien} ✓`);
+    } catch (e) {
+      this.ui.error(e);
+    } finally {
+      this.enviando.set(false);
+    }
   }
   alternarDestino(id: string) {
     this.cr.destinos.has(id) ? this.cr.destinos.delete(id) : this.cr.destinos.add(id);
@@ -368,26 +433,13 @@ export class TabRutinas {
   async ejecutarCompartir() {
     const destinos = [...this.cr.destinos];
     if (!destinos.length) return this.ui.toast('Selecciona al menos un atleta de destino', 'err');
-    const origen = this.atleta().rutina;
     const dias = this.cr.dia === '__todos__' ? DIAS : [this.cr.dia];
+    const copia = prepararDias(this.atleta().rutina, dias, this.cr.pesos);
     try {
       for (const idDest of destinos) {
         const dest = this.datos.atleta(idDest);
         if (!dest) continue;
-        const rutina = structuredClone(dest.rutina);
-        dias.forEach((d) => {
-          rutina[d] = {
-            titulo: origen[d].titulo,
-            ejercicios: origen[d].ejercicios.map((ej) => ({
-              nombre: ej.nombre,
-              series: ej.series,
-              peso: this.cr.pesos ? ej.peso : '',
-              descanso: ej.descanso,
-              notas: ej.notas,
-              historialPeso: this.cr.pesos && ej.peso ? [{ fecha: hoyISO(), peso: ej.peso }] : [],
-            })),
-          };
-        });
+        const rutina = { ...structuredClone(dest.rutina), ...structuredClone(copia) } as Rutina;
         await this.datos.actualizarAtleta(idDest, { rutina });
       }
       this.compartir.set(false);

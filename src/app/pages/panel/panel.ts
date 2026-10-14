@@ -14,13 +14,14 @@ import { MESES_CORTOS, MESES_ES, diasDesde, fmtDinero, fmtFecha, hoyISO, isoDe, 
 import { GraficaBarras } from '../../shared/graficas/grafica-barras';
 import { AvatarIniciales } from '../../shared/avatar-iniciales';
 import { GruposModal } from './grupos-modal';
+import { RutinasRecibidas } from './rutinas-recibidas';
 import { Icono } from '../../shared/icono';
 import { UnidadesService } from '../../core/unidades';
 
 /** Dashboard — balance global del entrenador (portado de renderDashboard). */
 @Component({
   selector: 'app-panel',
-  imports: [FormsModule, AvatarIniciales, GruposModal, Modal, GraficaBarras, Icono],
+  imports: [FormsModule, AvatarIniciales, GruposModal, Modal, GraficaBarras, Icono, RutinasRecibidas],
   template: `
     <section class="hero-panel">
       <div class="texto">
@@ -154,6 +155,8 @@ import { UnidadesService } from '../../core/unidades';
         </div>
       }
     }
+
+    <app-rutinas-recibidas />
 
     <div class="titulo-seccion"><app-icono nombre="usuarios" [tam]="16" /> Mis atletas</div>
 

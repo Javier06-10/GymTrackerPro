@@ -1453,3 +1453,32 @@ html:is([data-tema="marca"],[data-tema="fuerza"],[data-tema="bienestar"]) .estad
 html[data-tema="marca"] .titulo-seccion{color:var(--marino);}
 html[data-tema="marca"] :is(.metrica .valor, .ficha-datos h2, .grafica-cab .t, .manual-cuerpo h2, .plan-nombre){color:var(--marino);}
 html[data-tema="marca"] .titulo-seccion::after{background:var(--borde);}
+
+/* ---------- Rutinas compartidas entre entrenadores ---------- */
+.segmentado-ancho{display:flex;width:100%;margin-bottom:14px;}
+.segmentado-ancho button{flex:1;justify-content:center;}
+.lista-recibidas{display:flex;flex-direction:column;gap:10px;margin-bottom:6px;}
+.recibida{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;
+  background:var(--panel);border:1px solid var(--borde);border-left:4px solid var(--ambar);
+}
+.rr-ico{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--ambar-fondo);color:var(--ambar-texto);}
+.rr-info{flex:1;min-width:0;}
+.rr-nombre{font-weight:700;font-size:15px;}
+.rr-sub{font-size:12.5px;color:var(--texto-suave);}
+.rr-acciones{display:flex;align-items:center;gap:6px;}
+.rr-dias{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin:12px 0 14px;max-height:300px;overflow:auto;}
+.rr-dia{background:var(--panel2);border:1px solid var(--borde);border-radius:10px;padding:10px 12px;}
+.rr-dia-t{font-size:13.5px;margin-bottom:6px;}
+.rr-dia ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px;font-size:13px;}
+.rr-dia li span{color:var(--tenue);font-size:12px;}
+@media(max-width:760px){
+  .recibida{flex-wrap:wrap;}
+  .rr-acciones{width:100%;}
+  .rr-acciones .btn-primario{flex:1;justify-content:center;}
+}
+.contador{
+  display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;
+  border-radius:9px;font-family:var(--fuente);font-size:11px;font-weight:800;letter-spacing:0;
+  background:var(--ambar);color:var(--sobre-acento);vertical-align:1px;
+}

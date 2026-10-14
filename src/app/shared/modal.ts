@@ -6,7 +6,8 @@ import { Icono } from './icono';
   selector: 'app-modal',
   imports: [Icono],
   template: `
-    <div class="overlay" (click)="$event.target === $event.currentTarget && cerrar.emit()">
+    <!-- El manejador no debe devolver false: Angular lo toma como preventDefault y las casillas no se marcarían -->
+    <div class="overlay" (click)="clicFondo($event)">
       <div class="modal" [style.max-width]="ancho()">
         <div class="cab-modal">
           <h3>{{ titulo() }}</h3>
@@ -22,4 +23,9 @@ export class Modal {
   readonly titulo = input.required<string>();
   readonly ancho = input('520px');
   readonly cerrar = output<void>();
+
+  /** Cierra solo si el clic fue en el fondo oscuro, no dentro de la ventana. */
+  protected clicFondo(ev: MouseEvent): void {
+    if (ev.target === ev.currentTarget) this.cerrar.emit();
+  }
 }
