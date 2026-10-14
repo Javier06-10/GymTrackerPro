@@ -144,7 +144,7 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
         @if (modo() === 'entrenador') {
           <div class="campo"><label>¿Qué enviar de {{ a.nombre }}?</label>
             <select [(ngModel)]="cr.dia">
-              <option value="__todos__">Toda la semana ({{ diasConEjercicios() }} día{{ diasConEjercicios() === 1 ? '' : 's' }} con ejercicios)</option>
+              <option value="__con__">Toda la semana ({{ diasConEjercicios() }} día{{ diasConEjercicios() === 1 ? '' : 's' }} con ejercicios)</option>
               @for (d of dias; track d) {
                 <option [value]="d">{{ d }}{{ a.rutina[d].titulo ? ' — ' + a.rutina[d].titulo : '' }} ({{ a.rutina[d].ejercicios.length }} ej.)</option>
               }
@@ -166,7 +166,8 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
         } @else {
           <div class="campo"><label>¿Qué copiar de {{ a.nombre }}?</label>
             <select [(ngModel)]="cr.dia">
-              <option value="__todos__">Toda la semana ({{ diasConEjercicios() }} día{{ diasConEjercicios() === 1 ? '' : 's' }} con ejercicios)</option>
+              <option value="__con__">Los días con ejercicios ({{ diasConEjercicios() }}) · no toca los demás días</option>
+              <option value="__todos__">Toda la semana exacta · reemplaza los 7 días</option>
               @for (d of dias; track d) {
                 <option [value]="d">{{ d }}{{ a.rutina[d].titulo ? ' — ' + a.rutina[d].titulo : '' }} ({{ a.rutina[d].ejercicios.length }} ej.)</option>
               }
@@ -384,12 +385,12 @@ export class TabRutinas {
 
   /* ---------- Compartir rutina con otros atletas ---------- */
   protected readonly compartir = signal(false);
-  protected cr = { dia: '__todos__', destinos: new Set<string>(), pesos: false };
+  protected cr = { dia: '__con__', destinos: new Set<string>(), pesos: false };
   protected readonly otros = computed(() => this.datos.atletas().filter((x) => x.id !== this.atleta().id));
   protected readonly diasConEjercicios = computed(() => DIAS.filter((d) => this.atleta().rutina[d].ejercicios.length).length);
 
   abrirCompartir() {
-    this.cr = { dia: '__todos__', destinos: new Set(), pesos: false };
+    this.cr = { dia: '__con__', destinos: new Set(), pesos: false };
     this.env = { email: '', nombre: this.nombreSugerido(), nota: '' };
     this.modo.set('atletas');
     this.compartir.set(true);
@@ -413,7 +414,7 @@ export class TabRutinas {
     const email = this.env.email.trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return this.ui.toast('Escribe un correo válido', 'err');
     if (!this.env.nombre.trim()) return this.ui.toast('Ponle nombre a la rutina', 'err');
-    const dias = this.cr.dia === '__todos__' ? DIAS.filter((d) => this.atleta().rutina[d].ejercicios.length) : [this.cr.dia];
+    const dias = this.cr.dia.startsWith('__') ? DIAS.filter((d) => this.atleta().rutina[d].ejercicios.length) : [this.cr.dia];
     const rutina = prepararDias(this.atleta().rutina, dias, this.cr.pesos);
     if (!diasConContenido(rutina).length) return this.ui.toast('Ese día no tiene ejercicios para enviar', 'err');
     this.enviando.set(true);
@@ -433,7 +434,9 @@ export class TabRutinas {
   async ejecutarCompartir() {
     const destinos = [...this.cr.destinos];
     if (!destinos.length) return this.ui.toast('Selecciona al menos un atleta de destino', 'err');
-    const dias = this.cr.dia === '__todos__' ? DIAS : [this.cr.dia];
+    // "Los días con ejercicios" no toca los demás días del atleta; "Toda la semana exacta" deja los 7 días iguales
+    const dias = this.cr.dia === '__todos__' ? DIAS : this.cr.dia === '__con__' ? DIAS.filter((d) => this.atleta().rutina[d].ejercicios.length) : [this.cr.dia];
+    if (!dias.length) return this.ui.toast('Esta rutina no tiene días con ejercicios para copiar', 'err');
     const copia = prepararDias(this.atleta().rutina, dias, this.cr.pesos);
     try {
       for (const idDest of destinos) {
