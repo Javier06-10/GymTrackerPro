@@ -15,7 +15,7 @@ const DEFS_FIG = `<defs>
     <stop offset="0" class="fig-fondo-1" stop-color="#262f78"/><stop offset="1" class="fig-fondo-2" stop-color="#0a0d2a"/>
   </radialGradient>
 </defs>`;
-const LEYENDA_FIG = '<span class="leyenda-fig"><i style="background:#eb670e"></i>Músculo principal <i style="background:#a4470f"></i>Secundario <i class="flecha"></i>Movimiento</span>';
+const LEYENDA_FIG = '<span class="leyenda-fig"><i style="background:#e2834e"></i>Músculo principal <i style="background:#a4511f"></i>Secundario <i class="flecha"></i>Movimiento</span>';
 function figManual(svg, pie){
   const conDefs = svg.replace(/<svg([^>]*)>/, '<svg$1>' + DEFS_FIG).replace('fill="#e7ebf3"', 'fill="url(#figFondo)"')
     // Las leyendas largas al pie del dibujo se salían del recuadro: se parten en dos líneas
@@ -38,7 +38,7 @@ const _FT10 = _FT.replace('font-size="11"', 'font-size="9.5"');
    Colores categóricos validados: mayor ámbar, medio azul, menor verde. */
 function svgGluteosAnatomia(){
   const L = '#eef0f4', CU = '#0f1336', GR = '#6f6d6b';
-  const MAYOR = '#eb670e', MEDIO = '#6c84ff', MENOR = '#36a877';
+  const MAYOR = '#e2834e', MEDIO = '#8a9ad6', MENOR = '#5fae8a';
   const m = (d, c, extra = '') => `<path d="${d}" fill="${c}" stroke="${L}" stroke-width="1.5" stroke-linejoin="round" ${extra}/>`;
   const guia = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${L}" stroke-width="1" opacity=".55"/><circle cx="${x2}" cy="${y2}" r="1.8" fill="${L}"/>`;
   const T = 'fill="#ffffff" font-family="system-ui" font-size="10" font-weight="700"';
@@ -103,8 +103,8 @@ function svgGluteosAnatomia(){
 const LINEA = '#eef0f4';
 const CUERPO = '#0f1336';
 const GRIS = '#6f6d6b';
-const FOCO = { principal: '#eb670e', secundario: '#a4470f' };
-const MOV = '#6c84ff'; // flechas de movimiento en azul: el ámbar ya marca los músculos
+const FOCO = { principal: '#e2834e', secundario: '#a4511f' };
+const MOV = '#8a9ad6'; // flechas de movimiento en azul: el ámbar ya marca los músculos
 let _idFig = 0;
 /** Género de las figuras ('mujer' | 'hombre'); lo fija construirManual(). */
 let _GEN = 'mujer';

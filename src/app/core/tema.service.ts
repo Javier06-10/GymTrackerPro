@@ -14,12 +14,12 @@ export interface OpcionTema {
 }
 
 export const TEMAS: OpcionTema[] = [
-  { v: 'marca', t: 'Marca GymTracker', s: 'Claro con azul marino y naranja', muestras: ['#f3f5fb', '#2a3582', '#eb670e', '#ffffff'], barra: '#2a3582' },
-  { v: 'marca-oscuro', t: 'Marca oscuro', s: 'Todo en azul marino y naranja', muestras: ['#0b0f2e', '#2a3582', '#eb670e', '#ffffff'], barra: '#2a3582' },
-  { v: 'energia', t: 'High Energy', s: 'Lima neón sobre negro · estilo Nike', muestras: ['#121212', '#1e1e1e', '#ccff00', '#ff5500'], barra: '#262626' },
-  { v: 'fuerza', t: 'Fuerza y rendimiento', s: 'Claro, naranja atlético · estilo Strava', muestras: ['#f8fafc', '#1e3a8a', '#fc5200', '#e2e8f0'], barra: '#1e3a8a' },
-  { v: 'bienestar', t: 'Bienestar', s: 'Salvia y terracota · estilo Calm', muestras: ['#fdfbf7', '#4e7c67', '#d97757', '#f3efea'], barra: '#4e7c67' },
-  { v: 'tech', t: 'Tech minimalista', s: 'Cian y menta sobre negro · estilo Whoop', muestras: ['#0a0a0c', '#141418', '#00f0ff', '#00e5a3'], barra: '#16161c' },
+  { v: 'marca', t: 'Marca GymTracker', s: 'Claro · azul pizarra y naranja durazno', muestras: ['#f4f5f7', '#2f3858', '#e2834e', '#ffffff'], barra: '#2f3858' },
+  { v: 'marca-oscuro', t: 'Marca oscuro', s: 'Azul medianoche y naranja durazno', muestras: ['#14172a', '#20263f', '#e8935f', '#93a1d4'], barra: '#20263f' },
+  { v: 'energia', t: 'Grafito y lima', s: 'Oscuro sobrio con lima suave', muestras: ['#151617', '#202124', '#c3dc72', '#df9068'], barra: '#202124' },
+  { v: 'fuerza', t: 'Pizarra y coral', s: 'Claro, gris pizarra con coral', muestras: ['#f6f7f9', '#36424f', '#e2765a', '#ffffff'], barra: '#36424f' },
+  { v: 'bienestar', t: 'Salvia y arena', s: 'Claro cálido, verde salvia', muestras: ['#f7f5f1', '#41594e', '#7ba591', '#ffffff'], barra: '#41594e' },
+  { v: 'tech', t: 'Medianoche y menta', s: 'Oscuro con turquesa suave', muestras: ['#101216', '#181b21', '#66c2bd', '#8fb0d6'], barra: '#181b21' },
 ];
 
 const CLAVE = 'gt-tema';

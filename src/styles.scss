@@ -1255,93 +1255,66 @@ header.top{
    TemaService; los valores pasan contraste 4.5:1 (WCAG AA).
    Regla 60-30-10: fondo neutro · superficies · acento solo en acciones.
    ============================================================ */
-/* Marca (claro, 60-30-10): fondo neutro claro · azul marino estructural · naranja en acciones */
+/* Marca suave (claro, 60-30-10): gris perla · azul pizarra estructural · naranja durazno en acciones */
 :root, html[data-tema="marca"]{
   color-scheme:light;
-  --fondo:#f3f5fb; --panel:#ffffff; --panel2:#eef1f8;
-  --borde:#dde2ef; --borde-suave:#e6e9f3; --borde-fuerte:#c5cce0; --borde-vidrio:#dde2ef;
-  --texto:#12173f; --texto-suave:#4a5175; --tenue:#626a92;
-  --ambar:#eb670e; --ambar-osc:#d95e0c; --ambar-claro:#ffc39b; --ambar-texto:#b94f05; --sobre-acento:#10154a;
-  --acero:#2a3582; --acero-texto:#2a3582;
-  --verde:#15803d; --rojo:#dc2626;
-  --brillo:#12173f; --sombra-color:#12173f;
-  --marino:#2a3582; --marino-claro:#3a47a6; --marino-oscuro:#1f2766;
-  --serie-ambar:#eb670e; --serie-azul:#2a3582; --serie-verde:#15803d; --rejilla:#e6e9f3;
-  --fig-1:#2f3a8f; --fig-2:#141a4a;
+  --fondo:#f4f5f7; --panel:#ffffff; --panel2:#eef0f4; --borde:#e1e4ea; --borde-suave:#e8eaef; --borde-fuerte:#cdd2dc;
+  --borde-vidrio:#e1e4ea; --texto:#1d2333; --texto-suave:#4f5669; --tenue:#666d80; --ambar:#e2834e; --ambar-osc:#cf733f;
+  --ambar-claro:#f5cbb0; --ambar-texto:#a4511f; --sobre-acento:#1d2333; --acero:#3e4a78; --acero-texto:#3e4a78; --verde:#2f7d5b;
+  --rojo:#bf4a42; --brillo:#1d2333; --sombra-color:#1d2333; --marino:#2f3858; --marino-claro:#3d476d; --marino-oscuro:#242b45;
+  --serie-ambar:#e2834e; --serie-azul:#3e4a78; --serie-verde:#2f7d5b; --rejilla:#e8eaef; --fig-1:#3a4466; --fig-2:#1e2438;
 }
-/* Marca oscuro: la versión anterior, todo en azul marino */
+/* Marca oscuro: azul medianoche apagado con naranja durazno */
 html[data-tema="marca-oscuro"]{
   color-scheme:dark;
-  --fondo:#0b0f2e; --panel:#161c4a; --panel2:#1f2661;
-  --borde:#323b86; --borde-suave:#283071; --borde-fuerte:#3e4794; --borde-vidrio:rgba(255,255,255,.07);
-  --texto:#ffffff; --texto-suave:#bac0e6; --tenue:#838bc6;
-  --ambar:#eb670e; --ambar-osc:#d95e0c; --ambar-claro:#ffc39b; --ambar-texto:#eb670e; --sobre-acento:#10154a;
-  --acero:#7d93ff; --acero-texto:#a4b3ff;
-  --verde:#4cc38a; --rojo:#e56060;
-  --brillo:#ffffff; --sombra-color:#05081c;
-  --marino:#2a3582; --marino-claro:#3a47a6; --marino-oscuro:#1a2260;
-  --serie-ambar:#eb670e; --serie-azul:#6c84ff; --serie-verde:#36a877; --rejilla:#2a3275;
-  --fig-1:#262f78; --fig-2:#0a0d2a;
+  --fondo:#14172a; --panel:#1c2036; --panel2:#242a44; --borde:#2f3651; --borde-suave:#282e48; --borde-fuerte:#3b4362;
+  --borde-vidrio:rgba(255,255,255,.06); --texto:#eef0f6; --texto-suave:#adb3c7; --tenue:#8f96ad; --ambar:#e8935f;
+  --ambar-osc:#d9824e; --ambar-claro:#f4c6a8; --ambar-texto:#eea274; --sobre-acento:#14172a; --acero:#93a1d4;
+  --acero-texto:#aeb9e2; --verde:#72c19b; --rojo:#e2847c; --brillo:#ffffff; --sombra-color:#070914; --marino:#20263f;
+  --marino-claro:#2b3250; --marino-oscuro:#181c30; --serie-ambar:#e8935f; --serie-azul:#93a1d4; --serie-verde:#5fae8a;
+  --rejilla:#282e48; --fig-1:#262c48; --fig-2:#0f1222;
 }
-/* 1 · High Energy (Nike Training / Freeletics) */
+/* 1 · Grafito y lima: oscuro sobrio con lima suave */
 html[data-tema="energia"]{
   color-scheme:dark;
-  --fondo:#121212; --panel:#1e1e1e; --panel2:#262626;
-  --borde:#353535; --borde-suave:#2b2b2b; --borde-fuerte:#474747; --borde-vidrio:rgba(255,255,255,.07);
-  --texto:#ffffff; --texto-suave:#b8b8b8; --tenue:#8f8f8f;
-  --ambar:#ccff00; --ambar-osc:#b3e600; --ambar-claro:#e6ff80; --ambar-texto:#ccff00; --sobre-acento:#121212;
-  --acero:#ff5500; --acero-texto:#ff7a33;
-  --verde:#4cc38a; --rojo:#ff5a5a;
-  --brillo:#ffffff; --sombra-color:#000000;
-  --marino:#262626; --marino-claro:#323232; --marino-oscuro:#181818;
-  --serie-ambar:#ccff00; --serie-azul:#ff5500; --serie-verde:#36a877; --rejilla:#2e2e2e;
-  --fig-1:#2c2c2c; --fig-2:#0c0c0c;
+  --fondo:#151617; --panel:#1d1e20; --panel2:#252629; --borde:#323337; --borde-suave:#2a2b2e; --borde-fuerte:#424348;
+  --borde-vidrio:rgba(255,255,255,.06); --texto:#f1f2ee; --texto-suave:#b2b4ad; --tenue:#8e908a; --ambar:#c3dc72;
+  --ambar-osc:#afc862; --ambar-claro:#e1eeb6; --ambar-texto:#cbe282; --sobre-acento:#151617; --acero:#df9068;
+  --acero-texto:#e9a582; --verde:#7fc49d; --rojo:#e2847c; --brillo:#ffffff; --sombra-color:#000000; --marino:#202124;
+  --marino-claro:#2b2c30; --marino-oscuro:#18191b; --serie-ambar:#c3dc72; --serie-azul:#df9068; --serie-verde:#6fb58e;
+  --rejilla:#2a2b2e; --fig-1:#2a2b2f; --fig-2:#0e0e0f;
 }
-/* 2 · Fuerza y rendimiento (Strava / Garmin) — claro */
+/* 2 · Pizarra y coral (claro) */
 html[data-tema="fuerza"]{
   color-scheme:light;
-  --fondo:#f8fafc; --panel:#ffffff; --panel2:#f1f5f9;
-  --borde:#e2e8f0; --borde-suave:#e2e8f0; --borde-fuerte:#cbd5e1; --borde-vidrio:#e2e8f0;
-  --texto:#0f172a; --texto-suave:#475569; --tenue:#64748b;
-  --ambar:#fc5200; --ambar-osc:#e64a00; --ambar-claro:#ffb38a; --ambar-texto:#c2410c; --sobre-acento:#0f172a;
-  --acero:#1e3a8a; --acero-texto:#1e3a8a;
-  --verde:#15803d; --rojo:#dc2626;
-  --brillo:#0f172a; --sombra-color:#0f172a;
-  --marino:#1e3a8a; --marino-claro:#2b4fb5; --marino-oscuro:#172c6b;
-  --serie-ambar:#fc5200; --serie-azul:#1e3a8a; --serie-verde:#15803d; --rejilla:#e2e8f0;
-  --fig-1:#24408f; --fig-2:#0f1d4a;
+  --fondo:#f6f7f9; --panel:#ffffff; --panel2:#f0f2f5; --borde:#e2e6ec; --borde-suave:#e7eaef; --borde-fuerte:#cfd5de;
+  --borde-vidrio:#e2e6ec; --texto:#1f2937; --texto-suave:#4b5563; --tenue:#5f687a; --ambar:#e2765a; --ambar-osc:#cf6649;
+  --ambar-claro:#f4c4b6; --ambar-texto:#a9472c; --sobre-acento:#1f2937; --acero:#3f5068; --acero-texto:#3f5068; --verde:#2f7d5b;
+  --rojo:#bf4a42; --brillo:#1f2937; --sombra-color:#1f2937; --marino:#36424f; --marino-claro:#45525f; --marino-oscuro:#2a333e;
+  --serie-ambar:#e2765a; --serie-azul:#3f5068; --serie-verde:#2f7d5b; --rejilla:#e7eaef; --fig-1:#414e5c; --fig-2:#1f262e;
 }
-/* 3 · Bienestar y recuperación (Calm / Alo Moves) — claro cálido */
+/* 3 · Salvia y arena (claro cálido) */
 html[data-tema="bienestar"]{
   color-scheme:light;
-  --fondo:#fdfbf7; --panel:#f3efea; --panel2:#ffffff;
-  --borde:#e4ddd3; --borde-suave:#eae4db; --borde-fuerte:#d6ccbf; --borde-vidrio:#e4ddd3;
-  --texto:#2d3748; --texto-suave:#4a5568; --tenue:#665f55;
-  --ambar:#4e7c67; --ambar-osc:#3f6655; --ambar-claro:#a9c9b9; --ambar-texto:#3f6655; --sobre-acento:#ffffff;
-  --acero:#d97757; --acero-texto:#a34b2b;
-  --verde:#2f7a55; --rojo:#c53030;
-  --brillo:#2d3748; --sombra-color:#3b2f22;
-  --marino:#4e7c67; --marino-claro:#5e9079; --marino-oscuro:#3b6150;
-  --serie-ambar:#4e7c67; --serie-azul:#d97757; --serie-verde:#2f7a55; --rejilla:#e4ddd3;
-  --fig-1:#5a8a74; --fig-2:#2c4a3d;
+  --fondo:#f7f5f1; --panel:#ffffff; --panel2:#f1eee8; --borde:#e4dfd6; --borde-suave:#ebe7df; --borde-fuerte:#d4cdc1;
+  --borde-vidrio:#e4dfd6; --texto:#28332e; --texto-suave:#535e58; --tenue:#606964; --ambar:#7ba591; --ambar-osc:#6a9480;
+  --ambar-claro:#c3dbcf; --ambar-texto:#46705d; --sobre-acento:#1d2823; --acero:#b9795b; --acero-texto:#965638; --verde:#3f7d5f;
+  --rojo:#bb4d45; --brillo:#28332e; --sombra-color:#3b2f22; --marino:#41594e; --marino-claro:#4f685c; --marino-oscuro:#344a40;
+  --serie-ambar:#6a9480; --serie-azul:#b9795b; --serie-verde:#3f7d5f; --rejilla:#ebe7df; --fig-1:#557466; --fig-2:#2b3d35;
 }
-/* 4 · Tech minimalista (Whoop / Apple Fitness) */
+/* 4 · Medianoche y menta: oscuro con turquesa suave */
 html[data-tema="tech"]{
   color-scheme:dark;
-  --fondo:#0a0a0c; --panel:#141418; --panel2:#1c1c22;
-  --borde:#2a2a33; --borde-suave:#222229; --borde-fuerte:#3a3a45; --borde-vidrio:rgba(255,255,255,.07);
-  --texto:#ffffff; --texto-suave:#94a3b8; --tenue:#7d8a9c;
-  --ambar:#00f0ff; --ambar-osc:#00c8d6; --ambar-claro:#8af8ff; --ambar-texto:#00f0ff; --sobre-acento:#0a0a0c;
-  --acero:#00e5a3; --acero-texto:#00e5a3;
-  --verde:#00e5a3; --rojo:#ff2d55;
-  --brillo:#ffffff; --sombra-color:#000000;
-  --marino:#16161c; --marino-claro:#20202a; --marino-oscuro:#0e0e12;
-  --serie-ambar:#00f0ff; --serie-azul:#00e5a3; --serie-verde:#7c8cff; --rejilla:#22222a;
-  --fig-1:#1c1c24; --fig-2:#08080a;
+  --fondo:#101216; --panel:#171a20; --panel2:#1e2229; --borde:#2a2f38; --borde-suave:#232830; --borde-fuerte:#383e49;
+  --borde-vidrio:rgba(255,255,255,.06); --texto:#e9edf2; --texto-suave:#9ea8b6; --tenue:#86909e; --ambar:#66c2bd;
+  --ambar-osc:#55aea9; --ambar-claro:#ade0dd; --ambar-texto:#7cd0cb; --sobre-acento:#101216; --acero:#8fb0d6;
+  --acero-texto:#a8c3e2; --verde:#74c2a2; --rojo:#e2847c; --brillo:#ffffff; --sombra-color:#000000; --marino:#181b21;
+  --marino-claro:#22262e; --marino-oscuro:#121418; --serie-ambar:#66c2bd; --serie-azul:#8fb0d6; --serie-verde:#74c2a2;
+  --rejilla:#232830; --fig-1:#1f232b; --fig-2:#0a0b0e;
 }
 /* Tintes derivados del tema */
 :root{
-  --ambar-fondo:color-mix(in srgb, var(--ambar) 14%, transparent);
+  --ambar-fondo:color-mix(in srgb, var(--ambar) 12%, transparent);
   --acero-fondo:color-mix(in srgb, var(--acero) 14%, transparent);
   --verde-fondo:color-mix(in srgb, var(--verde) 14%, transparent);
   --rojo-fondo:color-mix(in srgb, var(--rojo) 13%, transparent);
@@ -1353,12 +1326,12 @@ html:is([data-tema="marca"],[data-tema="fuerza"],[data-tema="bienestar"]) :is(he
   --panel:color-mix(in srgb, var(--marino-oscuro) 82%, #ffffff); --panel2:color-mix(in srgb, var(--marino-oscuro) 70%, #ffffff);
   --borde:color-mix(in srgb, #ffffff 26%, var(--marino)); --borde-suave:color-mix(in srgb, #ffffff 18%, var(--marino));
   --borde-vidrio:rgba(255,255,255,.16); --brillo:#ffffff;
-  --verde:#86efac; --rojo:#fca5a5; --acero:#bfdbfe; --acero-texto:#dbeafe;
+  --verde:#a3d9bd; --rojo:#f0b3ac; --acero:#c9d2ea; --acero-texto:#dde3f2;
   color:var(--texto);
 }
-html[data-tema="fuerza"] :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){ --ambar-texto:#ff8a4c; }
-html[data-tema="marca"] :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){ --ambar-texto:#ff9a52; }
-html[data-tema="bienestar"] :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){ --ambar-texto:#ffd9b8; --ambar:#f3a17f; --ambar-osc:#e48a64; --sobre-acento:#2d3748; }
+html[data-tema="fuerza"] :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){ --ambar-texto:#f2a58f; }
+html[data-tema="marca"] :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){ --ambar-texto:#f0ae86; }
+html[data-tema="bienestar"] :is(header.top, .hero-panel, .perfil-cab, .cab-pagina, .marca-auth, .estado-plan){ --ambar-texto:#cfe3d8; --ambar:#a9cbb9; --ambar-osc:#98bba8; --sobre-acento:#1d2823; }
 html:is([data-tema="fuerza"],[data-tema="bienestar"]) .estado-plan{
   background:linear-gradient(135deg, var(--marino-claro), var(--marino-oscuro));
 }
