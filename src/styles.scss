@@ -1468,3 +1468,33 @@ html[data-tema="marca"] .titulo-seccion::after{background:var(--borde);}
 .contacto-admin{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13.5px;}
 .contacto-admin a{color:var(--ambar-texto);text-decoration:none;}
 .contacto-admin a:hover{text-decoration:underline;}
+
+/* ---------- Admin: vistas, catálogo de planes y gestión del plan ---------- */
+.admin-vistas{margin:4px 0 16px;}
+.cab-lista-planes{display:flex;align-items:center;gap:16px;justify-content:space-between;margin-bottom:12px;}
+.cab-lista-planes p{margin:0;font-size:13.5px;color:var(--texto-suave);max-width:640px;}
+.lista-planes-admin{display:flex;flex-direction:column;gap:10px;}
+.fila-plan{
+  display:grid;grid-template-columns:minmax(0,1.6fr) auto minmax(90px,auto) auto;gap:16px;align-items:center;
+  padding:14px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--borde);
+}
+.fila-plan.inactivo{opacity:.65;}
+.fp-info{min-width:0;}
+.fp-precio{font-family:var(--fuente-titulo, inherit);font-weight:800;font-size:20px;white-space:nowrap;}
+.fp-precio small{font-size:12px;font-weight:600;color:var(--texto-suave);}
+.fp-uso{font-size:13px;color:var(--texto-suave);white-space:nowrap;}
+.fp-uso b{color:var(--texto);}
+.plan-desc{font-size:12.5px;color:var(--texto-suave);margin:-2px 0 8px;}
+.atajos-fecha{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.atajos-fecha .chip-filtro{font-family:var(--fuente);}
+.casilla-linea{display:flex;align-items:center;gap:9px;font-size:14px;margin:6px 0 10px;cursor:pointer;}
+.casilla-linea input{width:17px;height:17px;accent-color:var(--ambar);}
+.nota-info.aviso-rojo{border-color:color-mix(in srgb, var(--rojo) 40%, transparent);background:var(--rojo-fondo);}
+.titulo-mini{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texto-suave);margin:16px 0 6px;}
+.tabla-compacta th, .tabla-compacta td{padding:7px 9px;font-size:13px;}
+@media (max-width: 720px){
+  .cab-lista-planes{flex-direction:column;align-items:stretch;}
+  .fila-plan{grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;}
+  .fp-uso{grid-column:1;}
+  .fila-plan .fe-acciones{grid-column:1 / -1;}
+}

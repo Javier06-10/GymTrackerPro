@@ -113,6 +113,9 @@ export interface Plan {
   nombre: string;
   precio_mensual: number;
   max_atletas: number | null;
+  activo: boolean;
+  destacado: boolean;
+  descripcion: string;
 }
 
 export interface Perfil {
@@ -135,4 +138,14 @@ export interface Suscripcion {
   estado: 'prueba' | 'activa' | 'vencida' | 'cancelada';
   vence_el: string;
   planes?: Plan;
+}
+
+export interface PagoSuscripcion {
+  id: string;
+  monto: number;
+  metodo: string;
+  referencia: string;
+  periodo_desde: string;
+  periodo_hasta: string;
+  plan_id: number;
 }

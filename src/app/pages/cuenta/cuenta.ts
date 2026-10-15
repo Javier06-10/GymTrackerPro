@@ -5,14 +5,13 @@ import { AuthService } from '../../core/auth.service';
 import { DatosService } from '../../core/datos.service';
 import { Sistema, UnidadesService } from '../../core/unidades';
 import { TEMAS, Tema, TemaService } from '../../core/tema.service';
-import { Plan } from '../../core/modelos';
+import { PagoSuscripcion, Plan } from '../../core/modelos';
 import { supabase } from '../../core/supabase';
 import { UiService } from '../../core/ui.service';
 import { diasDesde, fmtDinero, fmtFecha, iniciales } from '../../core/util';
 import { ImportarRespaldo } from './importar-respaldo';
 import { Icono } from '../../shared/icono';
 
-interface PagoSuscripcion { id: string; monto: number; metodo: string; referencia: string; periodo_desde: string; periodo_hasta: string; plan_id: number }
 
 
 /** Perfil del entrenador, plan actual y solicitud de renovación (pago manual). */
@@ -59,13 +58,14 @@ interface PagoSuscripcion { id: string; monto: number; metodo: string; referenci
     <div class="grid-planes">
       @for (p of planesPago(); track p.id) {
         @let actual = p.id === auth.suscripcion()?.plan_id;
-        <div class="plan" [class.actual]="actual" [class.destacado]="p.codigo === 'pro'">
+        <div class="plan" [class.actual]="actual" [class.destacado]="p.destacado">
           @if (actual) { <span class="plan-sello">Tu plan</span> }
-          @else if (p.codigo === 'pro') { <span class="plan-sello popular"><app-icono nombre="estrella" [tam]="12" /> Más popular</span> }
-          <div class="plan-ico"><app-icono [nombre]="p.codigo === 'basico' ? 'pesa' : p.codigo === 'pro' ? 'fuego' : 'estrella'" [tam]="20" /></div>
+          @else if (p.destacado) { <span class="plan-sello popular"><app-icono nombre="estrella" [tam]="12" /> Más popular</span> }
+          <div class="plan-ico"><app-icono [nombre]="p.destacado ? 'fuego' : !p.max_atletas ? 'estrella' : 'pesa'" [tam]="20" /></div>
           <div class="plan-nombre">{{ p.nombre }}</div>
           <div class="precio">{{ dinero(p.precio_mensual) }} <small>/ mes</small></div>
           <div class="plan-cupo">{{ p.max_atletas ? 'Hasta ' + p.max_atletas + ' atletas' : 'Atletas ilimitados' }}</div>
+          @if (p.descripcion) { <div class="plan-desc">{{ p.descripcion }}</div> }
           <ul>
             @for (b of beneficios; track b) { <li><span class="plan-check"><app-icono nombre="check" [tam]="12" /></span> {{ b }}</li> }
           </ul>
@@ -191,7 +191,7 @@ export class Cuenta implements OnInit {
   protected readonly dinero = fmtDinero;
   protected readonly fecha = fmtFecha;
 
-  protected readonly planesPago = computed(() => this.auth.planes().filter((p) => p.codigo !== 'prueba'));
+  protected readonly planesPago = computed(() => this.auth.planes().filter((p) => p.codigo !== 'prueba' && (p.activo || p.id === this.auth.suscripcion()?.plan_id)));
   protected readonly historial = signal<PagoSuscripcion[]>([]);
   private readonly datos = inject(DatosService);
   protected readonly env = environment;

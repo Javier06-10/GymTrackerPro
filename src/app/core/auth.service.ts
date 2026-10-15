@@ -45,7 +45,7 @@ export class AuthService {
   }
 
   async cargarPlanes() {
-    const { data } = await supabase.from('planes').select('*').eq('activo', true).order('precio_mensual');
+    const { data } = await supabase.from('planes').select('*').order('precio_mensual');
     this.planes.set((data as Plan[]) ?? []);
   }
 

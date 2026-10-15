@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth.service';
-import { Perfil, Suscripcion } from '../../core/modelos';
+import { PagoSuscripcion, Perfil, Plan, Suscripcion } from '../../core/modelos';
 import { supabase } from '../../core/supabase';
 import { UiService } from '../../core/ui.service';
 import { diasDesde, esc, fmtDinero, fmtFecha, hoyISO, normalizar, sumarDias } from '../../core/util';
@@ -11,8 +11,21 @@ import { AvatarIniciales } from '../../shared/avatar-iniciales';
 
 type Entrenador = Perfil & { created_at: string; suscripciones: Suscripcion | null };
 type Filtro = 'todos' | 'Activa' | 'Prueba' | 'Vencida';
+type EstadoSus = Suscripcion['estado'];
 
-/** Administración del SaaS: entrenadores, estado de suscripción y registro de pagos manuales. */
+/** Suma meses a una fecha ISO (31 ene + 1 mes = 28/29 feb). */
+function sumarMeses(iso: string, meses: number): string {
+  const [a, m, d] = iso.split('-').map(Number);
+  const fin = new Date(Date.UTC(a, m - 1 + meses + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(a, m - 1 + meses, Math.min(d, fin))).toISOString().slice(0, 10);
+}
+
+/** Código interno del plan a partir del nombre ("Pro Plus" → "pro-plus"). */
+function codigoDe(nombre: string): string {
+  return normalizar(nombre).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24) || 'plan';
+}
+
+/** Administración del SaaS: entrenadores, asignación de planes, pagos manuales y catálogo de planes. */
 @Component({
   selector: 'app-admin',
   imports: [FormsModule, Modal, Icono, AvatarIniciales],
@@ -21,7 +34,7 @@ type Filtro = 'todos' | 'Activa' | 'Prueba' | 'Vencida';
       <div class="cab-ico"><app-icono nombre="escudo" [tam]="24" /></div>
       <div class="cab-texto">
         <h1>Administración</h1>
-        <p>Entrenadores suscritos, estado de cada plan y registro de pagos manuales.</p>
+        <p>Entrenadores, planes asignados, pagos manuales y catálogo de planes.</p>
       </div>
       <div class="cab-acciones">
         <button class="btn btn-suave" (click)="cargar()"><app-icono nombre="recargar" [tam]="15" /> Recargar</button>
@@ -51,49 +64,82 @@ type Filtro = 'todos' | 'Activa' | 'Prueba' | 'Vencida';
       </div>
     </div>
 
-    <div class="barra-busqueda">
-      <div class="campo-buscar"><span class="lupa"><app-icono nombre="lupa" [tam]="16" /></span>
-        <input type="text" placeholder="Buscar por nombre, negocio o correo..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" /></div>
-      <div class="filtros-grupo" style="margin:0;">
-        @for (f of filtros; track f.v) {
-          <div class="chip-filtro" [class.activo]="filtro() === f.v" (click)="filtro.set(f.v)">{{ f.t }}</div>
+    <div class="segmentado admin-vistas" role="tablist">
+      <button role="tab" [class.activo]="vista() === 'entrenadores'" (click)="vista.set('entrenadores')"><app-icono nombre="usuarios" [tam]="15" /> Entrenadores</button>
+      <button role="tab" [class.activo]="vista() === 'planes'" (click)="vista.set('planes')"><app-icono nombre="tarjeta" [tam]="15" /> Planes</button>
+    </div>
+
+    @if (vista() === 'entrenadores') {
+      <div class="barra-busqueda">
+        <div class="campo-buscar"><span class="lupa"><app-icono nombre="lupa" [tam]="16" /></span>
+          <input type="text" placeholder="Buscar por nombre, negocio o correo..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" /></div>
+        <div class="filtros-grupo" style="margin:0;">
+          @for (f of filtros; track f.v) {
+            <div class="chip-filtro" [class.activo]="filtro() === f.v" (click)="filtro.set(f.v)">{{ f.t }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="lista-entrenadores">
+        @for (e of filtrados(); track e.id) {
+          @let s = e.suscripciones;
+          <div class="fila-entrenador">
+            <app-avatar-iniciales [nombre]="e.nombre || e.email" genero="hombre" [tam]="42" />
+            <div class="fe-info">
+              <div class="fe-nombre">
+                {{ e.nombre || '—' }}
+                @if (e.rol === 'admin') { <span class="chip chip-acero">Admin</span> }
+                @if (sinConfirmar(e.id)) { <span class="chip chip-rojo" title="No ha confirmado su correo: no puede entrar"><app-icono nombre="alerta" [tam]="12" /> Correo sin confirmar</span> }
+              </div>
+              <div class="fe-sub">{{ e.negocio ? e.negocio + ' · ' : '' }}{{ e.email }}</div>
+              @if (sinConfirmar(e.id)) {
+                <button class="btn btn-suave btn-mini fe-confirmar" (click)="confirmarCorreo(e)"><app-icono nombre="check" [tam]="14" /> Confirmar correo y dar acceso</button>
+              }
+            </div>
+            <div class="fe-plan">
+              <span [class]="'chip ' + chipEstado(s)">{{ estado(s) }}</span>
+              <div class="fe-sub">{{ nombrePlan(s?.plan_id) }} · vence {{ fecha(s?.vence_el) }}</div>
+            </div>
+            <div class="fe-acciones">
+              <button class="btn btn-primario btn-mini" (click)="abrirPago(e)"><app-icono nombre="dinero" [tam]="15" /> Registrar pago</button>
+              <button class="btn btn-suave btn-mini" (click)="abrirAsignar(e)" title="Cambiar plan, estado o vencimiento sin registrar pago"><app-icono nombre="engranaje" [tam]="15" /> Gestionar plan</button>
+            </div>
+          </div>
+        } @empty {
+          <div class="vacio" style="padding:30px;"><p>{{ cargado() ? 'No hay entrenadores con ese filtro.' : 'Cargando entrenadores…' }}</p></div>
         }
       </div>
-    </div>
-
-    <div class="lista-entrenadores">
-      @for (e of filtrados(); track e.id) {
-        @let s = e.suscripciones;
-        <div class="fila-entrenador">
-          <app-avatar-iniciales [nombre]="e.nombre || e.email" genero="hombre" [tam]="42" />
-          <div class="fe-info">
-            <div class="fe-nombre">
-              {{ e.nombre || '—' }}
-              @if (e.rol === 'admin') { <span class="chip chip-acero">Admin</span> }
-              @if (sinConfirmar(e.id)) { <span class="chip chip-rojo" title="No ha confirmado su correo: no puede entrar"><app-icono nombre="alerta" [tam]="12" /> Correo sin confirmar</span> }
+    } @else {
+      <div class="cab-lista-planes">
+        <p>Lo que cambies aquí lo ven los entrenadores al instante en <b>Mi cuenta → Planes</b>. Un plan en uso no se borra: se desactiva y deja de ofrecerse, pero quien ya lo tiene lo conserva.</p>
+        <button class="btn btn-primario" (click)="abrirPlan(null)"><app-icono nombre="mas" [tam]="15" /> Nuevo plan</button>
+      </div>
+      <div class="lista-planes-admin">
+        @for (p of auth.planes(); track p.id) {
+          <div class="fila-plan" [class.inactivo]="!p.activo">
+            <div class="fp-info">
+              <div class="fe-nombre">
+                {{ p.nombre }}
+                @if (p.codigo === 'prueba') { <span class="chip chip-ambar">Prueba gratis</span> }
+                @if (p.destacado) { <span class="chip chip-acero"><app-icono nombre="estrella" [tam]="11" /> Destacado</span> }
+                @if (!p.activo) { <span class="chip chip-gris">Desactivado</span> }
+              </div>
+              <div class="fe-sub">{{ p.max_atletas ? 'Hasta ' + p.max_atletas + ' atletas' : 'Atletas ilimitados' }}{{ p.descripcion ? ' · ' + p.descripcion : '' }}</div>
             </div>
-            <div class="fe-sub">{{ e.negocio ? e.negocio + ' · ' : '' }}{{ e.email }}</div>
-            @if (sinConfirmar(e.id)) {
-              <button class="btn btn-suave btn-mini fe-confirmar" (click)="confirmarCorreo(e)"><app-icono nombre="check" [tam]="14" /> Confirmar correo y dar acceso</button>
-            }
+            <div class="fp-precio">{{ dinero(p.precio_mensual) }}<small> / mes</small></div>
+            <div class="fp-uso"><b>{{ usoPlan(p.id) }}</b> entrenador{{ usoPlan(p.id) === 1 ? '' : 'es' }}</div>
+            <div class="fe-acciones">
+              <button class="btn btn-suave btn-mini" (click)="abrirPlan(p)"><app-icono nombre="editar" [tam]="14" /> Editar</button>
+              @if (p.codigo !== 'prueba') {
+                <button class="btn btn-fantasma btn-mini" (click)="alternarActivo(p)">{{ p.activo ? 'Desactivar' : 'Activar' }}</button>
+              }
+            </div>
           </div>
-          <div class="fe-plan">
-            <span [class]="'chip ' + chipEstado(s)">{{ estado(s) }}</span>
-            <div class="fe-sub">{{ nombrePlan(s?.plan_id) }} · vence {{ fecha(s?.vence_el) }}</div>
-          </div>
-          <div class="fe-acciones">
-            <button class="btn btn-primario btn-mini" (click)="abrirPago(e)"><app-icono nombre="dinero" [tam]="15" /> Registrar pago</button>
-            <button class="btn btn-suave btn-mini" (click)="extenderPrueba(e)" title="Sumar 7 días">+7 días</button>
-            @if (s?.estado !== 'cancelada') {
-              <button class="btn-x" title="Cancelar suscripción" (click)="cancelar(e)"><app-icono nombre="prohibido" [tam]="16" /></button>
-            }
-          </div>
-        </div>
-      } @empty {
-        <div class="vacio" style="padding:30px;"><p>{{ cargado() ? 'No hay entrenadores con ese filtro.' : 'Cargando entrenadores…' }}</p></div>
-      }
-    </div>
+        }
+      </div>
+    }
 
+    <!-- Registrar pago -->
     @if (pagoDe(); as e) {
       <app-modal [titulo]="'Registrar pago · ' + (e.nombre || e.email)" (cerrar)="pagoDe.set(null)">
         <div class="form-grid">
@@ -116,6 +162,71 @@ type Filtro = 'todos' | 'Activa' | 'Prueba' | 'Vencida';
         </ng-container>
       </app-modal>
     }
+
+    <!-- Gestionar plan de un entrenador (sin pago) -->
+    @if (asignarA(); as e) {
+      <app-modal [titulo]="'Gestionar plan · ' + (e.nombre || e.email)" (cerrar)="asignarA.set(null)" ancho="560px">
+        <div class="form-grid">
+          <div class="campo"><label>Plan</label>
+            <select [(ngModel)]="asg.planId">
+              @for (p of planesAsignables(e); track p.id) { <option [ngValue]="p.id">{{ p.nombre }}{{ p.activo ? '' : ' (desactivado)' }} — {{ p.max_atletas ? p.max_atletas + ' atletas' : 'ilimitado' }}</option> }
+            </select></div>
+          <div class="campo"><label>Estado</label>
+            <select [(ngModel)]="asg.estado">
+              @for (o of estados; track o.v) { <option [ngValue]="o.v">{{ o.t }}</option> }
+            </select></div>
+        </div>
+        <div class="campo"><label>Vence el</label>
+          <input type="date" [(ngModel)]="asg.vence" />
+          <div class="atajos-fecha">
+            <button type="button" class="chip-filtro" (click)="sumar('d', 7)">+7 días</button>
+            <button type="button" class="chip-filtro" (click)="sumar('m', 1)">+1 mes</button>
+            <button type="button" class="chip-filtro" (click)="sumar('m', 3)">+3 meses</button>
+            <button type="button" class="chip-filtro" (click)="sumar('m', 12)">+1 año</button>
+          </div>
+        </div>
+        @if (resumenAsignar(); as r) { <div class="nota-info" [class.aviso-rojo]="r.bloquea" [innerHTML]="r.texto"></div> }
+
+        @if (historial().length) {
+          <div class="titulo-mini">Pagos registrados</div>
+          <div class="tabla-scroll"><table class="tabla-compacta">
+            <thead><tr><th>Período</th><th>Plan</th><th>Monto</th><th>Método</th></tr></thead>
+            <tbody>
+              @for (h of historial(); track h.id) {
+                <tr><td>{{ fecha(h.periodo_desde) }} – {{ fecha(h.periodo_hasta) }}</td><td>{{ nombrePlan(h.plan_id) }}</td><td>{{ dinero(h.monto) }}</td><td>{{ h.metodo }}</td></tr>
+              }
+            </tbody>
+          </table></div>
+        }
+        <ng-container pie>
+          <button class="btn btn-fantasma" (click)="asignarA.set(null)">Cancelar</button>
+          <button class="btn btn-primario" (click)="guardarAsignacion(e)" [disabled]="guardando() || !asg.vence"><app-icono nombre="guardar" [tam]="15" /> Guardar cambios</button>
+        </ng-container>
+      </app-modal>
+    }
+
+    <!-- Crear / editar plan del catálogo -->
+    @if (planEdit(); as pe) {
+      <app-modal [titulo]="pe.id ? 'Editar plan · ' + pe.nombreOriginal : 'Nuevo plan'" (cerrar)="planEdit.set(null)">
+        <div class="campo"><label>Nombre</label><input [(ngModel)]="pe.nombre" maxlength="40" placeholder="Ej. Pro Plus" /></div>
+        <div class="form-grid">
+          <div class="campo"><label>Precio mensual ($)</label><input type="number" min="0" step="0.01" [(ngModel)]="pe.precio" /></div>
+          <div class="campo"><label>Máximo de atletas</label><input type="number" min="1" [(ngModel)]="pe.max" placeholder="Vacío = ilimitado" /></div>
+        </div>
+        <div class="campo"><label>Descripción corta (opcional)</label><input [(ngModel)]="pe.descripcion" maxlength="200" placeholder="Ej. Ideal para gimnasios con varios entrenadores" /></div>
+        <label class="casilla-linea"><input type="checkbox" [(ngModel)]="pe.destacado" /> <span>Destacar como <b>“Más popular”</b></span></label>
+        @if (pe.codigo !== 'prueba') {
+          <label class="casilla-linea"><input type="checkbox" [(ngModel)]="pe.activo" /> <span>Disponible para elegir en Mi cuenta</span></label>
+        }
+        @if (pe.id && usoPlan(pe.id)) {
+          <div class="nota-info">{{ usoPlan(pe.id) }} entrenador{{ usoPlan(pe.id) === 1 ? ' tiene' : 'es tienen' }} este plan: el nuevo cupo se les aplica al instante; el precio nuevo, a partir de su próximo pago.</div>
+        }
+        <ng-container pie>
+          <button class="btn btn-fantasma" (click)="planEdit.set(null)">Cancelar</button>
+          <button class="btn btn-primario" (click)="guardarPlan(pe)" [disabled]="guardando() || !pe.nombre.trim()"><app-icono nombre="guardar" [tam]="15" /> {{ pe.id ? 'Guardar' : 'Crear plan' }}</button>
+        </ng-container>
+      </app-modal>
+    }
   `,
 })
 export class Admin implements OnInit {
@@ -124,7 +235,11 @@ export class Admin implements OnInit {
   protected readonly dinero = fmtDinero;
   protected readonly fecha = fmtFecha;
   protected readonly metodos = ['Transferencia', 'Efectivo', 'Tarjeta', 'Otro'];
+  protected readonly estados: { v: EstadoSus; t: string }[] = [
+    { v: 'activa', t: 'Activa (pagada)' }, { v: 'prueba', t: 'Prueba gratis' }, { v: 'vencida', t: 'Vencida' }, { v: 'cancelada', t: 'Cancelada' },
+  ];
 
+  protected readonly vista = signal<'entrenadores' | 'planes'>('entrenadores');
   protected readonly lista = signal<Entrenador[]>([]);
   protected readonly busqueda = signal('');
   protected readonly cargado = signal(false);
@@ -133,7 +248,7 @@ export class Admin implements OnInit {
     { v: 'todos', t: 'Todos' }, { v: 'Activa', t: 'Activas' }, { v: 'Prueba', t: 'En prueba' }, { v: 'Vencida', t: 'Vencidas' },
   ];
   protected readonly guardando = signal(false);
-  protected readonly planesPago = computed(() => this.auth.planes().filter((p) => p.codigo !== 'prueba'));
+  protected readonly planesPago = computed(() => this.auth.planes().filter((p) => p.codigo !== 'prueba' && p.activo));
 
   protected readonly filtrados = computed(() => {
     const q = normalizar(this.busqueda());
@@ -158,6 +273,16 @@ export class Admin implements OnInit {
     return { activas, prueba, vencidas, mrr };
   });
 
+  /** Entrenadores por plan (para el catálogo). */
+  private readonly usoPorPlan = computed(() => {
+    const m = new Map<number, number>();
+    this.lista().forEach((e) => e.suscripciones && m.set(e.suscripciones.plan_id, (m.get(e.suscripciones.plan_id) ?? 0) + 1));
+    return m;
+  });
+  usoPlan(id: number) {
+    return this.usoPorPlan().get(id) ?? 0;
+  }
+
   ngOnInit() {
     this.cargar();
   }
@@ -166,6 +291,7 @@ export class Admin implements OnInit {
     const [perfiles, correos] = await Promise.all([
       supabase.from('perfiles').select('*, suscripciones(*)').order('created_at', { ascending: false }),
       supabase.rpc('admin_estado_correos'),
+      this.auth.cargarPlanes(),
     ]);
     if (perfiles.error) return this.ui.error(perfiles.error);
     this.lista.set((perfiles.data as Entrenador[]) ?? []);
@@ -241,26 +367,114 @@ export class Admin implements OnInit {
     if (e.id === this.auth.perfil()?.id) await this.auth.cargarCuenta();
   }
 
-  async extenderPrueba(e: Entrenador) {
+  /* ---------- Gestionar plan de un entrenador (cortesía, cambio de plan, fechas) ---------- */
+  protected readonly asignarA = signal<Entrenador | null>(null);
+  protected readonly historial = signal<PagoSuscripcion[]>([]);
+  protected asg: { planId: number; estado: EstadoSus; vence: string } = { planId: 0, estado: 'activa', vence: hoyISO() };
+  private readonly asCambio = signal(0); // fuerza recalcular el resumen al tocar los campos del modal
+
+  planesAsignables(e: Entrenador) {
+    return this.auth.planes().filter((p) => p.activo || p.id === e.suscripciones?.plan_id);
+  }
+
+  async abrirAsignar(e: Entrenador) {
     const s = e.suscripciones;
-    if (!s) return;
-    const base = (diasDesde(s.vence_el) ?? 0) > 0 ? hoyISO() : s.vence_el;
+    this.asg = { planId: s?.plan_id ?? this.planesPago()[0]?.id ?? 0, estado: s?.estado ?? 'activa', vence: s?.vence_el ?? hoyISO() };
+    this.historial.set([]);
+    this.asignarA.set(e);
+    const { data } = await supabase.from('pagos_suscripcion').select('*').eq('trainer_id', e.id).order('periodo_desde', { ascending: false }).limit(12);
+    this.historial.set((data as PagoSuscripcion[]) ?? []);
+  }
+
+  /** Suma tiempo desde el vencimiento (o desde hoy si ya venció) y, si estaba vencida/cancelada, la reactiva. */
+  sumar(tipo: 'd' | 'm', n: number) {
+    const base = this.asg.vence && this.asg.vence >= hoyISO() ? this.asg.vence : hoyISO();
+    this.asg.vence = tipo === 'd' ? sumarDias(base, n) : sumarMeses(base, n);
+    if (this.asg.estado === 'vencida' || this.asg.estado === 'cancelada') {
+      const plan = this.auth.planes().find((p) => p.id === Number(this.asg.planId));
+      this.asg.estado = plan?.codigo === 'prueba' ? 'prueba' : 'activa';
+    }
+    this.asCambio.update((v) => v + 1);
+  }
+
+  resumenAsignar() {
+    this.asCambio();
+    const v = this.asg.vence;
+    if (!v) return { bloquea: true, texto: 'Elige la fecha de vencimiento.' };
+    const plan = this.auth.planes().find((p) => p.id === Number(this.asg.planId));
+    const accede = (this.asg.estado === 'activa' || this.asg.estado === 'prueba') && v >= hoyISO();
+    const dias = -(diasDesde(v) ?? 0);
+    return accede
+      ? { bloquea: false, texto: `Tendrá acceso completo con <b>${esc(plan?.nombre ?? '')}</b> hasta el <b>${fmtFecha(v)}</b> (${dias} día${dias === 1 ? '' : 's'}). No se registra ningún pago.` }
+      : { bloquea: true, texto: 'Con este estado o fecha <b>no podrá guardar cambios</b>: solo verá sus datos.' };
+  }
+
+  async guardarAsignacion(e: Entrenador) {
+    this.guardando.set(true);
     const { error } = await supabase
       .from('suscripciones')
-      .update({ vence_el: sumarDias(base, 7), estado: s.estado === 'cancelada' || s.estado === 'vencida' ? 'prueba' : s.estado, updated_at: new Date().toISOString() })
+      .update({ plan_id: Number(this.asg.planId), estado: this.asg.estado, vence_el: this.asg.vence, updated_at: new Date().toISOString() })
       .eq('trainer_id', e.id);
+    this.guardando.set(false);
     if (error) return this.ui.error(error);
-    this.ui.toast('Se sumaron 7 días ✓');
+    this.asignarA.set(null);
+    this.ui.toast('Plan actualizado ✓');
     await this.cargar();
+    if (e.id === this.auth.perfil()?.id) await this.auth.cargarCuenta();
   }
 
-  async cancelar(e: Entrenador) {
-    const ok = await this.ui.confirmar('Cancelar suscripción', `<b>${esc(e.nombre || e.email)}</b> podrá ver sus datos pero no guardar cambios.`);
-    if (!ok) return;
-    const { error } = await supabase.from('suscripciones').update({ estado: 'cancelada', updated_at: new Date().toISOString() }).eq('trainer_id', e.id);
+  /* ---------- Catálogo de planes ---------- */
+  protected readonly planEdit = signal<{
+    id: number | null; codigo: string; nombreOriginal: string; nombre: string; precio: number; max: number | null;
+    descripcion: string; destacado: boolean; activo: boolean;
+  } | null>(null);
+
+  abrirPlan(p: Plan | null) {
+    this.planEdit.set(
+      p
+        ? { id: p.id, codigo: p.codigo, nombreOriginal: p.nombre, nombre: p.nombre, precio: Number(p.precio_mensual), max: p.max_atletas, descripcion: p.descripcion ?? '', destacado: p.destacado, activo: p.activo }
+        : { id: null, codigo: '', nombreOriginal: '', nombre: '', precio: 0, max: null, descripcion: '', destacado: false, activo: true },
+    );
+  }
+
+  async guardarPlan(pe: NonNullable<ReturnType<typeof this.planEdit>>) {
+    const max = pe.max === null || (pe.max as unknown) === '' || Number(pe.max) <= 0 ? null : Math.round(Number(pe.max));
+    const precio = Math.max(0, Number(pe.precio) || 0);
+    const datos = { nombre: pe.nombre.trim(), precio_mensual: precio, max_atletas: max, descripcion: pe.descripcion.trim(), destacado: pe.destacado, activo: pe.codigo === 'prueba' ? true : pe.activo };
+    this.guardando.set(true);
+    let error;
+    if (pe.id) {
+      ({ error } = await supabase.from('planes').update(datos).eq('id', pe.id));
+    } else {
+      const usados = new Set(this.auth.planes().map((p) => p.codigo));
+      let codigo = codigoDe(datos.nombre);
+      for (let i = 2; usados.has(codigo); i++) codigo = codigoDe(datos.nombre) + '-' + i;
+      ({ error } = await supabase.from('planes').insert({ ...datos, codigo }));
+    }
+    // Un solo plan destacado a la vez
+    if (!error && pe.destacado) {
+      const otros = this.auth.planes().filter((p) => p.destacado && p.id !== pe.id).map((p) => p.id);
+      if (otros.length) ({ error } = await supabase.from('planes').update({ destacado: false }).in('id', otros));
+    }
+    this.guardando.set(false);
     if (error) return this.ui.error(error);
-    this.ui.toast('Suscripción cancelada');
-    await this.cargar();
+    this.planEdit.set(null);
+    this.ui.toast(pe.id ? 'Plan actualizado ✓' : 'Plan creado ✓');
+    await this.auth.cargarPlanes();
+  }
+
+  async alternarActivo(p: Plan) {
+    if (p.activo && this.usoPlan(p.id)) {
+      const ok = await this.ui.confirmar(
+        'Desactivar plan',
+        `<b>${esc(p.nombre)}</b> dejará de ofrecerse. Los ${this.usoPlan(p.id)} entrenador(es) que lo tienen lo conservan hasta que les cambies el plan.`,
+        'Desactivar',
+      );
+      if (!ok) return;
+    }
+    const { error } = await supabase.from('planes').update({ activo: !p.activo }).eq('id', p.id);
+    if (error) return this.ui.error(error);
+    this.ui.toast(p.activo ? 'Plan desactivado' : 'Plan activado ✓');
+    await this.auth.cargarPlanes();
   }
 }
-
