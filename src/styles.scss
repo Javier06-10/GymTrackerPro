@@ -1463,3 +1463,8 @@ html[data-tema="marca"] .titulo-seccion::after{background:var(--borde);}
 }
 .campo .destino-item input[type="checkbox"]{width:18px;height:18px;flex:0 0 18px;margin:0;padding:0;accent-color:var(--ambar);}
 .campo .destino-item > span:first-of-type{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* Contacto del administrador (Mi cuenta → planes) */
+.contacto-admin{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13.5px;}
+.contacto-admin a{color:var(--ambar-texto);text-decoration:none;}
+.contacto-admin a:hover{text-decoration:underline;}

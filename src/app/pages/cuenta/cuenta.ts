@@ -77,6 +77,7 @@ interface PagoSuscripcion { id: string; monto: number; metodo: string; referenci
     </div>
     <div class="nota-info" style="margin-top:12px;">
       Los pagos se hacen por transferencia. Al elegir un plan se abre WhatsApp con tu solicitud; en cuanto confirmemos el pago, tu plan se activa.
+      <div class="contacto-admin"><app-icono nombre="chat" [tam]="15" /> Administración: <a [href]="'https://wa.me/' + env.whatsappVentas" target="_blank" rel="noopener"><b>{{ env.whatsappVentasTxt }}</b></a> por WhatsApp</div>
     </div>
 
     @if (historial().length) {
@@ -193,6 +194,7 @@ export class Cuenta implements OnInit {
   protected readonly planesPago = computed(() => this.auth.planes().filter((p) => p.codigo !== 'prueba'));
   protected readonly historial = signal<PagoSuscripcion[]>([]);
   private readonly datos = inject(DatosService);
+  protected readonly env = environment;
   protected readonly beneficios = ['Medidas con mapa muscular', 'Rutinas e historial de cargas', 'Nutrición, asistencia y objetivos', 'Cobros, recibos y WhatsApp', 'Reportes en PDF'];
 
   protected readonly usados = computed(() => this.datos.atletas().length);
