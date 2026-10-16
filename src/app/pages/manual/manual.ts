@@ -1,10 +1,17 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { construirManual } from '../../core/manual';
+import { construirManualVP } from '../../core/manual-vp';
 import { SvgSeguroPipe } from '../../shared/svg-seguro.pipe';
 import { Icono } from '../../shared/icono';
 
 type Genero = 'mujer' | 'hombre';
+type Libro = 'femenino' | 'vp';
+
+const LIBROS: { v: Libro; t: string; sub: string }[] = [
+  { v: 'femenino', t: 'Entrenamiento femenino', sub: 'Entrenamiento femenino · {n} capítulos con evidencia, técnica y fichas de ejercicio.' },
+  { v: 'vp', t: 'Anatomía y ejercicios', sub: 'Anatomía funcional, biomecánica y catálogo de ejercicios · VP Fitness.' },
+];
 const CLAVE_GENERO = 'gt-manual-genero';
 
 function generoGuardado(): Genero {
@@ -25,20 +32,27 @@ function generoGuardado(): Genero {
       <div class="cab-ico"><app-icono nombre="libro" [tam]="24" /></div>
       <div class="cab-texto">
         <h1>Manual del Entrenador</h1>
-        <p>Entrenamiento femenino · {{ capitulos().length - 1 }} capítulos con evidencia, técnica y fichas de ejercicio.</p>
+        <p>{{ subtitulo() }}</p>
         <div class="cab-progreso">
           <span>Capítulo {{ indice() }} de {{ capitulos().length - 1 }}</span>
           <div class="barra-uso"><span [style.width.%]="(indice() / (capitulos().length - 1)) * 100"></span></div>
         </div>
       </div>
-      <div class="cab-acciones">
-        <span class="cab-etq">Figuras</span>
-        <div class="segmentado" role="group" aria-label="Figuras de los ejercicios">
-          <button [class.activo]="genero() === 'mujer'" (click)="cambiarGenero('mujer')"><app-icono nombre="mujer" [tam]="14" /> Mujer</button>
-          <button [class.activo]="genero() === 'hombre'" (click)="cambiarGenero('hombre')"><app-icono nombre="hombre" [tam]="14" /> Hombre</button>
+      @if (libroActual() === 'femenino') {
+        <div class="cab-acciones">
+          <span class="cab-etq">Figuras</span>
+          <div class="segmentado" role="group" aria-label="Figuras de los ejercicios">
+            <button [class.activo]="genero() === 'mujer'" (click)="cambiarGenero('mujer')"><app-icono nombre="mujer" [tam]="14" /> Mujer</button>
+            <button [class.activo]="genero() === 'hombre'" (click)="cambiarGenero('hombre')"><app-icono nombre="hombre" [tam]="14" /> Hombre</button>
+          </div>
         </div>
-      </div>
+      }
     </section>
+    <div class="segmentado libros-manual" role="tablist" aria-label="Manual">
+      @for (l of libros; track l.v) {
+        <button role="tab" [class.activo]="libroActual() === l.v" (click)="cambiarLibro(l.v)"><app-icono nombre="libro" [tam]="14" /> {{ l.t }}</button>
+      }
+    </div>
     <div class="manual-layout">
       <div class="manual-nav">
         @for (c of capitulos(); track c.id; let i = $index) {
@@ -61,10 +75,15 @@ function generoGuardado(): Genero {
 export class Manual {
   /** Capítulo desde ?cap= */
   readonly cap = input<string>();
+  /** Manual desde ?libro= (femenino por defecto) */
+  readonly libro = input<string>();
+  protected readonly libros = LIBROS;
+  protected readonly libroActual = computed<Libro>(() => (this.libro() === 'vp' ? 'vp' : 'femenino'));
   private readonly router = inject(Router);
 
   protected readonly genero = signal<Genero>(generoGuardado());
-  protected readonly capitulos = computed(() => construirManual(this.genero()));
+  protected readonly capitulos = computed(() => (this.libroActual() === 'vp' ? construirManualVP() : construirManual(this.genero())));
+  protected readonly subtitulo = computed(() => LIBROS.find((l) => l.v === this.libroActual())!.sub.replace('{n}', String(this.capitulos().length - 1)));
 
   protected readonly indice = computed(() => Math.max(0, this.capitulos().findIndex((c) => c.id === this.cap())));
   protected readonly actual = computed(() => this.capitulos()[this.indice()]);
@@ -80,8 +99,13 @@ export class Manual {
     }
   }
 
+  cambiarLibro(l: Libro) {
+    this.router.navigate([], { queryParams: { libro: l === 'femenino' ? null : l, cap: null } });
+    window.scrollTo({ top: 0 });
+  }
+
   ir(id: string) {
-    this.router.navigate([], { queryParams: { cap: id } });
+    this.router.navigate([], { queryParams: { cap: id }, queryParamsHandling: 'merge' });
     window.scrollTo({ top: 0 });
   }
 }

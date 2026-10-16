@@ -504,15 +504,15 @@ function fichaEj(o){
     <div class="ficha-sec"><div class="ficha-t">${iconoSvg('tendencia', 14)} Cómo progresar</div><p>${o.progresion}</p></div>
   </div>`;
 }
-function tablaM(cabeceras, filas){
+export function tablaM(cabeceras, filas){
   return `<div class="tabla-scroll"><table class="tabla-manual">
     <tr>${cabeceras.map(h=>"<th>"+h+"</th>").join("")}</tr>
     ${filas.map(f=>"<tr>"+f.map(c=>"<td>"+c+"</td>").join("")+"</tr>").join("")}
   </table></div>`;
 }
-const calloutEv = t => `<div class="callout callout-ev">${iconoSvg('microscopio', 15)} <b>Evidencia:</b> ${t}</div>`;
-const calloutPr = t => `<div class="callout callout-pr">${iconoSvg('herramienta', 15)} <b>Recomendación práctica:</b> ${t}</div>`;
-const calloutSg = t => `<div class="callout callout-sg">${iconoSvg('alerta', 15)} <b>Seguridad:</b> ${t}</div>`;
+export const calloutEv = t => `<div class="callout callout-ev">${iconoSvg('microscopio', 15)} <b>Evidencia:</b> ${t}</div>`;
+export const calloutPr = t => `<div class="callout callout-pr">${iconoSvg('herramienta', 15)} <b>Recomendación práctica:</b> ${t}</div>`;
+export const calloutSg = t => `<div class="callout callout-sg">${iconoSvg('alerta', 15)} <b>Seguridad:</b> ${t}</div>`;
 export function construirManual(genero: 'mujer' | 'hombre' = 'mujer'): CapituloManual[] {
 _GEN = genero;
 return [

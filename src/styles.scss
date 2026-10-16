@@ -1498,3 +1498,9 @@ html[data-tema="marca"] .titulo-seccion::after{background:var(--borde);}
   .fp-uso{grid-column:1;}
   .fila-plan .fe-acciones{grid-column:1 / -1;}
 }
+
+/* Selector de manual (femenino / VP Fitness) */
+.libros-manual{display:flex;width:fit-content;max-width:100%;margin:0 0 14px;overflow-x:auto;}
+.libros-manual button{white-space:nowrap;}
+/* Recomendación práctica legible en todos los temas (ambar-claro no contrasta en temas claros) */
+.callout-pr{color:var(--ambar-texto);}
