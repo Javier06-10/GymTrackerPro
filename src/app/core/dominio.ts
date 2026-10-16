@@ -163,14 +163,35 @@ const META_BAJAR = /\b(bajar|rebajar|adelgaz\w*|perder (?:de )?(?:peso|grasa|lib
 
 /**
  * El atleta busca bajar de peso: objetivo "Perder grasa" o una meta escrita que lo pide.
- * En ese caso que bajen las medidas (brazos, piernas, cadera…) también es avance.
+ * En ese caso que bajen las medidas (brazos, piernas, cadera…) también es avance,
+ * salvo que la meta pida cuidar el músculo (ver cuidaMusculo).
  */
 export function quiereBajar(a: Pick<Atleta, 'objetivo' | 'objetivoTexto'>): boolean {
   return a.objetivo === 'perder' || META_BAJAR.test(a.objetivoTexto || '');
 }
 
-/** ¿Para este atleta, que baje esta zona es bueno? (abdomen siempre; todas si quiere bajar de peso). */
+/** Meta escrita que pide cuidar el músculo: "sin perder músculo", "mantener la masa muscular", "tonificar", "recomposición"... */
+const META_MUSCULO = /\b(?:sin perder|mantener|conservar|cuidar)\s+(?:(?:el|la|de|mi|su)\s+)*(?:m[uú]sculos?|masa(?:\s+muscular)?|musculatura)|\b(?:recomposici[oó]n|tonificar|tonificaci[oó]n|definir|definici[oó]n)/i;
+
+/**
+ * El atleta quiere conservar o ganar músculo mientras pierde grasa (recomposición):
+ * objetivo "Recomposición corporal" o una meta escrita que lo pide.
+ */
+export function cuidaMusculo(a: Pick<Atleta, 'objetivo' | 'objetivoTexto'>): boolean {
+  return a.objetivo === 'recomp' || META_MUSCULO.test(a.objetivoTexto || '');
+}
+
+/** Zonas donde se acumula grasa: en recomposición, que bajen es avance; en el resto (pecho, brazos, piernas) lo es que suban. */
+const ZONAS_GRASA = new Set([...ZONAS_INVERTIDAS, 'cadera']);
+
+/**
+ * ¿Para este atleta, que baje esta zona es bueno?
+ * - Cuida el músculo (p. ej. "bajar grasa sin perder músculo"): solo abdomen y cadera; pecho, brazos y piernas deben subir.
+ * - Solo quiere bajar de peso: todas las zonas.
+ * - Resto: solo el abdomen.
+ */
 export function bajarEsBueno(a: Pick<Atleta, 'objetivo' | 'objetivoTexto'>, zona: string): boolean {
+  if (cuidaMusculo(a)) return ZONAS_GRASA.has(zona);
   return quiereBajar(a) || ZONAS_INVERTIDAS.has(zona);
 }
 
