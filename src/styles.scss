@@ -1504,3 +1504,16 @@ html[data-tema="marca"] .titulo-seccion::after{background:var(--borde);}
 .libros-manual button{white-space:nowrap;}
 /* Recomendación práctica legible en todos los temas (ambar-claro no contrasta en temas claros) */
 .callout-pr{color:var(--ambar-texto);}
+
+/* Manual VP Fitness: fichas del catálogo y glosario */
+.ficha-vp .ficha-cab{margin-bottom:8px;}
+.ficha-vp-datos, .glosario-vp{display:grid;grid-template-columns:max-content 1fr;gap:5px 14px;margin:0;font-size:13.5px;}
+.ficha-vp-datos dt, .glosario-vp dt{font-weight:700;color:var(--texto-suave);}
+.ficha-vp-datos dd, .glosario-vp dd{margin:0;}
+.ficha-vp-nota{margin:10px 0 0;padding-top:8px;border-top:1px dashed var(--borde);font-size:13px;color:var(--texto-suave);}
+.glosario-vp{gap:9px 18px;font-size:14px;}
+.glosario-vp dt{color:var(--texto);}
+@media (max-width:560px){
+  .ficha-vp-datos, .glosario-vp{grid-template-columns:1fr;gap:2px;}
+  .ficha-vp-datos dd, .glosario-vp dd{margin-bottom:6px;}
+}
