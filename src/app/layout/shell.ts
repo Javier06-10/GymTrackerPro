@@ -25,6 +25,7 @@ import { Icono } from '../shared/icono';
         </a>
         <nav class="nav-top">
           <a routerLink="/panel" routerLinkActive="activo">Panel@if (compartidas.recibidas().length) { <span class="contador" title="Rutinas recibidas">{{ compartidas.recibidas().length }}</span> }</a>
+          <a routerLink="/asistencia" routerLinkActive="activo">Pasar lista</a>
           <a routerLink="/manual" routerLinkActive="activo">Manual</a>
           <a routerLink="/cuenta" routerLinkActive="activo">Mi cuenta</a>
           @if (auth.esAdmin()) { <a routerLink="/admin" routerLinkActive="activo">Admin</a> }
@@ -43,6 +44,7 @@ import { Icono } from '../shared/icono';
         @if (menu()) {
           <div class="menu-desplegable" (click)="menu.set(false)">
             <a routerLink="/panel"><app-icono nombre="casa" [tam]="16" /> Panel@if (compartidas.recibidas().length) { <span class="contador">{{ compartidas.recibidas().length }}</span> }</a>
+            <a routerLink="/asistencia"><app-icono nombre="calendario" [tam]="16" /> Pasar lista</a>
             <a routerLink="/manual"><app-icono nombre="libro" [tam]="16" /> Manual del entrenador</a>
             <a routerLink="/cuenta"><app-icono nombre="persona" [tam]="16" /> Mi cuenta y plan</a>
             @if (auth.esAdmin()) { <a routerLink="/admin"><app-icono nombre="herramienta" [tam]="16" /> Administración</a> }

@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { DatosService } from '../../core/datos.service';
 import { OBJETIVOS, medicionPendiente, nombreObjetivo, pagoVencido, ultimaMedida } from '../../core/dominio';
@@ -21,7 +21,7 @@ import { UnidadesService } from '../../core/unidades';
 /** Dashboard — balance global del entrenador (portado de renderDashboard). */
 @Component({
   selector: 'app-panel',
-  imports: [FormsModule, AvatarIniciales, GruposModal, Modal, GraficaBarras, Icono, RutinasRecibidas],
+  imports: [FormsModule, RouterLink, AvatarIniciales, GruposModal, Modal, GraficaBarras, Icono, RutinasRecibidas],
   template: `
     <section class="hero-panel">
       <div class="texto">
@@ -32,6 +32,7 @@ import { UnidadesService } from '../../core/unidades';
           <button class="btn btn-primario" (click)="ui.formAtleta.set({ id: null })" [disabled]="!auth.vigente()">
             <app-icono nombre="mas" [tam]="16" /> Nuevo atleta
           </button>
+          <a class="btn btn-suave" routerLink="/asistencia"><app-icono nombre="calendario" [tam]="16" /> Pasar lista</a>
           <button class="btn btn-suave" (click)="mesReporte = meses[0].valor; reporteAbierto.set(true)"><app-icono nombre="grafico" [tam]="16" /> Reporte del mes</button>
           <button class="btn btn-fantasma" (click)="irManual()"><app-icono nombre="libro" [tam]="16" /> Manual</button>
         </div>

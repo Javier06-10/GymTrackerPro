@@ -11,6 +11,7 @@ export const routes: Routes = [
     children: [
       { path: 'panel', loadComponent: () => import('./pages/panel/panel').then((m) => m.Panel) },
       { path: 'atletas/:id', loadComponent: () => import('./pages/atleta/atleta').then((m) => m.AtletaPage) },
+      { path: 'asistencia', loadComponent: () => import('./pages/asistencia/pasar-lista').then((m) => m.PasarLista) },
       { path: 'manual', loadComponent: () => import('./pages/manual/manual').then((m) => m.Manual) },
       { path: 'cuenta', loadComponent: () => import('./pages/cuenta/cuenta').then((m) => m.Cuenta) },
       { path: 'admin', canActivate: [adminGuard], loadComponent: () => import('./pages/admin/admin').then((m) => m.Admin) },
