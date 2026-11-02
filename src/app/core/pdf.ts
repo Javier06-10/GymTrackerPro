@@ -7,6 +7,7 @@ import { ZONAS, avanceObjetivo, bajarEsBueno, quiereBajar, medicionPendiente, pa
 import { Sistema, largoTxt, largoVer, pesoTxt, pesoVer, uLargo, uPeso } from './unidades';
 import { Atleta, Medida, PagoAtleta } from './modelos';
 import { MESES_ES, diasDesde, fmtDinero, fmtFecha, hoyISO, normalizar } from './util';
+import { EQUIVALENCIAS, PlanComidas } from './planes-comida';
 
 type Color = [number, number, number];
 type Op =
@@ -32,11 +33,12 @@ const GRISMED: Color = [0.55, 0.58, 0.63];
 function pdfTxt(t: string): string {
   const mapa: Record<string, number> = {
     á: 225, é: 233, í: 237, ó: 243, ú: 250, ñ: 241, Á: 193, É: 201, Í: 205, Ó: 211, Ú: 218, Ñ: 209, ü: 252, Ü: 220,
-    '°': 176, '·': 183, '¡': 161, '¿': 191, '–': 150, '—': 151, '“': 147, '”': 148, '’': 146,
+    '°': 176, '·': 183, '¡': 161, '¿': 191, '–': 150, '—': 151, '“': 147, '”': 148, '’': 146, '•': 149,
   };
   let s = '';
   for (const ch of String(t)) {
     if (ch === '→') { s += '->'; continue; }
+    if (ch === '≈') { s += '~'; continue; }
     let c = ch.charCodeAt(0);
     if (mapa[ch] !== undefined) c = mapa[ch];
     if (c > 255) c = 63;
@@ -463,4 +465,99 @@ export function reporteMensualPDF(atletas: Atleta[], valorMes: string, m: Membre
   const pdf = construirPDF([ops], m.logo);
   descargarPDF(`Reporte_Mensual_${MESES_ES[mes]}_${anio}.pdf`, pdf);
   return pdf;
+}
+
+/* ============================================================
+   🍽️ PLAN DE ALIMENTACIÓN SUGERIDO
+   ============================================================ */
+/** Convierte el PDF (cadena binaria) en Blob para compartirlo o descargarlo. */
+export function pdfABlob(pdf: string): Blob {
+  const bytes = new Uint8Array(pdf.length);
+  for (let i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 0xff;
+  return new Blob([bytes], { type: 'application/pdf' });
+}
+
+/** Parte un texto en líneas que caben en `max` puntos de ancho. */
+function envolver(texto: string, tam: number, max: number, negrita = false): string[] {
+  const lineas: string[] = [];
+  let actual = '';
+  for (const p of texto.split(' ')) {
+    const prueba = actual ? actual + ' ' + p : p;
+    if (actual && ancho(prueba, tam, negrita) > max) {
+      lineas.push(actual);
+      actual = p;
+    } else actual = prueba;
+  }
+  if (actual) lineas.push(actual);
+  return lineas;
+}
+
+/** Arma el PDF del plan de comidas (no lo descarga): devuelve nombre de archivo y contenido. */
+export function planComidasPDF(a: Atleta, p: PlanComidas, m: Membrete): { archivo: string; pdf: string } {
+  const { ops, T, TD, encabezado, pie } = lienzo(m);
+  encabezado();
+  T(64, 112, 'PLAN DE ALIMENTACIÓN', 20, true);
+  T(64, 134, 'Atleta: ' + a.nombre, 12, true);
+  T(64, 152, `${p.titulo}  ·  Objetivo: ${p.objetivo.toLowerCase()}`, 10.5, false, GRIS);
+
+  // Resumen del día
+  ops.push({ tipo: 'rect', x: 64, y: 166, w: 484, h: 46, color: [0.97, 0.95, 0.92] });
+  ops.push({ tipo: 'rectBorde', x: 64, y: 166, w: 484, h: 46, color: AMBAR, grosor: 1.1 });
+  T(80, 184, 'CALORÍAS DEL DÍA', 8, true, GRIS);
+  T(80, 202, `≈ ${(Math.round(p.kcal / 10) * 10).toLocaleString('en-US')} kcal`, 14, true);
+  T(250, 184, 'PROTEÍNA', 8, true, GRIS);
+  T(250, 202, `${Math.round(p.prot)} g`, 14, true);
+  T(380, 184, 'DISTRIBUCIÓN', 8, true, GRIS);
+  T(380, 202, `${p.comidas.length} comidas al día`, 12, true);
+
+  // Comidas en dos columnas
+  const colW = 236, gap = 12, x0 = 64;
+  let y = 230;
+  for (let i = 0; i < p.comidas.length; i += 2) {
+    const fila = p.comidas.slice(i, i + 2);
+    const altos = fila.map((c) => 56 + c.items.reduce((s, it) => s + envolver(it.texto, 10, colW - 40).length * 14, 0) + 16);
+    const alto = Math.max(...altos);
+    fila.forEach((c, j) => {
+      const x = x0 + j * (colW + gap);
+      ops.push({ tipo: 'rectBorde', x, y, w: colW, h: alto, color: LINEA, grosor: 1 });
+      ops.push({ tipo: 'rect', x, y, w: 4, h: alto, color: AMBAR });
+      // Número de la comida en un círculo (cuadro) de color
+      ops.push({ tipo: 'rect', x: x + 14, y: y + 12, w: 20, h: 20, color: AMBAR });
+      T(x + 21 - (i + j >= 9 ? 3 : 0), y + 26, String(i + j + 1), 11, true, [1, 1, 1]);
+      T(x + 42, y + 22, c.nombre, 12, true);
+      T(x + 42, y + 36, c.hora, 9, false, GRIS);
+      let yy = y + 56;
+      c.items.forEach((it) => {
+        envolver(it.texto, 10, colW - 40).forEach((l, k) => {
+          T(x + 18, yy, k === 0 ? '•' : '', 10, true, AMBAR);
+          T(x + 28, yy, l, 10);
+          yy += 14;
+        });
+      });
+      T(x + 18, y + alto - 12, `Proteína aprox.: ${Math.round(c.prot)} g  ·  ≈ ${Math.round(c.kcal / 10) * 10} kcal`, 8.5, false, GRIS);
+    });
+    y += alto + 12;
+  }
+
+  // Equivalencias
+  y += 6;
+  T(64, y, 'EQUIVALENCIAS PARA VARIAR EL MENÚ', 9, true, GRIS);
+  y += 16;
+  for (const [t, d] of EQUIVALENCIAS) {
+    const lineas = envolver(d.replace(/↔/g, '/'), 9, 484 - 90);
+    T(64, y, t + ':', 9, true);
+    lineas.forEach((l, k) => T(154, y + k * 12, l, 9, false, OSCURO));
+    y += lineas.length * 12 + 4;
+  }
+  y += 8;
+  envolver('Bebe agua durante el día. Plan orientativo: no sustituye la valoración de un nutricionista, sobre todo si hay condiciones médicas o alergias. Avísale a tu entrenador si algún alimento no te cae bien para cambiarlo.', 8.5, 484)
+    .forEach((l, k) => T(64, y + k * 11, l, 8.5, false, GRISMED));
+
+  pie(`Generado el ${fmtFecha(hoyISO())} con GymTracker Pro`);
+  return { archivo: `Plan_alimentacion_${slug(a.nombre)}.pdf`, pdf: construirPDF([ops], m.logo) };
+}
+
+/** Descarga un PDF ya armado. */
+export function descargarPlanPDF(archivo: string, pdf: string) {
+  descargarPDF(archivo, pdf);
 }

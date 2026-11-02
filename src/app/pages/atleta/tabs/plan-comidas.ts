@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { AuthService } from '../../../core/auth.service';
+import { PdfService } from '../../../core/pdf.service';
 import { Atleta } from '../../../core/modelos';
 import { EQUIVALENCIAS, TipoPlan, armarPlan, planRecomendado, planTexto } from '../../../core/planes-comida';
 import { UiService } from '../../../core/ui.service';
@@ -48,10 +49,14 @@ import { Icono } from '../../../shared/icono';
     </div>
 
     <div class="pc-acciones">
-      <button class="btn btn-primario" (click)="enviar()" [disabled]="!atleta().telefono"><app-icono nombre="chat" [tam]="16" /> Enviar por WhatsApp</button>
-      <button class="btn btn-suave" (click)="copiar()"><app-icono nombre="documento" [tam]="16" /> Copiar texto</button>
-      @if (!atleta().telefono) { <span class="pc-sin-tel">Agrega el teléfono del atleta para enviarlo por WhatsApp.</span> }
+      <button class="btn btn-primario" (click)="compartirPdf()" [disabled]="generando()" title="En el teléfono abre el menú para mandarlo por WhatsApp; en la computadora lo descarga">
+        <app-icono nombre="compartir" [tam]="16" /> {{ generando() ? 'Generando…' : 'Compartir PDF' }}
+      </button>
+      <button class="btn btn-suave" (click)="descargarPdf()" [disabled]="generando()"><app-icono nombre="descargar" [tam]="16" /> Descargar PDF</button>
+      <button class="btn btn-suave" (click)="enviar()" [disabled]="!atleta().telefono"><app-icono nombre="chat" [tam]="16" /> Enviar texto por WhatsApp</button>
+      <button class="btn btn-fantasma" (click)="copiar()"><app-icono nombre="documento" [tam]="16" /> Copiar texto</button>
     </div>
+    @if (!atleta().telefono) { <div class="pc-sin-tel">Agrega el teléfono del atleta para enviarle el texto directo a su WhatsApp.</div> }
 
     <details class="pc-equiv">
       <summary><app-icono nombre="recargar" [tam]="15" /> Equivalencias para variar el menú</summary>
@@ -72,6 +77,8 @@ export class PlanComidas {
   readonly atleta = input.required<Atleta>();
   private readonly ui = inject(UiService);
   private readonly auth = inject(AuthService);
+  private readonly pdf = inject(PdfService);
+  protected readonly generando = signal(false);
 
   protected readonly tipos: { v: TipoPlan; t: string }[] = [
     { v: 'deficit', t: 'Déficit' }, { v: 'mantenimiento', t: 'Mantenimiento' }, { v: 'superavit', t: 'Superávit' },
@@ -93,6 +100,31 @@ export class PlanComidas {
 
   enviar() {
     if (!abrirWhatsApp(this.atleta(), this.texto())) this.ui.toast('El teléfono del atleta no es válido para WhatsApp', 'err');
+  }
+
+  async descargarPdf() {
+    this.generando.set(true);
+    try {
+      await this.pdf.planComidas(this.atleta(), this.plan());
+    } catch (e) {
+      this.ui.error(e);
+    } finally {
+      this.generando.set(false);
+    }
+  }
+
+  /** En el teléfono abre el menú de compartir con el PDF adjunto (WhatsApp, correo…); si no se puede, lo descarga. */
+  async compartirPdf() {
+    this.generando.set(true);
+    try {
+      const nombre = this.atleta().nombre.split(' ')[0];
+      const r = await this.pdf.compartirPlanComidas(this.atleta(), this.plan(), `Hola ${nombre} 👋 Te comparto tu plan de alimentación.`);
+      if (r === 'descargado') this.ui.toast('PDF descargado. Adjúntalo en el chat de WhatsApp del atleta.');
+    } catch (e) {
+      this.ui.error(e);
+    } finally {
+      this.generando.set(false);
+    }
   }
 
   async copiar() {

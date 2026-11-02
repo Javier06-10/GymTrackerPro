@@ -1594,7 +1594,7 @@ html:is([data-tema="marca-oscuro"],[data-tema="energia"],[data-tema="tech"]) .pl
 .pc-macros{font-size:12.5px;color:var(--texto-suave);}
 .pc-macros b{color:var(--texto);}
 .pc-acciones{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;}
-.pc-sin-tel{font-size:12.5px;color:var(--tenue);}
+.pc-sin-tel{font-size:12.5px;color:var(--tenue);margin-top:6px;}
 .pc-equiv{margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--borde);font-size:13.5px;}
 .pc-equiv summary{cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px;}
 .pc-eq{margin-top:8px;color:var(--texto-suave);}
