@@ -15,8 +15,8 @@ import { Icono } from '../shared/icono';
     <div id="app">
       <header class="top">
         <a class="logo" routerLink="/panel" style="text-decoration:none;color:inherit;">
-          <div class="icono" id="logo-caja">
-            @if (auth.perfil()?.logo_url; as logo) { <img [src]="logo" alt="logo" /> } @else { <app-icono nombre="pesa" [tam]="22" /> }
+          <div class="icono" id="logo-caja" [class.icono-fenix]="!auth.perfil()?.logo_url">
+            @if (auth.perfil()?.logo_url; as logo) { <img [src]="logo" alt="logo" /> } @else { <img src="icons/fenix.svg" alt="" class="marca-fenix" /> }
           </div>
           <div>
             <h1>COACH <span>FÉNIX</span></h1>

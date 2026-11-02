@@ -15,7 +15,7 @@ import { Icono } from '../../shared/icono';
       <div class="auth-wrap">
       <div class="auth-card">
         <div class="logo">
-          <div class="icono"><app-icono nombre="pesa" [tam]="22" /></div>
+          <div class="icono icono-fenix"><img src="icons/fenix.svg" alt="" class="marca-fenix" /></div>
           <div><h1>COACH <span>FÉNIX</span></h1><small>Panel de Entrenador</small></div>
         </div>
         <div class="auth-titulo">

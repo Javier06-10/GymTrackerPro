@@ -1,13 +1,71 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ff8a3d"/><stop offset=".55" stop-color="#eb670e"/><stop offset="1" stop-color="#d95e0c"/>
-    </linearGradient>
-    <radialGradient id="brillo" cx=".3" cy=".2" r=".8">
-      <stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="512" height="512" rx="112" fill="url(#g)"/>
-  <rect width="512" height="512" rx="112" fill="url(#brillo)"/>
-  <g transform="translate(87.03999999999999 87.03999999999999) scale(14.08)" fill="none" stroke="#10154a" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12h19"/><rect x="4.5" y="7" width="3" height="10" rx="1"/><rect x="16.5" y="7" width="3" height="10" rx="1"/><path d="M2.5 9.5v5M21.5 9.5v5"/></g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><radialGradient id="fxFondo" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="#2B3154"/><stop offset="1" stop-color="#12152A"/></radialGradient></defs><rect width="512" height="512" rx="112" fill="url(#fxFondo)"/><svg x="14" y="14" width="484" height="484" viewBox="0 0 200 200"><defs>
+  <linearGradient id="fxPluma" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#A82C1A"/><stop offset=".5" stop-color="#E8603C"/><stop offset=".85" stop-color="#F6A63C"/><stop offset="1" stop-color="#FBD27A"/></linearGradient>
+  <linearGradient id="fxCob" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#D9662C"/><stop offset="1" stop-color="#F9D58C"/></linearGradient>
+  <linearGradient id="fxHombro" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C4402A"/><stop offset="1" stop-color="#EE8A36"/></linearGradient>
+  <linearGradient id="fxCuerpo" gradientUnits="userSpaceOnUse" x1="0" y1="58" x2="0" y2="132"><stop offset="0" stop-color="#F9CF6A"/><stop offset=".55" stop-color="#F09038"/><stop offset="1" stop-color="#C8402A"/></linearGradient>
+  <linearGradient id="fxCabeza" gradientUnits="userSpaceOnUse" x1="92" y1="34" x2="112" y2="66"><stop offset="0" stop-color="#FCE3A2"/><stop offset="1" stop-color="#F0A23A"/></linearGradient>
+  <linearGradient id="fxOro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCE6AE"/><stop offset=".45" stop-color="#E9B04E"/><stop offset="1" stop-color="#A8711F"/></linearGradient>
+  <path id="pl" d="M0,0 C8,-12 10,-34 3,-52 C1.5,-46 -1,-41 -4,-36 C-8,-24 -7,-10 0,0Z"/>
+  <g id="fxAla">
+    <g fill="url(#fxPluma)" stroke="#6E1F12" stroke-width=".8" stroke-opacity=".55"><use href="#pl" transform="translate(149,52) rotate(74) scale(1.1)"/><use href="#pl" transform="translate(146.3,55.1) rotate(68.6) scale(1.2)"/><use href="#pl" transform="translate(143.6,58.3) rotate(63.1) scale(1.3)"/><use href="#pl" transform="translate(140.9,61.4) rotate(57.7) scale(1.3)"/><use href="#pl" transform="translate(138.1,64.6) rotate(52.3) scale(1.4)"/><use href="#pl" transform="translate(135.4,67.7) rotate(46.9) scale(1.4)"/><use href="#pl" transform="translate(132.7,70.9) rotate(41.4) scale(1.4)"/><use href="#pl" transform="translate(130,74) rotate(36) scale(1.3)"/><use href="#pl" transform="translate(127.3,77.1) rotate(30.6) scale(1.3)"/><use href="#pl" transform="translate(124.6,80.3) rotate(25.1) scale(1.2)"/><use href="#pl" transform="translate(121.9,83.4) rotate(19.7) scale(1.1)"/><use href="#pl" transform="translate(119.1,86.6) rotate(14.3) scale(1)"/><use href="#pl" transform="translate(116.4,89.7) rotate(8.9) scale(0.9)"/><use href="#pl" transform="translate(113.7,92.9) rotate(3.4) scale(0.8)"/><use href="#pl" transform="translate(111,96) rotate(-2) scale(0.7)"/></g>
+    <path d="M100,104 C108,90 126,74 148,56 C156,52 160,60 155,68 C142,86 124,100 104,110Z" fill="url(#fxHombro)"/>
+    <g fill="url(#fxCob)" stroke="#8E3E16" stroke-width="1" stroke-opacity=".45"><use href="#pl" transform="translate(110,103) rotate(8) scale(0.4)"/><use href="#pl" transform="translate(115.1,97.6) rotate(16.9) scale(0.4)"/><use href="#pl" transform="translate(120.3,92.1) rotate(25.7) scale(0.5)"/><use href="#pl" transform="translate(125.4,86.7) rotate(34.6) scale(0.5)"/><use href="#pl" transform="translate(130.6,81.3) rotate(43.4) scale(0.5)"/><use href="#pl" transform="translate(135.7,75.9) rotate(52.3) scale(0.5)"/><use href="#pl" transform="translate(140.9,70.4) rotate(61.1) scale(0.4)"/><use href="#pl" transform="translate(146,65) rotate(70) scale(0.4)"/></g>
+  </g>
+  <g id="fxGarra">
+    <path d="M107,118 C109,124 111,132 113,144" fill="none" stroke="#C98A2E" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M110,130 l5,-1.5 M111.5,136 l5,-1.5 M112.5,141.5 l4,-1" stroke="#7E5018" stroke-width="1.1" stroke-linecap="round"/>
+    <path d="M104,112 C110,114 114,122 112,130 C109,126 106,124 103,124Z" fill="#E8703A"/>
+    <g fill="none" stroke="#DCA344" stroke-width="4" stroke-linecap="round">
+      <path d="M113,145 C107,145 104,150 105,155"/>
+      <path d="M113,145 C113,150 114,154 116,158"/>
+      <path d="M113,145 C119,145 123,149 122,155"/>
+    </g>
+    <g fill="#191C2E">
+      <path d="M103.4,154.6 C103,159 106,162 110,161.5 C107.5,160.5 106.5,158 106.6,155.2Z"/>
+      <path d="M114.4,158 C114.5,162 117.5,164 121,163 C118.4,162.2 117.4,160.4 117.6,157.6Z"/>
+      <path d="M120.4,154.8 C120,159 117.6,161.6 114.6,162.3 C118.6,163 123.6,160 123.6,155Z"/>
+    </g>
+  </g></defs>
+  <g transform="translate(13,9) scale(.87)">
+    <g fill="url(#fxPluma)" stroke="#6E1F12" stroke-width=".8" stroke-opacity=".5">
+      <use href="#pl" transform="translate(100,122) rotate(136) scale(.95)"/>
+      <use href="#pl" transform="translate(100,122) rotate(224) scale(.95) scale(-1,1)"/>
+      <use href="#pl" transform="translate(100,122) rotate(156) scale(1.25)"/>
+      <use href="#pl" transform="translate(100,122) rotate(204) scale(1.25) scale(-1,1)"/>
+      <use href="#pl" transform="translate(100,122) rotate(180) scale(1.45)"/>
+    </g>
+    <use href="#fxAla"/>
+    <use href="#fxAla" transform="translate(200,0) scale(-1,1)"/>
+    <path d="M113,145 C115,141 120,140 122,143 M87,145 C85,141 80,140 78,143" fill="none" stroke="#A8711F" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M100,58 C114,62 119,86 116,106 C114,120 108,128 100,130 C92,128 86,120 84,106 C81,86 86,62 100,58Z" fill="url(#fxCuerpo)"/>
+    <g fill="none" stroke="#FDE6A8" stroke-width="1.4" stroke-linecap="round" opacity=".7">
+      <path d="M91,84 Q95.5,89.5 100,84 Q104.5,89.5 109,84"/>
+      <path d="M89.5,94 Q94.7,100 100,94 Q105.3,100 110.5,94"/>
+      <path d="M90,104 Q95,110 100,104 Q105,110 110,104"/>
+      <path d="M92.5,114 Q96.2,119 100,114 Q103.8,119 107.5,114"/>
+    </g>
+    <g transform="translate(100,62) scale(.88) translate(-100,-62)">
+    <g fill="url(#fxPluma)">
+      <path d="M97,40 C90,30 82,24 70,22 C76,20 84,20 90,24 C86,18 82,12 74,8 C88,8 98,18 102,34Z"/>
+      <path d="M93,46 C84,42 74,42 64,46 C70,38 82,34 94,40Z"/>
+    </g>
+    <path d="M90,62 C86,50 90,38 101,35 C109,33 116,37 119,43 L118,56 C113,61 106,64 98,66Z" fill="url(#fxCabeza)"/>
+    <path d="M117,41.5 C124,41.5 130,47 130,55 C130,60 127.5,63 124.5,62.5 C124.5,59.5 122.5,57.5 119,57.5 L116,57.5 C115.5,52 115.8,46.5 117,41.5Z" fill="#F4EBDD"/>
+    <path d="M124.5,62.5 C127.5,63 130,60 130,55 C128.5,58 126.5,59.5 124.5,62.5Z" fill="#191C2E"/>
+    <path d="M116,57.5 L121.5,57.5 C121,60 118.5,61 116,60.5Z" fill="#D8CDBB"/>
+    <path d="M118,44 C120,47 120,52 119,57" fill="none" stroke="#C9BCA6" stroke-width=".9"/>
+    <path d="M102,42.5 C106,41 111,41.5 115,44" fill="none" stroke="#A82C1A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M107,47 C104,48.5 100,50 96,50" fill="none" stroke="#C8402A" stroke-width="1.3" stroke-linecap="round"/>
+    <circle cx="110" cy="46.5" r="2.3" fill="#191C2E"/>
+    <circle cx="110.7" cy="45.8" r=".75" fill="#fff"/>
+    </g>
+    <rect x="20" y="148" width="160" height="5" rx="2.5" fill="url(#fxOro)"/>
+    <rect x="26" y="129" width="12" height="43" rx="3" fill="url(#fxOro)"/>
+    <rect x="40" y="135" width="8" height="31" rx="2.5" fill="url(#fxOro)"/>
+    <rect x="50" y="144" width="4" height="13" rx="1.5" fill="#B9822A"/>
+    <rect x="162" y="129" width="12" height="43" rx="3" fill="url(#fxOro)"/>
+    <rect x="152" y="135" width="8" height="31" rx="2.5" fill="url(#fxOro)"/>
+    <rect x="146" y="144" width="4" height="13" rx="1.5" fill="#B9822A"/>
+    <use href="#fxGarra"/>
+    <use href="#fxGarra" transform="translate(200,0) scale(-1,1)"/>
+  </g></svg></svg>
