@@ -1695,7 +1695,8 @@ html:is([data-tema="marca-oscuro"],[data-tema="energia"],[data-tema="tech"]) .pl
   .auth-split .auth-wrap{padding:24px 16px 32px;}
 }
 
-/* Logo Coach Fénix: el ave va sobre fondo azul noche, no sobre el ámbar */
-.logo .icono.icono-fenix{background:radial-gradient(circle at 50% 42%,#2B3154,#12152A);overflow:hidden;}
-.logo .icono .marca-fenix{width:118%;height:118%;max-width:none;object-fit:contain;}
-.auth-card .logo .icono.icono-fenix, .marca-texto .logo .icono.icono-fenix{width:48px;height:48px;border-radius:12px;}
+/* Logo Coach Fénix: el ave va suelta, sin recuadro, para que tenga presencia propia */
+.logo .icono.icono-fenix{background:none;box-shadow:none;border-radius:0;width:54px;height:54px;overflow:visible;}
+.logo .icono .marca-fenix{width:100%;height:100%;max-width:none;object-fit:contain;filter:drop-shadow(0 3px 8px color-mix(in srgb, var(--ambar) 35%, transparent));}
+.auth-card .logo .icono.icono-fenix, .marca-texto .logo .icono.icono-fenix{width:76px;height:76px;}
+@media (max-width:640px){.top .logo .icono.icono-fenix{width:44px;height:44px;}}
