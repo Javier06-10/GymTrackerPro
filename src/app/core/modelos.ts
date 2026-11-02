@@ -88,10 +88,22 @@ export interface Atleta {
   rutina: Rutina;
   asistencia: Record<string, EstadoAsistencia>;
   objetivos: ObjetivoMeta[];
+  /** Plan de comidas editado por el entrenador (null = el sugerido automático). */
+  planComidas?: PlanComidasPersonal | null;
   fechaRegistro: string;
   // Relaciones cargadas aparte y ordenadas por fecha ascendente
   medidas: Medida[];
   pagos: PagoAtleta[];
+}
+
+/** Plan de comidas que el entrenador ajustó a mano para un atleta. */
+export interface PlanComidasPersonal {
+  tipo: 'deficit' | 'mantenimiento' | 'superavit';
+  titulo: string;
+  objetivo: string;
+  comidas: { nombre: string; hora: string; emoji: string; items: string[]; kcal: number; prot: number }[];
+  /** Fecha (ISO) de la última edición. */
+  editado: string;
 }
 
 export interface Grupo {

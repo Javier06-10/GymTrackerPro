@@ -4,7 +4,7 @@
    comunes en RD; las porciones se escalan a las calorías del atleta.
    Valores nutricionales aproximados (USDA, alimentos cocidos).
    ============================================================ */
-import { Atleta } from './modelos';
+import { Atleta, PlanComidasPersonal } from './modelos';
 import { calcularNutricion, quiereBajar } from './dominio';
 
 export type TipoPlan = 'deficit' | 'mantenimiento' | 'superavit';
@@ -92,6 +92,8 @@ export interface ItemPlan { texto: string; kcal: number; prot: number }
 export interface ComidaPlan { nombre: string; hora: string; emoji: string; items: ItemPlan[]; kcal: number; prot: number }
 export interface PlanComidas {
   tipo: TipoPlan; titulo: string; objetivo: string;
+  /** true si es el plan que el entrenador editó a mano. */
+  personal?: boolean; editado?: string;
   comidas: ComidaPlan[]; kcal: number; prot: number;
   /** Calorías objetivo del atleta (null si faltan datos: se muestra la plantilla sin ajustar). */
   meta: number | null; protMeta: [number, number] | null; factor: number;
@@ -164,13 +166,39 @@ export function armarPlan(a: Atleta, tipo: TipoPlan): PlanComidas {
   };
 }
 
+/** Plan editado por el entrenador, con las metas del atleta para comparar. */
+export function planDesdePersonal(a: Atleta, p: PlanComidasPersonal): PlanComidas {
+  const ref = armarPlan(a, p.tipo);
+  const comidas = p.comidas.map((c) => ({
+    nombre: c.nombre, hora: c.hora, emoji: c.emoji || '🍽️',
+    items: c.items.filter((t) => t.trim()).map((t) => ({ texto: t.trim(), kcal: 0, prot: 0 })),
+    kcal: Number(c.kcal) || 0, prot: Number(c.prot) || 0,
+  }));
+  return {
+    tipo: p.tipo, titulo: p.titulo, objetivo: p.objetivo, comidas, personal: true, editado: p.editado,
+    kcal: comidas.reduce((s, c) => s + c.kcal, 0), prot: comidas.reduce((s, c) => s + c.prot, 0),
+    meta: ref.meta, protMeta: ref.protMeta, factor: 1,
+  };
+}
+
+/** Copia editable de un plan (sugerido o personal) para el formulario del lápiz. */
+export function planEditable(p: PlanComidas): PlanComidasPersonal {
+  return {
+    tipo: p.tipo, titulo: p.titulo, objetivo: p.objetivo, editado: p.editado ?? '',
+    comidas: p.comidas.map((c) => ({
+      nombre: c.nombre, hora: c.hora, emoji: c.emoji, items: c.items.map((i) => i.texto),
+      kcal: Math.round(c.kcal / 10) * 10, prot: Math.round(c.prot),
+    })),
+  };
+}
+
 /** Texto del plan para enviarlo por WhatsApp. */
 export function planTexto(p: PlanComidas, nombreAtleta: string, entrenador: string): string {
   const lineas = [
     `Hola ${nombreAtleta.split(' ')[0]} 👋 Este es tu plan de alimentación sugerido:`,
     '',
     `*${p.titulo}* — ${p.objetivo}`,
-    `≈ ${Math.round(p.kcal / 10) * 10} kcal · ${Math.round(p.prot)} g de proteína al día`,
+    ...(p.kcal || p.prot ? [`≈ ${Math.round(p.kcal / 10) * 10} kcal · ${Math.round(p.prot)} g de proteína al día`] : []),
   ];
   p.comidas.forEach((c, i) => {
     lineas.push('', `${c.emoji} *${i + 1}. ${c.nombre} (${c.hora})*`);

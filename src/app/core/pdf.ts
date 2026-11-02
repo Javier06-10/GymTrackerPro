@@ -534,7 +534,7 @@ export function planComidasPDF(a: Atleta, p: PlanComidas, m: Membrete): { archiv
           yy += 14;
         });
       });
-      T(x + 18, y + alto - 12, `Proteína aprox.: ${Math.round(c.prot)} g  ·  ≈ ${Math.round(c.kcal / 10) * 10} kcal`, 8.5, false, GRIS);
+      if (c.prot || c.kcal) T(x + 18, y + alto - 12, `Proteína aprox.: ${Math.round(c.prot)} g  ·  ≈ ${Math.round(c.kcal / 10) * 10} kcal`, 8.5, false, GRIS);
     });
     y += alto + 12;
   }

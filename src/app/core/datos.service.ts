@@ -15,6 +15,7 @@ const COLUMNAS_ATLETA: Record<string, string> = {
   activo: 'activo', frecuenciaMedicion: 'frecuencia_medicion', tarifa: 'tarifa',
   proximoPago: 'proximo_pago', bitacoraFoco: 'bitacora_foco', bitacoraMetas: 'bitacora_metas',
   rutina: 'rutina', asistencia: 'asistencia', objetivos: 'objetivos', fechaRegistro: 'fecha_registro',
+  planComidas: 'plan_comidas',
 };
 const COLUMNAS_MEDIDA: Record<string, string> = {
   fecha: 'fecha', peso: 'peso', pecho: 'pecho', brazoRelajado: 'brazo_relajado',
@@ -73,6 +74,7 @@ function atletaDeFila(f: any, medidas: Medida[], pagos: PagoAtleta[]): Atleta {
     rutina: normalizarRutina(f.rutina),
     asistencia: f.asistencia ?? {},
     objetivos: f.objetivos ?? [],
+    planComidas: f.plan_comidas ?? null,
     fechaRegistro: f.fecha_registro,
     medidas,
     pagos,
