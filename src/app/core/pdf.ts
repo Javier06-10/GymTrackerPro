@@ -153,7 +153,7 @@ function lienzo(m: Membrete) {
     }
     const titular = [m.nombre, m.negocio || 'Entrenador personal'].filter(Boolean).join('  ·  ').toUpperCase();
     T(64, 58, titular, 9, true, GRIS);
-    if (!m.logo) TD(548, 58, 'GymTracker Pro', 9, false, GRIS);
+    if (!m.logo) TD(548, 58, 'Coach Fénix', 9, false, GRIS);
     L(78);
   };
   const pie = (texto: string, conFirma = true) => {
@@ -286,7 +286,7 @@ export function exportarProgresoPDF(a: Atleta, m: Membrete): string | null {
       y += 9;
     });
   }
-  pie(`Generado el ${fmtFecha(hoyISO())}  ·  Reporte de seguimiento — GymTracker Pro`);
+  pie(`Generado el ${fmtFecha(hoyISO())}  ·  Reporte de seguimiento — Coach Fénix`);
 
   // Página 2: gráficas de evolución
   const metricas: [string, string, string][] = [['peso', 'Peso corporal', uPeso(s)], ...ZONAS.map(([z, n]) => [z, n, uLargo(s)] as [string, string, string])];
@@ -306,7 +306,7 @@ export function exportarProgresoPDF(a: Atleta, m: Membrete): string | null {
     series.slice(1, 9).forEach((sp, i) => {
       graficaPDF(p2.ops, { x: 64 + (i % 2) * 252, y: yG + Math.floor(i / 2) * 128, w: 232, h: 82, puntos: sp.s, titulo: sp.mm[1], unidad: sp.mm[2] });
     });
-    p2.pie(`Generado el ${fmtFecha(hoyISO())}  ·  GymTracker Pro`);
+    p2.pie(`Generado el ${fmtFecha(hoyISO())}  ·  Coach Fénix`);
     p2.TD(548, 726, 'pág. 2/2', 8, false, GRISMED);
     paginas.push(p2.ops);
   }
@@ -335,7 +335,7 @@ export function reciboPagoPDF(a: Atleta, pago: PagoAtleta, m: Membrete): string 
   if (a.proximoPago) T(64, 352, 'Próximo vencimiento: ' + fmtFecha(a.proximoPago), 10.5, false, GRISMED);
   ops.push({ tipo: 'linea', x1: 340, y1: 436, x2: 548, y2: 436, color: GRISMED, grosor: 1 });
   T(444 - ancho(firma, 10, true) / 2, 452, firma, 10, true, GRIS);
-  pie(`Generado el ${fmtFecha(hoyISO())} con GymTracker Pro`, false);
+  pie(`Generado el ${fmtFecha(hoyISO())} con Coach Fénix  ·  coachfenix.com`, false);
   const pdf = construirPDF([ops], m.logo);
   descargarPDF(`Recibo_${num}_${slug(a.nombre)}.pdf`, pdf);
   return pdf;
@@ -461,7 +461,7 @@ export function reporteMensualPDF(atletas: Atleta[], valorMes: string, m: Membre
   if (!lineas.length) lineas.push('Mes en orden: cobros al día y seguimiento completo. A seguir creciendo.');
   lineas.slice(0, 4).forEach((l) => { T(64, y, '· ' + l, 10.5); y += 17; });
 
-  pie(`Generado el ${fmtFecha(hoyISO())}  ·  GymTracker Pro`);
+  pie(`Generado el ${fmtFecha(hoyISO())}  ·  Coach Fénix`);
   const pdf = construirPDF([ops], m.logo);
   descargarPDF(`Reporte_Mensual_${MESES_ES[mes]}_${anio}.pdf`, pdf);
   return pdf;
@@ -553,7 +553,7 @@ export function planComidasPDF(a: Atleta, p: PlanComidas, m: Membrete): { archiv
   envolver('Bebe agua durante el día. Plan orientativo: no sustituye la valoración de un nutricionista, sobre todo si hay condiciones médicas o alergias. Avísale a tu entrenador si algún alimento no te cae bien para cambiarlo.', 8.5, 484)
     .forEach((l, k) => T(64, y + k * 11, l, 8.5, false, GRISMED));
 
-  pie(`Generado el ${fmtFecha(hoyISO())} con GymTracker Pro`);
+  pie(`Generado el ${fmtFecha(hoyISO())} con Coach Fénix  ·  coachfenix.com`);
   return { archivo: `Plan_alimentacion_${slug(a.nombre)}.pdf`, pdf: construirPDF([ops], m.logo) };
 }
 

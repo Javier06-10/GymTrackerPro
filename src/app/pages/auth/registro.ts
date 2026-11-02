@@ -17,7 +17,7 @@ import { Icono } from '../../shared/icono';
       <div class="auth-card">
         <div class="logo">
           <div class="icono"><app-icono nombre="pesa" [tam]="22" /></div>
-          <div><h1>GYMTRACKER <span>PRO</span></h1><small>Crea tu cuenta de entrenador</small></div>
+          <div><h1>COACH <span>FÉNIX</span></h1><small>Crea tu cuenta de entrenador</small></div>
         </div>
         <div class="tarjeta">
           @if (enviado()) {
@@ -65,7 +65,7 @@ export class Registro {
   readonly enviado = signal(false);
 
   enlaceWhatsApp() {
-    const msj = `Hola 👋 Me registré en GymTracker Pro con el correo ${this.email.trim()} y no me llegó el correo de confirmación.`;
+    const msj = `Hola 👋 Me registré en Coach Fénix con el correo ${this.email.trim()} y no me llegó el correo de confirmación.`;
     return 'https://wa.me/' + environment.whatsappVentas + '?text=' + encodeURIComponent(msj);
   }
 

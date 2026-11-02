@@ -522,7 +522,7 @@ return [
 <p>Un principio transversal: <b>las mujeres no necesitan un entrenamiento "especial" por ser mujeres</b>. Los principios de fuerza e hipertrofia son los mismos para ambos sexos. Lo que sí cambia en la práctica son los objetivos más frecuentes (glúteos y tren inferior, tono general, pérdida de grasa), el punto de partida promedio de fuerza absoluta y algunas consideraciones de adaptación que verás en los capítulos finales.</p>
 ${calloutEv("Los estudios comparativos muestran que hombres y mujeres responden al entrenamiento de fuerza con ganancias relativas similares de fuerza y masa muscular; las diferencias absolutas se explican principalmente por la masa muscular y los niveles hormonales de partida.")}
 ${calloutPr(`Cuando algo proviene de investigación se marca con ${iconoSvg('microscopio', 14)} y cuando es criterio profesional de campo se marca con ${iconoSvg('herramienta', 14)}. Sé igual de honesto con tu clienta: diferencia siempre qué es ciencia y qué es experiencia.`)}
-<p><b>Cómo usar el manual:</b> léelo completo una vez y luego úsalo como referencia: el capítulo de Glúteos para corregir técnica, las rutinas como plantillas de partida (nunca recetas rígidas) y las fichas de registro junto con GymTracker Pro para el seguimiento diario.</p>
+<p><b>Cómo usar el manual:</b> léelo completo una vez y luego úsalo como referencia: el capítulo de Glúteos para corregir técnica, las rutinas como plantillas de partida (nunca recetas rígidas) y las fichas de registro junto con Coach Fénix para el seguimiento diario.</p>
 `},
 {id:"principios", t:"Principios del entrenamiento", h:`
 <h2>Capítulo 1 · Principios básicos del entrenamiento</h2>
@@ -703,7 +703,7 @@ ${tablaM(["Semana","Hip thrust (ejemplo)","Acción"],[
 ["2","60 kg → 11, 10, 9","Mantener carga"],
 ["3","60 kg → 12, 12, 12 (RIR 2)","¡Tope logrado! Subir"],
 ["4","65 kg → 9, 8, 8","Nuevo ciclo"]])}
-${calloutPr(`Registra cada peso en GymTracker (campo de peso del ejercicio): el historial de carga ${iconoSvg('tendencia', 14)} dibuja la curva y motiva muchísimo cuando la clienta ve sus ▲.`)}
+${calloutPr(`Registra cada peso en Coach Fénix (campo de peso del ejercicio): el historial de carga ${iconoSvg('tendencia', 14)} dibuja la curva y motiva muchísimo cuando la clienta ve sus ▲.`)}
 <h3>6.2 Otras palancas de progresión</h3>
 ${tablaM(["Palanca","Cuándo usarla"],[
 ["Añadir repeticiones","Siempre primero: es la progresión más fina"],
@@ -769,7 +769,7 @@ ${calloutSg("Derivar no es perder una clienta: es la conducta que te define como
 <h3>10.1 Organización del piso</h3>
 <p>Con 2–4 clientas simultáneas: agrupa por nivel y usa estaciones cercanas; asigna a cada una un ejercicio que domine mientras corriges a la que aprende uno nuevo; rota tu atención en los momentos de riesgo técnico (series pesadas de compuestos), no en los descansos.</p>
 ${tablaM(["Hábito profesional","Cómo se ve en la práctica"],[
-["Plan preparado ANTES de la sesión","La rutina del día ya está cargada en GymTracker; nada de improvisar"],
+["Plan preparado ANTES de la sesión","La rutina del día ya está cargada en Coach Fénix; nada de improvisar"],
 ["Registro en el momento","Pesos y repeticiones se anotan al terminar cada ejercicio, no 'luego'"],
 ["Revisión semanal (15 min por clienta)",`Historial de cargas ${iconoSvg('tendencia', 14)}, asistencia ${iconoSvg('calendario', 14)} y objetivos ${iconoSvg('diana', 14)}: ¿progresa, se estanca, falta?`],
 ["Medición periódica",`El recordatorio ${iconoSvg('regla', 14)} te avisa; no dependas de la memoria`],
@@ -779,7 +779,7 @@ ${tablaM(["Hábito profesional","Cómo se ve en la práctica"],[
 `},
 {id:"fichas", t:"Fichas de registro", h:`
 <h2>Capítulo 11 · Fichas de registro (plantillas)</h2>
-<p>Estas tres fichas cubren todo el seguimiento. En GymTracker Pro ya existen digitalmente (Medidas, Rutinas con historial de carga, Objetivos y Bitácora); las plantillas sirven si algún día necesitas papel.</p>
+<p>Estas tres fichas cubren todo el seguimiento. En Coach Fénix ya existen digitalmente (Medidas, Rutinas con historial de carga, Objetivos y Bitácora); las plantillas sirven si algún día necesitas papel.</p>
 <h3>Ficha 1 · Evaluación inicial</h3>
 ${tablaM(["Campo","Registro"],[
 ["Nombre / Edad / Contacto","________________"],

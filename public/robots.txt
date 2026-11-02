@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /login
+Allow: /registro
+Disallow: /panel
+Disallow: /atletas/
+Disallow: /admin
+Disallow: /cuenta
+Disallow: /asistencia
+Disallow: /manual

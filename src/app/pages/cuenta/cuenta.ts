@@ -213,7 +213,7 @@ export class Cuenta implements OnInit {
   });
   protected inicialesNegocio() {
     // Sin artículos ni preposiciones: "Gym de Prueba" → "GP"
-    const texto = (this.perfil.negocio || this.perfil.nombre || 'GymTracker').replace(/\b(de|del|la|las|el|los|y)\b/gi, ' ');
+    const texto = (this.perfil.negocio || this.perfil.nombre || 'Coach Fénix').replace(/\b(de|del|la|las|el|los|y)\b/gi, ' ');
     return iniciales(texto);
   }
   protected perfil = { nombre: '', negocio: '', telefono: '', logo_url: null as string | null };
@@ -238,7 +238,7 @@ export class Cuenta implements OnInit {
     const perfil = this.auth.perfil();
     const msj =
       `Hola 👋 Quiero ${p.id === this.auth.suscripcion()?.plan_id ? 'renovar' : 'activar'} el plan *${p.nombre}* ` +
-      `(${fmtDinero(p.precio_mensual)}/mes) de GymTracker Pro.\n\nCuenta: ${perfil?.email}\nNombre: ${perfil?.nombre}`;
+      `(${fmtDinero(p.precio_mensual)}/mes) de Coach Fénix.\n\nCuenta: ${perfil?.email}\nNombre: ${perfil?.nombre}`;
     window.open('https://wa.me/' + environment.whatsappVentas + '?text=' + encodeURIComponent(msj), '_blank');
   }
 

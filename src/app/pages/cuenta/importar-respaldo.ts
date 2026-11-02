@@ -15,7 +15,7 @@ import { Icono } from '../../shared/icono';
   template: `
     <div class="tarjeta" style="display:flex;flex-direction:column;gap:12px;">
       <div style="font-size:13.5px;color:var(--texto-suave);">
-        ¿Usabas la versión anterior de GymTracker Pro (el archivo HTML)? Sube aquí el respaldo que descargabas con el botón de guardar
+        ¿Usabas la versión anterior de la app (GymTracker Pro, el archivo HTML)? Sube aquí el respaldo que descargabas con el botón de guardar
         (<b>GymTracker_Respaldo_….json</b>) y pasamos tus atletas, medidas, rutinas, asistencia, objetivos y pagos a tu cuenta.
       </div>
       <label class="zona-archivo" [class.deshabilitada]="!auth.vigente()">

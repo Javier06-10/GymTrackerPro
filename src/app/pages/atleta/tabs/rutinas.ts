@@ -160,7 +160,7 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
             <input type="checkbox" [(ngModel)]="cr.pesos" style="width:16px;height:16px;accent-color:var(--ambar);" />
             Incluir los pesos de trabajo
           </label>
-          <div class="nota-info">El entrenador debe tener cuenta en GymTracker Pro con ese correo. La recibirá en su panel, en <b>Rutinas recibidas</b>, y decide a qué atletas aplicarla. No se envían datos de {{ a.nombre }}: solo los ejercicios.</div>
+          <div class="nota-info">El entrenador debe tener cuenta en Coach Fénix con ese correo. La recibirá en su panel, en <b>Rutinas recibidas</b>, y decide a qué atletas aplicarla. No se envían datos de {{ a.nombre }}: solo los ejercicios.</div>
         } @else if (!otros().length) {
           <p style="color:var(--texto-suave);font-size:14px;">No hay otros atletas registrados a quienes copiarles la rutina. Crea otro atleta primero.</p>
         } @else {

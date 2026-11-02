@@ -19,7 +19,7 @@ import { Icono } from '../shared/icono';
             @if (auth.perfil()?.logo_url; as logo) { <img [src]="logo" alt="logo" /> } @else { <app-icono nombre="pesa" [tam]="22" /> }
           </div>
           <div>
-            <h1>GYMTRACKER <span>PRO</span></h1>
+            <h1>COACH <span>FÉNIX</span></h1>
             <small>Panel de Entrenador · {{ auth.perfil()?.negocio || auth.perfil()?.nombre }}</small>
           </div>
         </a>
@@ -32,7 +32,7 @@ import { Icono } from '../shared/icono';
         </nav>
         <div class="separador"></div>
         @if (pwa.puedeOfrecer()) {
-          <button class="btn btn-suave btn-txt" (click)="pwa.instalar()" title="Instalar GymTracker como app">
+          <button class="btn btn-suave btn-txt" (click)="pwa.instalar()" title="Instalar Coach Fénix como app">
             <app-icono nombre="instalar" [tam]="16" /> Instalar app
           </button>
         }

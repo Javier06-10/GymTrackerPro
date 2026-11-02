@@ -26,7 +26,7 @@ return [
 {id:"vp-intro", t:"Introducción", h:`
 <h2>Manual del Entrenador Personal</h2>
 <p><b>Anatomía funcional, biomecánica y catálogo de ejercicios de musculación</b><br>
-<span style="color:var(--texto-suave);font-size:13px;">GymTracker Pro · VP Fitness — Autor: Equipo de formación VP Fitness</span></p>
+<span style="color:var(--texto-suave);font-size:13px;">Coach Fénix · VP Fitness — Autor: Equipo de formación VP Fitness</span></p>
 
 <h3>Índice general</h3>
 ${lista(['Introducción', 'Capítulo 1. Fundamentos de anatomía y biomecánica', 'Capítulo 2. Entrenamiento del pecho', 'Capítulo 3. Entrenamiento de piernas y glúteos', 'Capítulo 4. Entrenamiento de espalda', 'Capítulo 5. Entrenamiento de bíceps', 'Capítulo 6. Entrenamiento de tríceps', 'Capítulo 7. Selección de ejercicios y programación', 'Capítulo 8. Técnica, seguridad y evaluación del cliente', 'Glosario de términos técnicos', 'Conclusión y referencias'])}
@@ -35,7 +35,7 @@ ${lista(['Introducción', 'Capítulo 1. Fundamentos de anatomía y biomecánica'
 <p>El entrenamiento personal requiere mucho más que conocer los nombres de los ejercicios o aprender a utilizar las máquinas de un gimnasio. Un buen entrenador debe comprender cómo funciona el cuerpo humano, qué músculos participan en cada movimiento, cómo se aplica la resistencia y de qué manera se puede adaptar un ejercicio a las necesidades de cada cliente.</p>
 <p>Este manual ha sido diseñado para servir como material de consulta y formación para entrenadores personales, especialmente aquellos que desean mejorar sus conocimientos de anatomía, biomecánica y programación del entrenamiento de fuerza.</p>
 <p>A lo largo de sus capítulos se estudian los principales ejercicios de pecho, piernas, glúteos, espalda, bíceps y tríceps. Cada ejercicio se describe mediante su patrón de movimiento, músculos principales, músculos secundarios, estabilizadores y recomendaciones técnicas.</p>
-<p>El contenido puede utilizarse para diseñar rutinas, explicar ejercicios a los clientes y construir una biblioteca de ejercicios dentro de una aplicación de entrenamiento como GymTracker Pro.</p>
+<p>El contenido puede utilizarse para diseñar rutinas, explicar ejercicios a los clientes y construir una biblioteca de ejercicios dentro de una aplicación de entrenamiento como Coach Fénix.</p>
 
 <h3>Objetivos del manual</h3>
 ${listaN(['Comprender la función de los principales grupos musculares.', 'Identificar los músculos que producen y ayudan a producir cada movimiento.', 'Analizar la biomecánica básica de los ejercicios.', 'Seleccionar ejercicios según los objetivos del cliente.', 'Mejorar la técnica y reducir errores frecuentes.', 'Aplicar principios de progresión, recuperación y seguimiento.', 'Reconocer cuándo un ejercicio debe modificarse por molestias o limitaciones individuales.'])}
@@ -386,7 +386,7 @@ ${lista(['Carga utilizada.', 'Repeticiones realizadas.', 'Series completadas.', 
 <h2>Conclusión</h2>
 <p>Un entrenador personal competente no se limita a conocer ejercicios: comprende el movimiento, identifica qué músculos participan, selecciona variantes adecuadas y adapta el programa a las características del cliente.</p>
 <p>La anatomía y la biomecánica son herramientas para tomar mejores decisiones, no fórmulas rígidas que sustituyen la observación y el criterio profesional.</p>
-<p>Este manual constituye una base para continuar estudiando, mejorar la práctica diaria y desarrollar una metodología de trabajo consistente en VP Fitness y GymTracker Pro.</p>
+<p>Este manual constituye una base para continuar estudiando, mejorar la práctica diaria y desarrollar una metodología de trabajo consistente en VP Fitness y Coach Fénix.</p>
 ${calloutPr('<b>Principio final del entrenador:</b> evaluar antes de prescribir, enseñar antes de aumentar la carga, progresar sin sacrificar la técnica y medir para tomar mejores decisiones.')}
 
 <h3>Referencias para ampliar el estudio</h3>

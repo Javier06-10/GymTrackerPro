@@ -26,7 +26,7 @@ const ARTE = dibujarAvatar(
       <div class="marca-texto">
       <div class="logo">
         <div class="icono"><app-icono nombre="pesa" [tam]="22" /></div>
-        <div><h1>GYMTRACKER <span>PRO</span></h1><small>Software para entrenadores</small></div>
+        <div><h1>COACH <span>FÉNIX</span></h1><small>Software para entrenadores</small></div>
       </div>
       <h2>Entrena mejor.<br />Mide el progreso.<br /><span>Cobra a tiempo.</span></h2>
       <p class="lema">Todo lo que un entrenador personal necesita para profesionalizar su servicio y retener a sus clientes.</p>
