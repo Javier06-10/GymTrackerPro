@@ -19,6 +19,10 @@ import { Icono } from '../../shared/icono';
           <div class="icono"><app-icono nombre="pesa" [tam]="22" /></div>
           <div><h1>COACH <span>FÉNIX</span></h1><small>Crea tu cuenta de entrenador</small></div>
         </div>
+        <div class="auth-titulo">
+          <h2>Crea tu cuenta</h2>
+          <p>Prueba Coach Fénix gratis 14 días. Sin tarjeta.</p>
+        </div>
         <div class="tarjeta">
           @if (enviado()) {
             <div class="ok-form">
@@ -37,10 +41,15 @@ import { Icono } from '../../shared/icono';
                 <input name="negocio" [(ngModel)]="negocio" placeholder="Ej. VP Fitness" /></div>
               <div class="campo"><label>Correo</label>
                 <input type="email" name="email" [(ngModel)]="email" required autocomplete="email" /></div>
-              <div class="campo"><label>Contraseña</label>
-                <input type="password" name="clave" [(ngModel)]="clave" required minlength="6" autocomplete="new-password" /></div>
+              <div class="campo"><label for="reg-clave">Contraseña</label>
+                <div class="campo-icono sin-icono">
+                  <input id="reg-clave" [type]="verClave() ? 'text' : 'password'" name="clave" [(ngModel)]="clave" required minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres" />
+                  <button type="button" class="ver-clave" (click)="verClave.set(!verClave())" [attr.aria-label]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'" [title]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                    <app-icono [nombre]="verClave() ? 'ojoNo' : 'ojo'" [tam]="17" />
+                  </button>
+                </div></div>
               @if (error()) { <div class="error-form">{{ error() }}</div> }
-              <button class="btn btn-primario" style="justify-content:center;" [disabled]="cargando()">
+              <button class="btn btn-primario btn-auth" [disabled]="cargando()">
                 {{ cargando() ? 'Creando cuenta…' : 'Empezar prueba gratis de 14 días' }}
               </button>
               <div class="nota-info">Sin tarjeta. Al terminar la prueba eliges un plan.</div>
@@ -63,6 +72,7 @@ export class Registro {
   readonly cargando = signal(false);
   readonly error = signal('');
   readonly enviado = signal(false);
+  readonly verClave = signal(false);
 
   enlaceWhatsApp() {
     const msj = `Hola 👋 Me registré en Coach Fénix con el correo ${this.email.trim()} y no me llegó el correo de confirmación.`;

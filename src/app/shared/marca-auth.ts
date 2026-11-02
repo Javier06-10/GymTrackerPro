@@ -42,7 +42,13 @@ const ARTE = dibujarAvatar(
         <span><app-icono nombre="check" [tam]="14" /> 14 días gratis, sin tarjeta</span>
       </div>
       </div>
-      <div class="arte" aria-hidden="true" [innerHTML]="arte | svgSeguro"></div>
+      <div class="arte-caja" aria-hidden="true">
+        <div class="arte" [innerHTML]="arte | svgSeguro"></div>
+        <span class="dato-flota df-1"><b>+2.5 in</b> Pecho</span>
+        <span class="dato-flota df-2"><b>+1.2 in</b> Brazo</span>
+        <span class="dato-flota df-3 baja"><b>−1.5 in</b> Abdomen</span>
+        <span class="dato-flota df-4"><app-icono nombre="fuego" [tam]="13" /> <b>12</b> días seguidos</span>
+      </div>
     </aside>
   `,
 })

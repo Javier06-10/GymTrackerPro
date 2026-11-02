@@ -18,16 +18,34 @@ import { Icono } from '../../shared/icono';
           <div class="icono"><app-icono nombre="pesa" [tam]="22" /></div>
           <div><h1>COACH <span>FÉNIX</span></h1><small>Panel de Entrenador</small></div>
         </div>
+        <div class="auth-titulo">
+          @if (recuperando()) {
+            <h2>Recupera tu contraseña</h2>
+            <p>Escribe tu correo y te enviamos un enlace para crear una nueva.</p>
+          } @else {
+            <h2>Bienvenido de vuelta</h2>
+            <p>Entra a tu panel para ver a tus atletas.</p>
+          }
+        </div>
         <div class="tarjeta">
           <form (ngSubmit)="recuperando() ? recuperar() : entrar()">
             <div class="campo">
-              <label>Correo</label>
-              <input type="email" name="email" [(ngModel)]="email" required autocomplete="email" />
+              <label for="login-email">Correo</label>
+              <div class="campo-icono">
+                <app-icono nombre="correo" [tam]="17" />
+                <input id="login-email" type="email" name="email" [(ngModel)]="email" required autocomplete="email" placeholder="tu@correo.com" />
+              </div>
             </div>
             @if (!recuperando()) {
               <div class="campo">
-                <label>Contraseña</label>
-                <input type="password" name="clave" [(ngModel)]="clave" required autocomplete="current-password" />
+                <label for="login-clave">Contraseña</label>
+                <div class="campo-icono">
+                  <app-icono nombre="candado" [tam]="17" />
+                  <input id="login-clave" [type]="verClave() ? 'text' : 'password'" name="clave" [(ngModel)]="clave" required autocomplete="current-password" placeholder="Tu contraseña" />
+                  <button type="button" class="ver-clave" (click)="verClave.set(!verClave())" [attr.aria-label]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'" [title]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                    <app-icono [nombre]="verClave() ? 'ojoNo' : 'ojo'" [tam]="17" />
+                  </button>
+                </div>
               </div>
             }
             @if (error()) { <div class="error-form">{{ error() }}</div> }
@@ -37,8 +55,9 @@ import { Icono } from '../../shared/icono';
               </button>
             }
             @if (aviso()) { <div class="ok-form">{{ aviso() }}</div> }
-            <button class="btn btn-primario" style="justify-content:center;" [disabled]="cargando()">
-              {{ cargando() ? 'Un momento…' : recuperando() ? 'Enviar enlace de recuperación' : 'Entrar' }}
+            <button class="btn btn-primario btn-auth" [disabled]="cargando()">
+              {{ cargando() ? 'Un momento…' : recuperando() ? 'Enviar enlace de recuperación' : 'Entrar a mi panel' }}
+              @if (!cargando()) { <app-icono nombre="flecha" [tam]="17" /> }
             </button>
             <button type="button" class="btn btn-fantasma btn-mini" style="align-self:center;"
               (click)="recuperando.set(!recuperando()); error.set(''); aviso.set('')">
@@ -46,7 +65,8 @@ import { Icono } from '../../shared/icono';
             </button>
           </form>
         </div>
-        <div class="pie-auth">¿Eres entrenador y no tienes cuenta? <a routerLink="/registro">Prueba 14 días gratis</a></div>
+        <div class="separador-auth"><span>¿Nuevo en Coach Fénix?</span></div>
+        <a routerLink="/registro" class="btn btn-suave btn-auth">Crear cuenta gratis · 14 días sin tarjeta</a>
       </div>
       </div>
     </div>
@@ -61,6 +81,7 @@ export class Login {
   readonly error = signal('');
   readonly aviso = signal('');
   readonly recuperando = signal(false);
+  readonly verClave = signal(false);
 
   /** La cuenta existe pero no ha confirmado el correo: se ofrece reenviarlo. */
   readonly sinConfirmar = signal(false);
