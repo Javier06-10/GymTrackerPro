@@ -4,11 +4,12 @@ import { Atleta } from '../../../core/modelos';
 import { UiService } from '../../../core/ui.service';
 import { Icono } from '../../../shared/icono';
 import { UnidadesService } from '../../../core/unidades';
+import { PlanComidas } from './plan-comidas';
 
 /** Recomendación nutricional según el objetivo (portado de tabNutricion). */
 @Component({
   selector: 'app-tab-nutricion',
-  imports: [Icono],
+  imports: [Icono, PlanComidas],
   template: `
     @let a = atleta();
     @if (a.condiciones.trim()) {
@@ -77,7 +78,9 @@ import { UnidadesService } from '../../../core/unidades';
         </div>
       }
 
-      <div class="titulo-seccion"><app-icono nombre="cubiertos" [tam]="16" /> Recomendaciones para {{ obj().t.toLowerCase() }}</div>
+      <app-plan-comidas [atleta]="a" />
+
+      <div class="titulo-seccion"><app-icono nombre="bombilla" [tam]="16" /> Recomendaciones para {{ obj().t.toLowerCase() }}</div>
       @for (t of consejos(); track $index) {
         <div class="tarjeta" style="margin-bottom:9px;padding:13px 16px;font-size:13.5px;display:flex;gap:11px;align-items:flex-start;">
           <span style="color:var(--ambar);font-weight:800;">▸</span><span>{{ t }}</span>
@@ -101,6 +104,7 @@ import { UnidadesService } from '../../../core/unidades';
           @if (!ultima()) { <button class="btn btn-suave" (click)="irA.emit('medidas')"><app-icono nombre="regla" [tam]="16" /> Ir a Medidas</button> }
         </div>
       </div>
+      <app-plan-comidas [atleta]="a" />
     }
   `,
 })

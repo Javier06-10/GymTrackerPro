@@ -1572,3 +1572,35 @@ html[data-tema="marca"] .titulo-seccion::after{background:var(--borde);}
 .pl-selector:focus, .pl-grupo:focus{border-color:var(--ambar);}
 .pl-selector::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.8;}
 html:is([data-tema="marca-oscuro"],[data-tema="energia"],[data-tema="tech"]) .pl-selector::-webkit-calendar-picker-indicator{filter:invert(.8);}
+
+/* ---------- Plan de comidas sugerido (Nutrición) ---------- */
+.pc-tipos{margin-bottom:12px;}
+.pc-reco{margin-left:4px;color:inherit;opacity:.85;}
+.pc-cab{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
+.pc-titulo{font-weight:800;font-size:17px;margin-bottom:6px;}
+.pc-totales{display:flex;flex-direction:column;gap:2px;font-size:13.5px;color:var(--texto-suave);text-align:right;}
+.pc-totales b{color:var(--texto);font-size:16px;}
+.pc-totales small{color:var(--tenue);}
+.pc-comidas{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+.pc-comida{display:flex;gap:14px;padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--borde);}
+.pc-emoji{
+  width:72px;height:72px;flex-shrink:0;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:38px;line-height:1;background:var(--ambar-fondo);border:1px solid color-mix(in srgb, var(--ambar) 25%, transparent);
+}
+.pc-cuerpo{min-width:0;flex:1;}
+.pc-nombre{font-weight:800;font-size:15.5px;margin-bottom:4px;}
+.pc-nombre span{font-weight:600;color:var(--texto-suave);font-size:13px;}
+.pc-cuerpo ul{margin:0 0 6px;padding-left:18px;font-size:14px;line-height:1.55;}
+.pc-macros{font-size:12.5px;color:var(--texto-suave);}
+.pc-macros b{color:var(--texto);}
+.pc-acciones{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.pc-sin-tel{font-size:12.5px;color:var(--tenue);}
+.pc-equiv{margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--borde);font-size:13.5px;}
+.pc-equiv summary{cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px;}
+.pc-eq{margin-top:8px;color:var(--texto-suave);}
+.pc-eq b{color:var(--texto);}
+@media (max-width:560px){
+  .pc-totales{text-align:left;}
+  .pc-comidas{grid-template-columns:1fr;}
+  .pc-emoji{width:56px;height:56px;font-size:30px;border-radius:13px;}
+}
