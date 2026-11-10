@@ -53,10 +53,12 @@ import { Icono } from '../../shared/icono';
                 {{ cargando() ? 'Creando cuenta…' : 'Empezar prueba gratis de 14 días' }}
               </button>
               <div class="nota-info">Sin tarjeta. Al terminar la prueba eliges un plan.</div>
+              <div class="nota-legal">Al crear tu cuenta aceptas los <a routerLink="/terminos">Términos de uso</a> y la <a routerLink="/privacidad">Política de privacidad</a>.</div>
             </form>
           }
         </div>
         <div class="pie-auth">¿Ya tienes cuenta? <a routerLink="/login">Entrar</a></div>
+        <div class="pie-legal"><a routerLink="/privacidad">Privacidad</a> · <a routerLink="/terminos">Términos</a> · <a href="mailto:hola@coachfenix.com">hola&#64;coachfenix.com</a></div>
       </div>
       </div>
     </div>

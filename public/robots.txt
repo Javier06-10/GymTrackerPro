@@ -1,9 +1,13 @@
 User-agent: *
 Allow: /login
 Allow: /registro
+Allow: /privacidad
+Allow: /terminos
 Disallow: /panel
 Disallow: /atletas/
 Disallow: /admin
 Disallow: /cuenta
 Disallow: /asistencia
 Disallow: /manual
+
+Sitemap: https://coachfenix.com/sitemap.xml

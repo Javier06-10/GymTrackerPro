@@ -5,4 +5,6 @@ export const environment = {
   // WhatsApp del administrador para activar/renovar planes (pago manual). Con código de país (1 = RD).
   whatsappVentas: '18293813667',
   whatsappVentasTxt: '(829) 381-3667',
+  // Correo público de contacto (Cloudflare Email Routing lo reenvía al dueño)
+  correoContacto: 'hola@coachfenix.com',
 };

@@ -2,10 +2,13 @@ import { Routes } from '@angular/router';
 import { adminGuard, authGuard, invitadoGuard } from './core/guards';
 
 export const routes: Routes = [
-  { path: 'login', canActivate: [invitadoGuard], loadComponent: () => import('./pages/auth/login').then((m) => m.Login) },
-  { path: 'registro', canActivate: [invitadoGuard], loadComponent: () => import('./pages/auth/registro').then((m) => m.Registro) },
+  { path: 'login', title: 'Coach Fénix — Software para entrenadores personales', canActivate: [invitadoGuard], loadComponent: () => import('./pages/auth/login').then((m) => m.Login) },
+  { path: 'registro', title: 'Crea tu cuenta — Coach Fénix', canActivate: [invitadoGuard], loadComponent: () => import('./pages/auth/registro').then((m) => m.Registro) },
+  { path: 'privacidad', title: 'Política de privacidad — Coach Fénix', data: { tipo: 'privacidad' }, loadComponent: () => import('./pages/legal/legal').then((m) => m.Legal) },
+  { path: 'terminos', title: 'Términos de uso — Coach Fénix', data: { tipo: 'terminos' }, loadComponent: () => import('./pages/legal/legal').then((m) => m.Legal) },
   {
     path: '',
+    title: 'Coach Fénix',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/shell').then((m) => m.Shell),
     children: [

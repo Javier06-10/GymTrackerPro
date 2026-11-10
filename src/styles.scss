@@ -1700,3 +1700,22 @@ html:is([data-tema="marca-oscuro"],[data-tema="energia"],[data-tema="tech"]) .pl
 .logo .icono .marca-fenix{width:100%;height:100%;max-width:none;object-fit:contain;filter:drop-shadow(0 3px 8px color-mix(in srgb, var(--ambar) 35%, transparent));}
 .auth-card .logo .icono.icono-fenix, .marca-texto .logo .icono.icono-fenix{width:76px;height:76px;}
 @media (max-width:640px){.top .logo .icono.icono-fenix{width:44px;height:44px;}}
+
+/* ---------- PÁGINAS LEGALES (públicas) ---------- */
+.legal{max-width:820px;margin:0 auto;padding:22px 18px 40px;}
+.legal-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px;}
+.legal-top nav{display:flex;gap:6px;}
+.legal-top nav a{padding:8px 14px;border-radius:999px;text-decoration:none;color:var(--texto-suave);font-weight:700;font-size:14px;border:1px solid var(--borde);}
+.legal-top nav a.activo{background:var(--ambar);border-color:var(--ambar);color:#fff;}
+.legal-doc{background:var(--panel);border:1px solid var(--borde);border-radius:18px;padding:28px clamp(18px,4vw,40px);line-height:1.65;color:var(--texto-suave);font-size:15px;}
+.legal-doc h2{color:var(--texto);font-size:28px;margin:0 0 4px;}
+.legal-doc h3{color:var(--texto);font-size:17px;margin:24px 0 6px;}
+.legal-doc b{color:var(--texto);}
+.legal-doc ul{padding-left:20px;margin:6px 0;}
+.legal-doc li{margin:4px 0;}
+.legal-doc a, .legal-pie a, .pie-legal a, .nota-legal a{color:var(--ambar-texto);font-weight:700;text-decoration:none;}
+.legal-fecha{color:var(--tenue);font-size:13px;margin:0 0 16px;}
+.legal-contacto{margin-top:28px;padding:14px 16px;border-radius:12px;background:var(--panel2);}
+.legal-pie{text-align:center;margin-top:18px;color:var(--tenue);font-size:13px;}
+.pie-legal{text-align:center;font-size:12px;color:var(--tenue);margin-top:14px;}
+.nota-legal{font-size:12px;color:var(--tenue);text-align:center;margin-top:8px;line-height:1.5;}

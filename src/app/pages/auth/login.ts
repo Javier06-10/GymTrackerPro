@@ -67,6 +67,7 @@ import { Icono } from '../../shared/icono';
         </div>
         <div class="separador-auth"><span>¿Nuevo en Coach Fénix?</span></div>
         <a routerLink="/registro" class="btn btn-suave btn-auth">Crear cuenta gratis · 14 días sin tarjeta</a>
+        <div class="pie-legal"><a routerLink="/privacidad">Privacidad</a> · <a routerLink="/terminos">Términos</a> · <a href="mailto:hola@coachfenix.com">hola&#64;coachfenix.com</a></div>
       </div>
       </div>
     </div>
