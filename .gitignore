@@ -42,3 +42,6 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 *.local.txt
+
+# Supabase CLI (estado local)
+supabase/.temp/
