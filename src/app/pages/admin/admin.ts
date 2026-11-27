@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth.service';
+import { leerTodo } from '../../core/leer-todo';
 import { PagoSuscripcion, Perfil, Plan, Suscripcion } from '../../core/modelos';
 import { supabase } from '../../core/supabase';
 import { UiService } from '../../core/ui.service';
@@ -288,14 +289,20 @@ export class Admin implements OnInit {
   }
 
   async cargar() {
-    const [perfiles, correos] = await Promise.all([
-      supabase.from('perfiles').select('*, suscripciones(*)').order('created_at', { ascending: false }),
-      supabase.rpc('admin_estado_correos'),
-      this.auth.cargarPlanes(),
-    ]);
-    if (perfiles.error) return this.ui.error(perfiles.error);
-    this.lista.set((perfiles.data as Entrenador[]) ?? []);
-    const pendientes = ((correos.data as { trainer_id: string; confirmado: boolean }[]) ?? []).filter((c) => !c.confirmado);
+    // Paginado: con más de 1.000 entrenadores Supabase cortaría la lista sin avisar.
+    let perfiles: Entrenador[], correos: { trainer_id: string; confirmado: boolean }[];
+    try {
+      [perfiles, correos] = await Promise.all([
+        leerTodo<Entrenador>((d, h) => supabase.from('perfiles').select('*, suscripciones(*)').order('created_at', { ascending: false }).order('id').range(d, h)),
+        // el estado de correo es un extra: si falla, la lista se muestra igual (como antes)
+        leerTodo<{ trainer_id: string; confirmado: boolean }>((d, h) => supabase.rpc('admin_estado_correos').order('trainer_id').range(d, h)).catch(() => []),
+        this.auth.cargarPlanes(),
+      ]);
+    } catch (e) {
+      return this.ui.error(e);
+    }
+    this.lista.set(perfiles);
+    const pendientes = correos.filter((c) => !c.confirmado);
     this.pendientes.set(new Set(pendientes.map((c) => c.trainer_id)));
     this.cargado.set(true);
   }

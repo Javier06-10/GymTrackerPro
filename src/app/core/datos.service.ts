@@ -1,6 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { CATALOGO_BASE } from './catalogo';
 import { normalizarRutina } from './dominio';
+import { leerTodo } from './leer-todo';
 import { Atleta, EjercicioCatalogo, Grupo, Medida, PagoAtleta } from './modelos';
 import { RespaldoNormalizado } from './respaldo';
 import { supabase } from './supabase';
@@ -98,33 +99,33 @@ export class DatosService {
   readonly catalogo = computed(() => CATALOGO_BASE.concat(this.ejerciciosExtra()));
 
   async cargar() {
+    // Todas paginadas: Supabase corta en 1.000 filas sin avisar (ver leer-todo.ts).
+    // El `id` como segundo orden hace la paginación estable.
     const [a, g, m, p, e] = await Promise.all([
-      supabase.from('atletas').select('*').order('nombre'),
-      supabase.from('grupos').select('id, nombre').order('nombre'),
-      supabase.from('medidas').select('*').order('fecha'),
-      supabase.from('pagos').select('*').order('fecha'),
-      supabase.from('ejercicios_extra').select('*').order('nombre'),
+      leerTodo<any>((d, h) => supabase.from('atletas').select('*').order('nombre').order('id').range(d, h)),
+      leerTodo<any>((d, h) => supabase.from('grupos').select('id, nombre').order('nombre').order('id').range(d, h)),
+      leerTodo<any>((d, h) => supabase.from('medidas').select('*').order('fecha').order('id').range(d, h)),
+      leerTodo<any>((d, h) => supabase.from('pagos').select('*').order('fecha').order('id').range(d, h)),
+      leerTodo<any>((d, h) => supabase.from('ejercicios_extra').select('*').order('nombre').order('id').range(d, h)),
     ]);
-    const error = a.error || g.error || m.error || p.error || e.error;
-    if (error) throw error;
 
     const medidasPor = new Map<string, Medida[]>();
-    (m.data ?? []).forEach((f: any) => {
+    m.forEach((f: any) => {
       const lista = medidasPor.get(f.atleta_id) ?? [];
       lista.push(medidaDeFila(f));
       medidasPor.set(f.atleta_id, lista);
     });
     const pagosPor = new Map<string, PagoAtleta[]>();
-    (p.data ?? []).forEach((f: any) => {
+    p.forEach((f: any) => {
       const lista = pagosPor.get(f.atleta_id) ?? [];
       lista.push(pagoDeFila(f));
       pagosPor.set(f.atleta_id, lista);
     });
 
-    this.atletas.set((a.data ?? []).map((f: any) => atletaDeFila(f, medidasPor.get(f.id) ?? [], pagosPor.get(f.id) ?? [])));
-    this.grupos.set((g.data as Grupo[]) ?? []);
+    this.atletas.set(a.map((f: any) => atletaDeFila(f, medidasPor.get(f.id) ?? [], pagosPor.get(f.id) ?? [])));
+    this.grupos.set(g as Grupo[]);
     this.ejerciciosExtra.set(
-      (e.data ?? []).map((f: any) => ({ id: f.id, nombre: f.nombre, grupo: f.grupo, familia: f.familia, musculos: f.musculos })),
+      e.map((f: any) => ({ id: f.id, nombre: f.nombre, grupo: f.grupo, familia: f.familia, musculos: f.musculos })),
     );
     this.cargado.set(true);
   }
