@@ -90,6 +90,9 @@ export interface Atleta {
   objetivos: ObjetivoMeta[];
   /** Plan de comidas editado por el entrenador (null = el sugerido automático). */
   planComidas?: PlanComidasPersonal | null;
+  /** Versión de `rutina` y `objetivos` en el servidor: guardar solo si nadie la cambió (migración 0014). */
+  rutinaRev?: number;
+  objetivosRev?: number;
   fechaRegistro: string;
   // Relaciones cargadas aparte y ordenadas por fecha ascendente
   medidas: Medida[];

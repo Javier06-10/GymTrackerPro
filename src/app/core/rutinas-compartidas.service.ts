@@ -82,7 +82,7 @@ export class RutinasCompartidasService {
       if (!a) continue;
       const rutina = structuredClone(a.rutina);
       dias.forEach((d) => (rutina[d] = structuredClone(rc.rutina[d] as DiaRutina)));
-      await this.datos.actualizarAtleta(id, { rutina });
+      await this.datos.guardarRutina(id, rutina);
     }
     await this.cambiarEstado(rc.id, 'aplicada');
   }

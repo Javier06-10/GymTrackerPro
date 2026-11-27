@@ -2,10 +2,21 @@ import { Injectable, computed, signal } from '@angular/core';
 import { CATALOGO_BASE } from './catalogo';
 import { normalizarRutina } from './dominio';
 import { leerTodo } from './leer-todo';
-import { Atleta, EjercicioCatalogo, Grupo, Medida, PagoAtleta } from './modelos';
+import { Atleta, EjercicioCatalogo, EstadoAsistencia, Grupo, Medida, ObjetivoMeta, PagoAtleta, Rutina } from './modelos';
 import { RespaldoNormalizado } from './respaldo';
 import { supabase } from './supabase';
 import { normalizar } from './util';
+
+/** Otro dispositivo cambió este bloque antes de guardar: ya se cargó su versión. */
+export class ConflictoVersion extends Error {
+  constructor(readonly campo: 'rutina' | 'objetivos') {
+    super(
+      `${campo === 'rutina' ? 'La rutina de este atleta se cambió' : 'Los objetivos de este atleta se cambiaron'} desde otro dispositivo. ` +
+        'Cargamos la versión más reciente: revísala y repite tu último cambio.',
+    );
+    this.name = 'ConflictoVersion';
+  }
+}
 
 /* ---------- Mapeo fila (snake_case) ⇄ modelo (camelCase) ---------- */
 const COLUMNAS_ATLETA: Record<string, string> = {
@@ -76,6 +87,8 @@ function atletaDeFila(f: any, medidas: Medida[], pagos: PagoAtleta[]): Atleta {
     asistencia: f.asistencia ?? {},
     objetivos: f.objetivos ?? [],
     planComidas: f.plan_comidas ?? null,
+    rutinaRev: f.rutina_rev ?? 0,
+    objetivosRev: f.objetivos_rev ?? 0,
     fechaRegistro: f.fecha_registro,
     medidas,
     pagos,
@@ -158,10 +171,75 @@ export class DatosService {
     return nuevo;
   }
 
+  /**
+   * Campos sueltos del atleta (perfil, bitácora, tarifa…). Rutina, objetivos y
+   * asistencia NO van por aquí: son bloques jsonb y tienen su propio guardado
+   * seguro ante dos dispositivos (guardarRutina, guardarObjetivos, marcarAsistencia).
+   */
   async actualizarAtleta(id: string, cambios: Partial<Atleta>) {
+    if ('rutina' in cambios || 'objetivos' in cambios || 'asistencia' in cambios) {
+      throw new Error('actualizarAtleta: usa guardarRutina, guardarObjetivos o marcarAsistencia');
+    }
     const { error } = await supabase.from('atletas').update(aFila(cambios, COLUMNAS_ATLETA)).eq('id', id);
     if (error) throw error;
     this.reemplazar(id, (a) => ({ ...a, ...cambios }));
+  }
+
+  /** Guarda la rutina solo si nadie la cambió desde otro dispositivo; si la cambiaron, recarga y avisa. */
+  guardarRutina(id: string, rutina: Rutina) {
+    return this.guardarVersionado(id, 'rutina', rutina);
+  }
+
+  /** Igual que guardarRutina, para los objetivos. */
+  guardarObjetivos(id: string, objetivos: ObjetivoMeta[]) {
+    return this.guardarVersionado(id, 'objetivos', objetivos);
+  }
+
+  private async guardarVersionado(id: string, campo: 'rutina' | 'objetivos', valor: Rutina | ObjetivoMeta[]) {
+    const actual = this.atleta(id);
+    const revCol = campo === 'rutina' ? 'rutina_rev' : 'objetivos_rev';
+    const revKey = campo === 'rutina' ? 'rutinaRev' : 'objetivosRev';
+    const { data, error } = await supabase
+      .from('atletas')
+      .update({ [campo]: valor })
+      .eq('id', id)
+      .eq(revCol, actual?.[revKey] ?? 0)
+      .select(revCol);
+    if (error) throw error;
+    if (!data?.length) {
+      // Otro dispositivo guardó antes: traemos su versión en vez de pisarla.
+      await this.recargarCampo(id, campo);
+      throw new ConflictoVersion(campo);
+    }
+    const rev = (data[0] as Record<string, number>)[revCol];
+    this.reemplazar(id, (a) => ({ ...a, [campo]: valor, [revKey]: rev }));
+  }
+
+  private async recargarCampo(id: string, campo: 'rutina' | 'objetivos') {
+    const revCol = campo === 'rutina' ? 'rutina_rev' : 'objetivos_rev';
+    const { data, error } = await supabase.from('atletas').select(`${campo}, ${revCol}`).eq('id', id).maybeSingle();
+    if (error) throw error;
+    if (!data) {
+      this.atletas.update((l) => l.filter((a) => a.id !== id));
+      throw new Error('Este atleta ya no existe: se eliminó desde otro dispositivo.');
+    }
+    const f = data as Record<string, any>;
+    this.reemplazar(id, (a) =>
+      campo === 'rutina'
+        ? { ...a, rutina: normalizarRutina(f['rutina']), rutinaRev: f['rutina_rev'] }
+        : { ...a, objetivos: f['objetivos'] ?? [], objetivosRev: f['objetivos_rev'] },
+    );
+  }
+
+  /**
+   * Marca (E/F) o borra (null) un día de asistencia. Se fusiona en el servidor,
+   * así que marcar desde dos dispositivos a la vez no se pisa; la respuesta trae
+   * la asistencia completa, incluidas las marcas del otro dispositivo.
+   */
+  async marcarAsistencia(id: string, fecha: string, estado: EstadoAsistencia | null) {
+    const { data, error } = await supabase.rpc('marcar_asistencia', { p_atleta: id, p_fecha: fecha, p_estado: estado });
+    if (error) throw error;
+    this.reemplazar(id, (a) => ({ ...a, asistencia: (data as Record<string, EstadoAsistencia>) ?? {} }));
   }
 
   async eliminarAtleta(id: string) {

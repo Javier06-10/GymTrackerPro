@@ -181,10 +181,7 @@ export class PasarLista {
   }
 
   private async guardar(a: Atleta, estado: EstadoAsistencia | null, f: string) {
-    const asistencia = { ...a.asistencia };
-    if (estado) asistencia[f] = estado;
-    else delete asistencia[f];
-    await this.datos.actualizarAtleta(a.id, { asistencia });
+    await this.datos.marcarAsistencia(a.id, f, estado);
   }
 
   /** Marca o desmarca (si ya tenía esa misma marca). */

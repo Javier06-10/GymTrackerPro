@@ -37,7 +37,7 @@ import { Icono } from '../../../shared/icono';
           a <b style="color:var(--ambar)">{{ ver(ob, ob.valorObjetivo) }} {{ u }}</b> · Actual:
           @if (ob.tipo === 'manual') {
             <input class="peso-inline" style="width:64px;" type="number" step="0.1" [value]="ob.valorActual ?? ''"
-              (change)="actualizarManual(i, $any($event.target).value)" /> {{ u }}
+              (change)="actualizarManual(i, $any($event.target))" /> {{ u }}
           } @else if (av.actual !== null) { <b style="color:var(--texto)">{{ ver(ob, av.actual) }} {{ u }}</b> }
           @else { <i>registra una medición</i> }
           @if (ob.fecha) { · desde {{ fecha(ob.fecha) }} }
@@ -119,7 +119,7 @@ export class TabObjetivos {
 
   private async guardarObjetivos(objetivos: ObjetivoMeta[], msg: string) {
     try {
-      await this.datos.actualizarAtleta(this.atleta().id, { objetivos });
+      await this.datos.guardarObjetivos(this.atleta().id, objetivos);
       this.ui.toast(msg);
       return true;
     } catch (e) {
@@ -143,11 +143,15 @@ export class TabObjetivos {
     if (await this.guardarObjetivos([...this.atleta().objetivos, ob], 'Objetivo creado ✓')) this.modal.set(false);
   }
 
-  async actualizarManual(i: number, valor: string) {
+  async actualizarManual(i: number, campo: HTMLInputElement) {
     const objetivos = structuredClone(this.atleta().objetivos);
+    if (!objetivos[i]) return;
+    const valor = campo.value;
     objetivos[i].valorActual = valor === '' ? null : Number(valor);
     const { pct } = avanceObjetivo(this.atleta(), objetivos[i]);
-    await this.guardarObjetivos(objetivos, pct === 100 ? '¡Objetivo logrado!' : 'Avance actualizado ✓');
+    const ok = await this.guardarObjetivos(objetivos, pct === 100 ? '¡Objetivo logrado!' : 'Avance actualizado ✓');
+    // Si no se guardó (p. ej. otro dispositivo cambió los objetivos), el campo muestra lo que hay de verdad
+    if (!ok) campo.value = String(this.atleta().objetivos[i]?.valorActual ?? '');
   }
 
   async eliminar(i: number) {

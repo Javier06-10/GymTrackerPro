@@ -20,7 +20,8 @@ export class UiService {
   toast(texto: string, tipo: 'ok' | 'err' = 'ok') {
     this.toastMsg.set({ texto, tipo });
     clearTimeout(this.timer);
-    this.timer = setTimeout(() => this.toastMsg.set(null), 2600);
+    // Los errores se leen con más calma: algunos explican qué hacer
+    this.timer = setTimeout(() => this.toastMsg.set(null), tipo === 'err' ? 6000 : 2600);
   }
 
   error(e: unknown) {

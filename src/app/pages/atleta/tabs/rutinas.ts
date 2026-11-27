@@ -37,7 +37,7 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
         <div class="card-dia">
           <div class="cab">
             <span class="dia">{{ dia }}</span>
-            <input type="text" placeholder="Ej. Pierna / Glúteo" [value]="r.titulo" (change)="guardarTitulo(dia, $any($event.target).value)" />
+            <input type="text" placeholder="Ej. Pierna / Glúteo" [value]="r.titulo" (change)="guardarTitulo(dia, $any($event.target))" />
           </div>
           <div class="cuerpo-dia">
             @if (!r.ejercicios.length && formDia() !== dia) {
@@ -54,7 +54,7 @@ interface FilaHistorial { fecha: string; peso: string; delta: { txt: string; cls
                 <div class="specs">
                   <span>Series: <b>{{ ej.series || '—' }}</b></span>
                   <span class="peso-wrap">Peso: <input class="peso-inline" type="text" [value]="ej.peso" placeholder="—"
-                    (change)="actualizarPeso(dia, i, $any($event.target).value)" /></span>
+                    (change)="actualizarPeso(dia, i, $any($event.target))" /></span>
                   <span>Descanso: <b>{{ ej.descanso || '—' }}</b></span>
                 </div>
                 @if (ej.notas) { <div class="nota"><app-icono nombre="pin" [tam]="13" /> {{ ej.notas }}</div> }
@@ -226,7 +226,7 @@ export class TabRutinas {
 
   private async guardarRutina(rutina: Rutina, msg?: string) {
     try {
-      await this.datos.actualizarAtleta(this.atleta().id, { rutina });
+      await this.datos.guardarRutina(this.atleta().id, rutina);
       if (msg) this.ui.toast(msg);
       return true;
     } catch (e) {
@@ -361,18 +361,21 @@ export class TabRutinas {
     else if (!ultimo || ultimo.peso !== peso) ej.historialPeso.push({ fecha: hoy, peso });
   }
 
-  async actualizarPeso(dia: string, i: number, valor: string) {
+  async actualizarPeso(dia: string, i: number, campo: HTMLInputElement) {
     const rutina = this.clonar();
     const ej = rutina[dia].ejercicios[i];
-    ej.peso = valor.trim();
+    if (!ej) return;
+    ej.peso = campo.value.trim();
     if (ej.peso) this.registrarPeso(ej, ej.peso);
-    await this.guardarRutina(rutina, 'Peso de trabajo actualizado ✓ (guardado en el historial)');
+    const ok = await this.guardarRutina(rutina, 'Peso de trabajo actualizado ✓ (guardado en el historial)');
+    // Si no se guardó (p. ej. otro dispositivo cambió la rutina), el campo vuelve a lo que hay de verdad
+    if (!ok) campo.value = this.atleta().rutina[dia]?.ejercicios[i]?.peso ?? '';
   }
 
-  async guardarTitulo(dia: string, valor: string) {
+  async guardarTitulo(dia: string, campo: HTMLInputElement) {
     const rutina = this.clonar();
-    rutina[dia].titulo = valor.trim();
-    await this.guardarRutina(rutina);
+    rutina[dia].titulo = campo.value.trim();
+    if (!(await this.guardarRutina(rutina))) campo.value = this.atleta().rutina[dia]?.titulo ?? '';
   }
 
   async quitar(dia: string, i: number) {
@@ -443,7 +446,7 @@ export class TabRutinas {
         const dest = this.datos.atleta(idDest);
         if (!dest) continue;
         const rutina = { ...structuredClone(dest.rutina), ...structuredClone(copia) } as Rutina;
-        await this.datos.actualizarAtleta(idDest, { rutina });
+        await this.datos.guardarRutina(idDest, rutina);
       }
       this.compartir.set(false);
       this.ui.toast(`Rutina copiada a ${destinos.length} atleta${destinos.length === 1 ? '' : 's'} ✓`);

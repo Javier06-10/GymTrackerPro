@@ -99,13 +99,10 @@ export class TabAsistencia {
   }
 
   async ciclo(iso: string) {
-    const asistencia = { ...this.atleta().asistencia };
-    const actual = asistencia[iso];
-    if (!actual) asistencia[iso] = 'E';
-    else if (actual === 'E') asistencia[iso] = 'F';
-    else delete asistencia[iso];
+    const actual = this.atleta().asistencia[iso];
+    const siguiente = !actual ? 'E' : actual === 'E' ? 'F' : null;
     try {
-      await this.datos.actualizarAtleta(this.atleta().id, { asistencia });
+      await this.datos.marcarAsistencia(this.atleta().id, iso, siguiente);
     } catch (e) {
       this.ui.error(e);
     }
