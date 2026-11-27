@@ -3,6 +3,7 @@
    Genera PDF 1.4 a mano: Helvetica WinAnsi, carta (612x792),
    coordenadas con y hacia abajo y logo JPEG opcional.
    ============================================================ */
+import { lecturaGrasa } from './grasa';
 import { ZONAS, avanceObjetivo, bajarEsBueno, quiereBajar, medicionPendiente, pagoVencido, serieMedida, unidadObjetivo, verValorObjetivo } from './dominio';
 import { Sistema, largoTxt, largoVer, pesoTxt, pesoVer, uLargo, uPeso } from './unidades';
 import { Atleta, Medida, PagoAtleta } from './modelos';
@@ -184,6 +185,12 @@ export function compararProgreso(a: Atleta, s: Sistema = 'imperial'): Comparacio
     const bajar = quiereBajar(a);
     const neutral = !(bajar || a.objetivo === 'ganar');
     filas.push({ zona: 'Peso corporal', antes: pesoTxt(ant.peso, s), ahora: pesoTxt(act.peso, s), delta: d, ev: evaluar(d, bajar, neutral) });
+  }
+  // % de grasa estimado: bajar siempre es avance
+  const gAnt = lecturaGrasa(a, ant), gAct = lecturaGrasa(a, act);
+  if (gAnt && gAct) {
+    const d = Number((gAct.pct - gAnt.pct).toFixed(1));
+    filas.push({ zona: '% de grasa', antes: gAnt.pct + ' %', ahora: gAct.pct + ' %', delta: d, ev: evaluar(d, true, false) });
   }
   ZONAS.forEach(([z, nombre]) => {
     if (ant[z] != null && act[z] != null) {

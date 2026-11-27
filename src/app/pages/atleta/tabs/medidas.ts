@@ -15,6 +15,7 @@ import { Modal } from '../../../shared/modal';
 import { SvgSeguroPipe } from '../../../shared/svg-seguro.pipe';
 import { Icono } from '../../../shared/icono';
 import { UnidadesService } from '../../../core/unidades';
+import { lecturaGrasa, serieGrasa } from '../../../core/grasa';
 
 /** Medidas + avatar anatómico evolutivo (portado de tabMedidas). */
 @Component({
@@ -62,6 +63,22 @@ import { UnidadesService } from '../../../core/unidades';
             } @else {
               <div style="font-size:12.5px;color:var(--texto-suave);margin-bottom:12px;">
                 <app-icono nombre="reloj" [tam]="14" /> Próxima medición en <b style="color:var(--verde)">{{ mp.proximaEn }} día{{ mp.proximaEn === 1 ? '' : 's' }}</b> · última: {{ fecha(mp.ultFecha) }}
+              </div>
+            }
+          }
+          @if (a.medidas.length) {
+            @if (grasa(); as g) {
+              <div class="grasa-res">
+                <div class="gr-pct"><span class="gr-num">{{ g.pct }}<small>%</small></span><span class="chip gr-{{ g.cls }}">{{ g.categoria }}</span></div>
+                <div class="gr-detalle">
+                  <span>Grasa corporal estimada</span>
+                  <span>Masa grasa <b>{{ u.pesoTxt(g.grasaLb) }}</b> · Masa magra <b>{{ u.pesoTxt(g.magraLb) }}</b></span>
+                  @if (cambioGrasa(); as c) { <span>Desde la medición anterior: <b [class]="c < 0 ? 'delta-pos' : c > 0 ? 'delta-neg' : 'delta-cero'">{{ c > 0 ? '+' : '' }}{{ c }} %</b></span> }
+                </div>
+              </div>
+            } @else {
+              <div class="nota-info" style="margin-bottom:12px;">
+                <app-icono nombre="info" [tam]="14" /> Para estimar el <b>% de grasa corporal</b>, registra el <b>cuello</b>{{ a.genero === 'mujer' ? ', la cintura y la cadera' : ' y el abdomen a la altura del ombligo' }} en la próxima medición{{ a.estaturaPies ? '' : ', y la estatura en el perfil' }}.
               </div>
             }
           }
@@ -187,24 +204,39 @@ export class TabMedidas {
     return this.medidasDesc()[i + 1];
   }
 
+  /* ---------- % de grasa corporal (fórmula de la Marina de EE. UU.) ---------- */
+  protected readonly grasa = computed(() => lecturaGrasa(this.atleta(), this.ultima()));
+  /** Cambio frente a la medición anterior en la que también se pudo calcular. */
+  protected readonly cambioGrasa = computed(() => {
+    const s = serieGrasa(this.atleta());
+    return s.length >= 2 ? Math.round((s[s.length - 1].valor - s[s.length - 2].valor) * 10) / 10 : null;
+  });
+
   /* ---------- Gráfica de evolución ---------- */
   protected readonly metrica = signal('peso');
   protected readonly metricasDisponibles = computed(() =>
     ([['peso', 'Peso', this.u.uPeso()]] as [string, string, string][])
+      .concat([['grasa', '% de grasa', '%']])
       .concat(ZONAS.map((z) => [z[0], z[1], this.u.uLargo()] as [string, string, string]))
-      .filter((m) => serieMedida(this.atleta(), m[0]).length >= 2),
+      .filter((m) => this.serie(m[0]).length >= 2),
   );
+  /** El % de grasa no es una medida guardada: se calcula y no se convierte de unidades. */
+  private serie(clave: string) {
+    return clave === 'grasa' ? serieGrasa(this.atleta()) : serieMedida(this.atleta(), clave);
+  }
   protected readonly metricaActiva = computed(() => {
     const disp = this.metricasDisponibles();
     return disp.find((m) => m[0] === this.metrica()) ?? disp[0];
   });
   protected readonly serieActiva = computed(() => {
     const clave = this.metricaActiva()[0];
+    if (clave === 'grasa') return serieGrasa(this.atleta());
     return serieMedida(this.atleta(), clave).map((p) => ({ fecha: p.fecha, valor: this.u.valor(clave, p.valor)! }));
   });
   /** Meta del primer objetivo que sigue esta métrica (peso o zona). */
   protected readonly metaActiva = computed(() => {
     const clave = this.metricaActiva()[0];
+    if (clave === 'grasa') return null;
     const ob = this.atleta().objetivos.find((o) => (clave === 'peso' ? o.tipo === 'peso' : o.tipo === 'zona' && o.zona === clave));
     return ob ? this.u.valor(clave, ob.valorObjetivo) : null;
   });
@@ -212,7 +244,8 @@ export class TabMedidas {
     const s = this.serieActiva();
     if (s.length < 2) return null;
     const clave = this.metricaActiva()[0];
-    return clave === 'peso' ? this.dp(s[s.length - 1].valor, s[0].valor) : delta(s[s.length - 1].valor, s[0].valor, this.invertida(clave));
+    if (clave === 'peso') return this.dp(s[s.length - 1].valor, s[0].valor);
+    return delta(s[s.length - 1].valor, s[0].valor, clave === 'grasa' || this.invertida(clave));
   });
 
   /* ---------- Alta de medición ---------- */

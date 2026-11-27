@@ -1831,3 +1831,16 @@ a.btn{text-decoration:none;}
 .contacto-admin{display:block;line-height:1.6;}
 .contacto-admin .icono-app{vertical-align:-3px;margin-right:4px;}
 .contacto-admin a{white-space:nowrap;}
+
+/* ---------- % de grasa corporal (pestaña Medidas) ---------- */
+.grasa-res{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 14px;margin-bottom:12px;border-radius:12px;background:var(--panel2);border:1px solid var(--borde);}
+.gr-pct{display:flex;flex-direction:column;align-items:flex-start;gap:4px;}
+.gr-num{font-family:var(--fuente-titulo);font-size:var(--t-2xl);font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:var(--texto);}
+.gr-num small{font-size:.55em;margin-left:2px;color:var(--texto-suave);}
+.gr-detalle{display:flex;flex-direction:column;gap:2px;font-size:var(--t-sm);color:var(--texto-suave);min-width:0;}
+.gr-detalle > span:first-child{font-size:var(--t-2xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tenue);}
+.gr-detalle b{color:var(--texto);}
+.chip.gr-verde{background:var(--verde-fondo);color:var(--verde);}
+.chip.gr-ambar{background:var(--ambar-fondo);color:var(--ambar-texto);}
+.chip.gr-rojo{background:var(--rojo-fondo);color:var(--rojo);}
+.chip.gr-neutro{background:color-mix(in srgb, var(--texto-suave) 12%, transparent);color:var(--texto-suave);}

@@ -6,6 +6,7 @@ import { Sistema, largoGuardar, largoVer, pesoGuardar, pesoVer, uLargo, uPeso } 
 export const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 export const ZONAS: [string, string][] = [
+  ['cuello', 'Cuello'],
   ['pecho', 'Pecho'],
   ['brazoRelajado', 'Brazo relajado'],
   ['brazoContraido', 'Brazo contraído'],
@@ -20,7 +21,7 @@ export const ZONAS: [string, string][] = [
 export const ZONAS_INVERTIDAS = new Set(['abdomenAlto', 'abdomenOmbligo']);
 export const GRUPOS_MEDIDA: [string, string[]][] = [
   ['Brazos', ['brazoRelajado', 'brazoContraido', 'antebrazo']],
-  ['Torso', ['pecho', 'abdomenAlto', 'abdomenOmbligo']],
+  ['Torso', ['cuello', 'pecho', 'abdomenAlto', 'abdomenOmbligo']],
   ['Tren inferior', ['cadera', 'pierna', 'pantorrilla']],
 ];
 export function etiquetaZona(id: string): string {

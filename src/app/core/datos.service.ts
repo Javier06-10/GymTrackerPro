@@ -30,7 +30,7 @@ const COLUMNAS_ATLETA: Record<string, string> = {
   planComidas: 'plan_comidas',
 };
 const COLUMNAS_MEDIDA: Record<string, string> = {
-  fecha: 'fecha', peso: 'peso', pecho: 'pecho', brazoRelajado: 'brazo_relajado',
+  fecha: 'fecha', peso: 'peso', cuello: 'cuello', pecho: 'pecho', brazoRelajado: 'brazo_relajado',
   brazoContraido: 'brazo_contraido', antebrazo: 'antebrazo', abdomenAlto: 'abdomen_alto',
   abdomenOmbligo: 'abdomen_ombligo', cadera: 'cadera', pierna: 'pierna', pantorrilla: 'pantorrilla',
 };

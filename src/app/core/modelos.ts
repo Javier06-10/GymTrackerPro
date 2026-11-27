@@ -43,6 +43,7 @@ export interface Medida {
   id: string;
   fecha: string;
   peso: number;
+  cuello: number | null;
   pecho: number | null;
   brazoRelajado: number | null;
   brazoContraido: number | null;
