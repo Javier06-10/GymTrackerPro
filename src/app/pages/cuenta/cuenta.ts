@@ -164,6 +164,24 @@ import { Icono } from '../../shared/icono';
       </div>
     </div>
 
+    <div class="titulo-seccion"><app-icono nombre="campana" [tam]="16" /> Recordatorios por correo</div>
+    <div class="tarjeta unidades-pref">
+      <div class="up-texto">
+        <b>¿Te avisamos por correo?</b>
+        <span>Un correo a {{ auth.perfil()?.email || 'tu correo' }} solo los días en que algo lo necesita: cobros que vencen, mediciones que tocan, cumpleaños y el vencimiento de tu plan. Los lunes, un resumen de la semana. A tus atletas no les llega nada.</span>
+      </div>
+      <div class="opciones-unidad" role="radiogroup" aria-label="Recordatorios por correo">
+        @for (o of opcionesRecordatorio; track o.v) {
+          <button class="op-unidad" role="radio" [attr.aria-checked]="recordatorios() === o.v" [class.activa]="recordatorios() === o.v"
+            [disabled]="guardandoRecordatorios()" (click)="cambiarRecordatorios(o.v)">
+            <span class="ou-check"><app-icono nombre="check" [tam]="13" /></span>
+            <span class="ou-t">{{ o.t }}</span>
+            <span class="ou-s">{{ o.s }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
     <div class="grid-cuenta-extra">
       <div>
         <div class="titulo-seccion"><app-icono nombre="subir" [tam]="16" /> Importar versión anterior</div>
@@ -292,6 +310,26 @@ export class Cuenta implements OnInit {
     { v: 'imperial', t: 'Libras y pulgadas', s: 'lb · in · pies' },
     { v: 'metrico', t: 'Kilos y centímetros', s: 'kg · cm' },
   ];
+
+  protected readonly opcionesRecordatorio: { v: boolean; t: string; s: string }[] = [
+    { v: true, t: 'Activados', s: 'Te avisamos cuando haga falta' },
+    { v: false, t: 'Desactivados', s: 'Lo reviso yo en el panel' },
+  ];
+  protected readonly recordatorios = computed(() => this.auth.perfil()?.recordatorios ?? true);
+  protected readonly guardandoRecordatorios = signal(false);
+
+  async cambiarRecordatorios(v: boolean) {
+    if (v === this.recordatorios()) return;
+    this.guardandoRecordatorios.set(true);
+    try {
+      await this.auth.actualizarPerfil({ recordatorios: v });
+      this.ui.toast(v ? 'Recordatorios por correo activados ✓' : 'Recordatorios por correo desactivados');
+    } catch (e) {
+      this.ui.error(e);
+    } finally {
+      this.guardandoRecordatorios.set(false);
+    }
+  }
 
   async cambiarUnidades(v: Sistema) {
     if (v === this.unidades.sistema()) return;

@@ -145,6 +145,8 @@ export interface Perfil {
   unidades: 'imperial' | 'metrico';
   /** Tema visual elegido (ver core/tema.service.ts). */
   tema: 'marca' | 'marca-oscuro' | 'energia' | 'fuerza' | 'bienestar' | 'tech';
+  /** Recordatorios diarios por correo al entrenador (migración 0015). */
+  recordatorios?: boolean;
 }
 
 export interface Suscripcion {
